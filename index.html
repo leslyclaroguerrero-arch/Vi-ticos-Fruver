@@ -30,10 +30,10 @@
   .gasto-item .gasto-desc { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
   .gasto-item .gasto-monto { font-size: 18px; font-weight: 700; color: #b85c00; }
   .gasto-item .evidencia-thumb { width: 100%; max-height: 130px; object-fit: cover; border-radius: 6px; margin-top: 8px; border: 1px solid #dde8da; }
-  .gasto-item .upload-status { font-size: 11px; margin-top: 4px; padding: 3px 8px; border-radius: 10px; display: inline-block; }
-  .status-pending  { background: #fff8e1; color: #b85c00; }
-  .status-ok       { background: #e8f5e9; color: #1e7a3a; }
-  .status-error    { background: #fdecea; color: #c0392b; }
+  .upload-status { font-size: 11px; margin-top: 4px; padding: 3px 8px; border-radius: 10px; display: inline-block; }
+  .status-pending { background: #fff8e1; color: #b85c00; }
+  .status-ok      { background: #e8f5e9; color: #1e7a3a; text-decoration: none; }
+  .status-error   { background: #fdecea; color: #c0392b; }
 
   .add-gasto-form { border: 1.5px dashed #1e4d2b; border-radius: 10px; padding: 14px; background: #f0f7f0; margin-bottom: 10px; display: none; }
   .add-gasto-form.visible { display: block; }
@@ -53,8 +53,8 @@
   .balance-label { font-size: 12px; color: #556; text-transform: uppercase; letter-spacing: 1px; }
   .balance-valor { font-size: 38px; font-weight: 800; margin: 4px 0 2px; line-height: 1; }
   .balance-det { font-size: 13px; color: #778; margin-top: 4px; }
-  .balance-pos { color: #1e7a3a; }
-  .balance-neg { color: #c0392b; }
+  .balance-pos  { color: #1e7a3a; }
+  .balance-neg  { color: #c0392b; }
   .balance-zero { color: #888; }
 
   .resumen-cats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 14px; }
@@ -63,13 +63,11 @@
 
   .acciones { padding: 14px; display: flex; flex-direction: column; gap: 10px; }
 
-  /* Progress bar envío */
-  #progress-wrap { display: none; margin: 0 14px; background: #fff; border: 1px solid #dde8da; border-radius: 10px; padding: 14px; }
+  #progress-wrap { display: none; margin: 14px 14px 0; background: #fff; border: 1px solid #dde8da; border-radius: 10px; padding: 14px; }
   #progress-wrap p { font-size: 13px; color: #556; margin-bottom: 8px; }
   #progress-bar-bg { background: #eef3ec; border-radius: 20px; height: 10px; }
   #progress-bar { background: #1e4d2b; height: 10px; border-radius: 20px; width: 0%; transition: width .4s; }
 
-  /* Toast */
   #toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #1e4d2b; color: #fff; padding: 12px 24px; border-radius: 30px; font-size: 14px; font-weight: 600; opacity: 0; transition: opacity .3s; pointer-events: none; z-index: 999; white-space: nowrap; box-shadow: 0 4px 16px rgba(0,0,0,.2); }
   #toast.show { opacity: 1; }
 </style>
@@ -86,7 +84,6 @@
   </div>
 </header>
 
-<!-- Info del viaje -->
 <div class="section">
   <div class="section-title">Información del viaje</div>
   <div class="row2">
@@ -117,7 +114,6 @@
   </div>
 </div>
 
-<!-- Gastos -->
 <div class="section">
   <div class="section-title">Gastos del viaje</div>
   <div id="gastos-lista"></div>
@@ -156,7 +152,6 @@
   </button>
 </div>
 
-<!-- Balance -->
 <div id="balance-box">
   <div class="balance-label">Balance del viaje</div>
   <div class="balance-valor balance-zero" id="balance-valor">$ —</div>
@@ -164,19 +159,17 @@
   <div class="resumen-cats" id="resumen-cats" style="display:none;"></div>
 </div>
 
-<!-- Barra progreso -->
 <div id="progress-wrap">
   <p id="progress-txt">Subiendo evidencias…</p>
   <div id="progress-bar-bg"><div id="progress-bar"></div></div>
 </div>
 
-<!-- Acciones -->
 <div class="acciones">
   <button class="btn btn-green" id="btn-enviar" onclick="enviarRegistro()">
     📊 Enviar registro a Google Sheets
   </button>
   <button class="btn btn-outline" onclick="window.print()">📄 Imprimir / Guardar PDF</button>
-  <button class="btn" onclick="limpiarTodo()" style="background:#fff;color:#b55;border:1.5px solid #b55;">🗑 Limpiar planilla</button>
+  <button class="btn" onclick="limpiarTodo(false)" style="background:#fff;color:#b55;border:1.5px solid #b55;">🗑 Limpiar planilla</button>
 </div>
 
 <div style="height:30px;"></div>
@@ -198,14 +191,22 @@ let catActiva = "combustible";
 
 document.getElementById("fecha").value = new Date().toISOString().split("T")[0];
 
-// ── Categoría ────────────────────────────────────────────
+// ── Nombre único del viaje ────────────────────────────────
+function nombreViaje() {
+  const conductor = document.getElementById("conductor").value.trim() || "Sin conductor";
+  const destino   = document.getElementById("destino").value.trim() || "Sin destino";
+  const fecha     = document.getElementById("fecha").value || new Date().toISOString().split("T")[0];
+  return `${conductor} – ${destino} – ${fecha}`;
+}
+
+// ── Categoría ─────────────────────────────────────────────
 function selCat(btn) {
   document.querySelectorAll(".cat-btn").forEach(b => b.classList.remove("active"));
   btn.classList.add("active");
   catActiva = btn.dataset.cat;
 }
 
-// ── Formulario gasto ─────────────────────────────────────
+// ── Formulario gasto ──────────────────────────────────────
 function mostrarForm() {
   document.getElementById("form-gasto").classList.add("visible");
   document.getElementById("btn-agregar").style.display = "none";
@@ -247,10 +248,7 @@ function guardarGasto() {
 
   if (file) {
     const reader = new FileReader();
-    reader.onload = e => {
-      const base64 = e.target.result.split(",")[1];
-      agregar(base64, file.type);
-    };
+    reader.onload = e => agregar(e.target.result.split(",")[1], file.type);
     reader.readAsDataURL(file);
   } else {
     agregar(null, null);
@@ -263,7 +261,7 @@ function eliminarGasto(id) {
   actualizarBalance();
 }
 
-// ── Render lista gastos ───────────────────────────────────
+// ── Render gastos ─────────────────────────────────────────
 function cop(n) {
   return "$ " + Math.abs(n).toLocaleString("es-CO");
 }
@@ -283,8 +281,8 @@ function renderGastos() {
       <div class="gasto-desc">${g.desc}</div>
       <div class="gasto-monto">${cop(g.monto)}</div>
       ${g.img ? `<img src="data:${g.mimeType};base64,${g.img}" class="evidencia-thumb" alt="Evidencia">` : ""}
-      ${g.img && !g.driveUrl ? `<span class="upload-status status-pending">📎 Factura pendiente de subir</span>` : ""}
-      ${g.driveUrl ? `<a href="${g.driveUrl}" target="_blank" class="upload-status status-ok" style="text-decoration:none;">✓ Ver factura en Drive</a>` : ""}
+      ${g.img && !g.driveUrl ? `<span class="upload-status status-pending">📎 Factura pendiente de envío</span>` : ""}
+      ${g.driveUrl ? `<a href="${g.driveUrl}" target="_blank" class="upload-status status-ok">✓ Ver factura en Drive</a>` : ""}
     </div>
   `).join("");
 }
@@ -348,21 +346,23 @@ function ocultarProgreso() {
 }
 
 // ── Subir imagen a Drive ──────────────────────────────────
-async function subirImagen(gasto) {
+async function subirImagen(gasto, viaje) {
   const resp = await fetch(SHEETS_URL, {
     method: "POST",
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      tipo: "imagen",
-      base64: gasto.img,
-      mimeType: gasto.mimeType,
-      nombre: gasto.fileName
+      tipo:        "imagen",
+      base64:      gasto.img,
+      mimeType:    gasto.mimeType,
+      nombre:      gasto.fileName,
+      nombreViaje: viaje
     })
   });
   const data = await resp.json();
   return data.url || null;
 }
 
-// ── Enviar registro completo ──────────────────────────────
+// ── Enviar registro ───────────────────────────────────────
 async function enviarRegistro() {
   const conductor  = document.getElementById("conductor").value.trim();
   const presupuesto = parseFloat(document.getElementById("presupuesto").value) || 0;
@@ -372,30 +372,30 @@ async function enviarRegistro() {
     return;
   }
 
-  const btn = document.getElementById("btn-enviar");
+  const viaje = nombreViaje();
+  const btn   = document.getElementById("btn-enviar");
   btn.disabled = true;
   btn.textContent = "⏳ Enviando…";
 
-  // 1. Subir imágenes a Drive
+  // 1. Subir imágenes a la carpeta del viaje en Drive
   const gastosConImg = gastos.filter(g => g.img && !g.driveUrl);
   for (let i = 0; i < gastosConImg.length; i++) {
-    const g = gastosConImg[i];
     setProgreso(
-      Math.round(((i) / gastosConImg.length) * 70),
+      Math.round((i / Math.max(gastosConImg.length, 1)) * 70),
       `Subiendo factura ${i + 1} de ${gastosConImg.length}…`
     );
     try {
-      const url = await subirImagen(g);
-      const idx = gastos.findIndex(x => x.id === g.id);
+      const url = await subirImagen(gastosConImg[i], viaje);
+      const idx = gastos.findIndex(x => x.id === gastosConImg[i].id);
       if (idx !== -1) gastos[idx].driveUrl = url;
     } catch(e) {
       console.warn("Error subiendo imagen", e);
     }
   }
 
-  // 2. Armar detalle de gastos como texto
+  // 2. Armar detalle de gastos
   const detalleGastos = gastos.map(g =>
-    `${CATS[g.cat].replace(/[^\w\s\/]/gu,"").trim()}: ${g.desc} (${cop(g.monto)})${g.driveUrl ? " [" + g.driveUrl + "]" : ""}`
+    `${CATS[g.cat].replace(/[^\w\s\/\-]/gu, "").trim()}: ${g.desc} (${cop(g.monto)})${g.driveUrl ? " → " + g.driveUrl : ""}`
   ).join(" | ");
 
   const totalGastado = gastos.reduce((s, g) => s + g.monto, 0);
@@ -403,7 +403,7 @@ async function enviarRegistro() {
   const cats = {};
   gastos.forEach(g => { cats[g.cat] = (cats[g.cat] || 0) + g.monto; });
 
-  setProgreso(80, "Guardando en Google Sheets…");
+  setProgreso(85, "Guardando en Google Sheets…");
 
   // 3. Enviar fila al Sheets
   try {
@@ -412,7 +412,8 @@ async function enviarRegistro() {
       mode: "no-cors",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        tipo: "registro",
+        tipo:         "registro",
+        nombreViaje:  viaje,
         fecha:        document.getElementById("fecha").value,
         destino:      document.getElementById("destino").value,
         conductor,
@@ -429,7 +430,7 @@ async function enviarRegistro() {
       })
     });
 
-    setProgreso(100, "¡Listo!");
+    setProgreso(100, "¡Enviado!");
     setTimeout(() => {
       ocultarProgreso();
       mostrarToast("✓ Registro enviado correctamente", "#1e4d2b");
@@ -454,7 +455,6 @@ function limpiarTodo(silencioso) {
   const btn = document.getElementById("btn-enviar");
   btn.textContent = "📊 Enviar registro a Google Sheets";
   btn.disabled = false;
-  btn.style.background = "";
   renderGastos();
   actualizarBalance();
 }
