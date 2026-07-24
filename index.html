@@ -24,12 +24,16 @@
   .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 
   .gasto-item { border: 1px solid #dde8da; border-radius: 10px; padding: 12px; margin-bottom: 8px; background: #f9fbf8; }
-  .gasto-item .gasto-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .gasto-item .gasto-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
   .gasto-item .cat-tag { font-size: 12px; background: #e8f2e8; color: #1e4d2b; border-radius: 20px; padding: 2px 10px; font-weight: 600; }
-  .gasto-item .eliminar { background: none; border: none; color: #b55; font-size: 18px; cursor: pointer; line-height: 1; padding: 0 4px; }
+  .gasto-item .eliminar { background: none; border: none; color: #b55; font-size: 18px; cursor: pointer; padding: 0 4px; }
   .gasto-item .gasto-desc { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
   .gasto-item .gasto-monto { font-size: 18px; font-weight: 700; color: #b85c00; }
   .gasto-item .evidencia-thumb { width: 100%; max-height: 130px; object-fit: cover; border-radius: 6px; margin-top: 8px; border: 1px solid #dde8da; }
+  .gasto-item .upload-status { font-size: 11px; margin-top: 4px; padding: 3px 8px; border-radius: 10px; display: inline-block; }
+  .status-pending  { background: #fff8e1; color: #b85c00; }
+  .status-ok       { background: #e8f5e9; color: #1e7a3a; }
+  .status-error    { background: #fdecea; color: #c0392b; }
 
   .add-gasto-form { border: 1.5px dashed #1e4d2b; border-radius: 10px; padding: 14px; background: #f0f7f0; margin-bottom: 10px; display: none; }
   .add-gasto-form.visible { display: block; }
@@ -40,14 +44,15 @@
 
   .btn { display: block; width: 100%; padding: 13px; border: none; border-radius: 10px; font-size: 15px; font-weight: 700; cursor: pointer; font-family: inherit; transition: opacity .15s; }
   .btn:active { opacity: .8; }
+  .btn:disabled { opacity: .6; cursor: not-allowed; }
   .btn-green { background: #1e4d2b; color: #fff; }
   .btn-outline { background: #fff; color: #1e4d2b; border: 1.5px solid #1e4d2b; }
   .btn-small { padding: 9px 14px; font-size: 13px; width: auto; display: inline-block; }
 
   #balance-box { margin: 14px 14px 0; border-radius: 12px; padding: 20px; border: 2px solid #1e4d2b; background: #fff; text-align: center; }
-  #balance-box .balance-label { font-size: 12px; color: #556; text-transform: uppercase; letter-spacing: 1px; }
-  #balance-box .balance-valor { font-size: 38px; font-weight: 800; margin: 4px 0 2px; line-height: 1; }
-  #balance-box .balance-det { font-size: 13px; color: #778; margin-top: 4px; }
+  .balance-label { font-size: 12px; color: #556; text-transform: uppercase; letter-spacing: 1px; }
+  .balance-valor { font-size: 38px; font-weight: 800; margin: 4px 0 2px; line-height: 1; }
+  .balance-det { font-size: 13px; color: #778; margin-top: 4px; }
   .balance-pos { color: #1e7a3a; }
   .balance-neg { color: #c0392b; }
   .balance-zero { color: #888; }
@@ -58,16 +63,15 @@
 
   .acciones { padding: 14px; display: flex; flex-direction: column; gap: 10px; }
 
-  /* Toast */
-  #toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #1e4d2b; color: #fff; padding: 12px 24px; border-radius: 30px; font-size: 14px; font-weight: 600; opacity: 0; transition: opacity .3s; pointer-events: none; z-index: 999; white-space: nowrap; }
-  #toast.show { opacity: 1; }
+  /* Progress bar envío */
+  #progress-wrap { display: none; margin: 0 14px; background: #fff; border: 1px solid #dde8da; border-radius: 10px; padding: 14px; }
+  #progress-wrap p { font-size: 13px; color: #556; margin-bottom: 8px; }
+  #progress-bar-bg { background: #eef3ec; border-radius: 20px; height: 10px; }
+  #progress-bar { background: #1e4d2b; height: 10px; border-radius: 20px; width: 0%; transition: width .4s; }
 
-  @media print {
-    header { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-    .no-print { display: none !important; }
-    .section, #balance-box { break-inside: avoid; }
-    body { background: #fff; }
-  }
+  /* Toast */
+  #toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #1e4d2b; color: #fff; padding: 12px 24px; border-radius: 30px; font-size: 14px; font-weight: 600; opacity: 0; transition: opacity .3s; pointer-events: none; z-index: 999; white-space: nowrap; box-shadow: 0 4px 16px rgba(0,0,0,.2); }
+  #toast.show { opacity: 1; }
 </style>
 </head>
 <body>
@@ -137,7 +141,7 @@
       <input type="number" id="g-monto" placeholder="Ej: 80000" inputmode="numeric">
     </div>
     <div class="field">
-      <label>Evidencia (foto de factura, pesaje…)</label>
+      <label>Foto de factura o evidencia</label>
       <input type="file" id="g-foto" accept="image/*" capture="environment"
         style="font-size:13px;background:#fff;border:1.5px solid #cdd8ca;border-radius:8px;padding:8px 10px;">
     </div>
@@ -147,7 +151,7 @@
     </div>
   </div>
 
-  <button class="btn btn-outline no-print" id="btn-agregar" onclick="mostrarForm()" style="margin-top:4px;">
+  <button class="btn btn-outline" id="btn-agregar" onclick="mostrarForm()" style="margin-top:4px;">
     + Agregar gasto
   </button>
 </div>
@@ -160,12 +164,18 @@
   <div class="resumen-cats" id="resumen-cats" style="display:none;"></div>
 </div>
 
+<!-- Barra progreso -->
+<div id="progress-wrap">
+  <p id="progress-txt">Subiendo evidencias…</p>
+  <div id="progress-bar-bg"><div id="progress-bar"></div></div>
+</div>
+
 <!-- Acciones -->
-<div class="acciones no-print">
-  <button class="btn btn-green" id="btn-enviar" onclick="enviarASheets()">
-    📊 Enviar al registro de Google Sheets
+<div class="acciones">
+  <button class="btn btn-green" id="btn-enviar" onclick="enviarRegistro()">
+    📊 Enviar registro a Google Sheets
   </button>
-  <button class="btn btn-outline" onclick="imprimirPlanilla()">📄 Imprimir / Guardar PDF</button>
+  <button class="btn btn-outline" onclick="window.print()">📄 Imprimir / Guardar PDF</button>
   <button class="btn" onclick="limpiarTodo()" style="background:#fff;color:#b55;border:1.5px solid #b55;">🗑 Limpiar planilla</button>
 </div>
 
@@ -188,12 +198,14 @@ let catActiva = "combustible";
 
 document.getElementById("fecha").value = new Date().toISOString().split("T")[0];
 
+// ── Categoría ────────────────────────────────────────────
 function selCat(btn) {
   document.querySelectorAll(".cat-btn").forEach(b => b.classList.remove("active"));
   btn.classList.add("active");
   catActiva = btn.dataset.cat;
 }
 
+// ── Formulario gasto ─────────────────────────────────────
 function mostrarForm() {
   document.getElementById("form-gasto").classList.add("visible");
   document.getElementById("btn-agregar").style.display = "none";
@@ -203,10 +215,6 @@ function mostrarForm() {
 function cancelarGasto() {
   document.getElementById("form-gasto").classList.remove("visible");
   document.getElementById("btn-agregar").style.display = "block";
-  limpiarFormGasto();
-}
-
-function limpiarFormGasto() {
   document.getElementById("g-desc").value = "";
   document.getElementById("g-monto").value = "";
   document.getElementById("g-foto").value = "";
@@ -219,11 +227,19 @@ function guardarGasto() {
     alert("Por favor ingresa la descripción y el monto.");
     return;
   }
-  const fileInput = document.getElementById("g-foto");
-  const file = fileInput.files[0];
+  const file = document.getElementById("g-foto").files[0];
 
-  const finalizar = (imgData) => {
-    gastos.push({ id: Date.now(), cat: catActiva, desc, monto, img: imgData || null, fileName: file ? file.name : null });
+  const agregar = (imgData, mimeType) => {
+    gastos.push({
+      id: Date.now(),
+      cat: catActiva,
+      desc,
+      monto,
+      img: imgData || null,
+      mimeType: mimeType || null,
+      fileName: file ? `${Date.now()}_${file.name}` : null,
+      driveUrl: null
+    });
     renderGastos();
     actualizarBalance();
     cancelarGasto();
@@ -231,10 +247,13 @@ function guardarGasto() {
 
   if (file) {
     const reader = new FileReader();
-    reader.onload = e => finalizar(e.target.result);
+    reader.onload = e => {
+      const base64 = e.target.result.split(",")[1];
+      agregar(base64, file.type);
+    };
     reader.readAsDataURL(file);
   } else {
-    finalizar(null);
+    agregar(null, null);
   }
 }
 
@@ -244,6 +263,7 @@ function eliminarGasto(id) {
   actualizarBalance();
 }
 
+// ── Render lista gastos ───────────────────────────────────
 function cop(n) {
   return "$ " + Math.abs(n).toLocaleString("es-CO");
 }
@@ -255,19 +275,21 @@ function renderGastos() {
     return;
   }
   lista.innerHTML = gastos.map(g => `
-    <div class="gasto-item">
+    <div class="gasto-item" id="gasto-${g.id}">
       <div class="gasto-head">
         <span class="cat-tag">${CATS[g.cat]}</span>
-        <button class="eliminar no-print" onclick="eliminarGasto(${g.id})">✕</button>
+        <button class="eliminar" onclick="eliminarGasto(${g.id})">✕</button>
       </div>
       <div class="gasto-desc">${g.desc}</div>
       <div class="gasto-monto">${cop(g.monto)}</div>
-      ${g.img ? `<img src="${g.img}" class="evidencia-thumb" alt="Evidencia">` : ""}
-      ${!g.img && g.fileName ? `<div style="font-size:12px;color:#1e4d2b;margin-top:6px;">📎 ${g.fileName}</div>` : ""}
+      ${g.img ? `<img src="data:${g.mimeType};base64,${g.img}" class="evidencia-thumb" alt="Evidencia">` : ""}
+      ${g.img && !g.driveUrl ? `<span class="upload-status status-pending">📎 Factura pendiente de subir</span>` : ""}
+      ${g.driveUrl ? `<a href="${g.driveUrl}" target="_blank" class="upload-status status-ok" style="text-decoration:none;">✓ Ver factura en Drive</a>` : ""}
     </div>
   `).join("");
 }
 
+// ── Balance ───────────────────────────────────────────────
 function actualizarBalance() {
   const presupuesto  = parseFloat(document.getElementById("presupuesto").value) || 0;
   const totalGastado = gastos.reduce((s, g) => s + g.monto, 0);
@@ -294,93 +316,145 @@ function actualizarBalance() {
     detEl.innerHTML = `<b style="color:#c0392b">⚠ Se pasaron ${cop(Math.abs(balance))}</b><br><span style="font-size:12px;">Entregado ${cop(presupuesto)} · Gastado ${cop(totalGastado)}</span>`;
   } else {
     valEl.className = "balance-valor balance-zero";
-    detEl.innerHTML = `Gastado exacto: ${cop(totalGastado)}`;
+    detEl.innerHTML = `Exacto: ${cop(totalGastado)}`;
   }
 
   const cats = {};
   gastos.forEach(g => { cats[g.cat] = (cats[g.cat] || 0) + g.monto; });
   const entries = Object.entries(cats);
-  if (entries.length > 0) {
-    resumen.style.display = "grid";
-    resumen.innerHTML = entries.map(([k, v]) => `
-      <div class="resumen-cat">${CATS[k]}<span>${cop(v)}</span></div>
-    `).join("");
-  } else {
-    resumen.style.display = "none";
-  }
+  resumen.style.display = entries.length ? "grid" : "none";
+  resumen.innerHTML = entries.map(([k, v]) =>
+    `<div class="resumen-cat">${CATS[k]}<span>${cop(v)}</span></div>`
+  ).join("");
 }
 
+// ── Toast ─────────────────────────────────────────────────
 function mostrarToast(msg, color) {
   const t = document.getElementById("toast");
   t.textContent = msg;
   t.style.background = color || "#1e4d2b";
   t.classList.add("show");
-  setTimeout(() => t.classList.remove("show"), 3500);
+  setTimeout(() => t.classList.remove("show"), 4000);
 }
 
-async function enviarASheets() {
+// ── Progreso ──────────────────────────────────────────────
+function setProgreso(pct, txt) {
+  document.getElementById("progress-wrap").style.display = "block";
+  document.getElementById("progress-bar").style.width = pct + "%";
+  document.getElementById("progress-txt").textContent = txt;
+}
+function ocultarProgreso() {
+  document.getElementById("progress-wrap").style.display = "none";
+}
+
+// ── Subir imagen a Drive ──────────────────────────────────
+async function subirImagen(gasto) {
+  const resp = await fetch(SHEETS_URL, {
+    method: "POST",
+    body: JSON.stringify({
+      tipo: "imagen",
+      base64: gasto.img,
+      mimeType: gasto.mimeType,
+      nombre: gasto.fileName
+    })
+  });
+  const data = await resp.json();
+  return data.url || null;
+}
+
+// ── Enviar registro completo ──────────────────────────────
+async function enviarRegistro() {
   const conductor  = document.getElementById("conductor").value.trim();
   const presupuesto = parseFloat(document.getElementById("presupuesto").value) || 0;
 
   if (!conductor || presupuesto === 0) {
-    alert("Por favor completa al menos el nombre del conductor y el dinero entregado.");
+    alert("Por favor completa el nombre del conductor y el dinero entregado.");
     return;
   }
 
+  const btn = document.getElementById("btn-enviar");
+  btn.disabled = true;
+  btn.textContent = "⏳ Enviando…";
+
+  // 1. Subir imágenes a Drive
+  const gastosConImg = gastos.filter(g => g.img && !g.driveUrl);
+  for (let i = 0; i < gastosConImg.length; i++) {
+    const g = gastosConImg[i];
+    setProgreso(
+      Math.round(((i) / gastosConImg.length) * 70),
+      `Subiendo factura ${i + 1} de ${gastosConImg.length}…`
+    );
+    try {
+      const url = await subirImagen(g);
+      const idx = gastos.findIndex(x => x.id === g.id);
+      if (idx !== -1) gastos[idx].driveUrl = url;
+    } catch(e) {
+      console.warn("Error subiendo imagen", e);
+    }
+  }
+
+  // 2. Armar detalle de gastos como texto
+  const detalleGastos = gastos.map(g =>
+    `${CATS[g.cat].replace(/[^\w\s\/]/gu,"").trim()}: ${g.desc} (${cop(g.monto)})${g.driveUrl ? " [" + g.driveUrl + "]" : ""}`
+  ).join(" | ");
+
   const totalGastado = gastos.reduce((s, g) => s + g.monto, 0);
   const balance      = presupuesto - totalGastado;
-
   const cats = {};
   gastos.forEach(g => { cats[g.cat] = (cats[g.cat] || 0) + g.monto; });
 
-  const datos = {
-    fecha:        document.getElementById("fecha").value,
-    destino:      document.getElementById("destino").value,
-    conductor,
-    encargada:    document.getElementById("encargada").value.trim(),
-    presupuesto,
-    totalGastado,
-    balance,
-    estado:       balance >= 0 ? `Sobró $${balance.toLocaleString("es-CO")}` : `Faltaron $${Math.abs(balance).toLocaleString("es-CO")}`,
-    cats,
-    notas:        document.getElementById("notas").value.trim()
-  };
+  setProgreso(80, "Guardando en Google Sheets…");
 
-  const btn = document.getElementById("btn-enviar");
-  btn.textContent = "⏳ Enviando...";
-  btn.disabled = true;
-
+  // 3. Enviar fila al Sheets
   try {
     await fetch(SHEETS_URL, {
       method: "POST",
       mode: "no-cors",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(datos)
+      body: JSON.stringify({
+        tipo: "registro",
+        fecha:        document.getElementById("fecha").value,
+        destino:      document.getElementById("destino").value,
+        conductor,
+        encargada:    document.getElementById("encargada").value.trim(),
+        presupuesto,
+        totalGastado,
+        balance,
+        estado: balance >= 0
+          ? `Sobró $${balance.toLocaleString("es-CO")}`
+          : `Faltaron $${Math.abs(balance).toLocaleString("es-CO")}`,
+        cats,
+        detalleGastos,
+        notas: document.getElementById("notas").value.trim()
+      })
     });
-    mostrarToast("✓ Registro enviado a Google Sheets", "#1e4d2b");
-    btn.textContent = "✓ Enviado correctamente";
-    btn.style.background = "#1e7a3a";
-  } catch (err) {
+
+    setProgreso(100, "¡Listo!");
+    setTimeout(() => {
+      ocultarProgreso();
+      mostrarToast("✓ Registro enviado correctamente", "#1e4d2b");
+      limpiarTodo(true);
+    }, 800);
+
+  } catch(err) {
+    ocultarProgreso();
     mostrarToast("❌ Error al enviar. Revisa tu conexión.", "#c0392b");
-    btn.textContent = "📊 Enviar al registro de Google Sheets";
     btn.disabled = false;
+    btn.textContent = "📊 Enviar registro a Google Sheets";
   }
 }
 
-function imprimirPlanilla() {
-  window.print();
-}
-
-function limpiarTodo() {
-  if (!confirm("¿Borrar todos los datos de la planilla?")) return;
+// ── Limpiar ───────────────────────────────────────────────
+function limpiarTodo(silencioso) {
+  if (!silencioso && !confirm("¿Borrar todos los datos de la planilla?")) return;
   gastos = [];
   document.getElementById("fecha").value = new Date().toISOString().split("T")[0];
   ["conductor","encargada","presupuesto","notas"].forEach(id => document.getElementById(id).value = "");
   document.getElementById("destino").value = "Batallón";
   const btn = document.getElementById("btn-enviar");
-  btn.textContent = "📊 Enviar al registro de Google Sheets";
+  btn.textContent = "📊 Enviar registro a Google Sheets";
   btn.disabled = false;
-  btn.style.background = "#1e4d2b";
+  btn.style.background = "";
   renderGastos();
   actualizarBalance();
 }
