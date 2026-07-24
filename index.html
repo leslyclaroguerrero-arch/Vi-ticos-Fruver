@@ -7,22 +7,18 @@
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'Segoe UI', Arial, sans-serif; background: #f5f7f2; color: #1a2a1a; min-height: 100vh; }
-
   header { background: #1e4d2b; color: #fff; padding: 18px 20px 14px; display: flex; align-items: center; gap: 12px; }
   header .logo { font-size: 28px; }
   header h1 { font-size: 18px; font-weight: 700; line-height: 1.2; }
   header p { font-size: 11px; opacity: .7; margin-top: 2px; }
-
   .section { background: #fff; margin: 14px 14px 0; border-radius: 12px; padding: 16px; border: 1px solid #dde8da; }
   .section-title { font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #1e4d2b; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #eef3ec; }
-
   .field { margin-bottom: 12px; }
   .field label { display: block; font-size: 12px; color: #556; margin-bottom: 4px; font-weight: 600; }
   .field input, .field select, .field textarea { width: 100%; border: 1.5px solid #cdd8ca; border-radius: 8px; padding: 10px 12px; font-size: 15px; color: #1a2a1a; background: #f9fbf8; outline: none; transition: border-color .15s; font-family: inherit; }
   .field input:focus, .field select:focus, .field textarea:focus { border-color: #1e4d2b; background: #fff; }
   .field textarea { resize: vertical; min-height: 60px; }
   .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-
   .gasto-item { border: 1px solid #dde8da; border-radius: 10px; padding: 12px; margin-bottom: 8px; background: #f9fbf8; }
   .gasto-item .gasto-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
   .cat-tag { font-size: 12px; background: #e8f2e8; color: #1e4d2b; border-radius: 20px; padding: 2px 10px; font-weight: 600; }
@@ -34,21 +30,17 @@
   .status-pending { background: #fff8e1; color: #b85c00; }
   .status-ok      { background: #e8f5e9; color: #1e7a3a; text-decoration: none; }
   .status-error   { background: #fdecea; color: #c0392b; }
-
   .add-gasto-form { border: 1.5px dashed #1e4d2b; border-radius: 10px; padding: 14px; background: #f0f7f0; margin-bottom: 10px; display: none; }
   .add-gasto-form.visible { display: block; }
-
   .cat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 10px; }
   .cat-btn { border: 1.5px solid #cdd8ca; background: #fff; border-radius: 8px; padding: 7px 4px; font-size: 11px; cursor: pointer; text-align: center; color: #1a2a1a; transition: all .15s; line-height: 1.4; }
   .cat-btn.active { border-color: #1e4d2b; background: #1e4d2b; color: #fff; }
-
   .btn { display: block; width: 100%; padding: 13px; border: none; border-radius: 10px; font-size: 15px; font-weight: 700; cursor: pointer; font-family: inherit; transition: opacity .15s; }
   .btn:active { opacity: .8; }
   .btn:disabled { opacity: .6; cursor: not-allowed; }
   .btn-green   { background: #1e4d2b; color: #fff; }
   .btn-outline { background: #fff; color: #1e4d2b; border: 1.5px solid #1e4d2b; }
   .btn-small   { padding: 9px 14px; font-size: 13px; width: auto; display: inline-block; }
-
   #balance-box { margin: 14px 14px 0; border-radius: 12px; padding: 20px; border: 2px solid #1e4d2b; background: #fff; text-align: center; }
   .balance-label { font-size: 12px; color: #556; text-transform: uppercase; letter-spacing: 1px; }
   .balance-valor { font-size: 38px; font-weight: 800; margin: 4px 0 2px; line-height: 1; }
@@ -56,18 +48,14 @@
   .balance-pos  { color: #1e7a3a; }
   .balance-neg  { color: #c0392b; }
   .balance-zero { color: #888; }
-
   .resumen-cats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 14px; }
   .resumen-cat { background: #f5f7f2; border: 1px solid #dde8da; border-radius: 8px; padding: 8px 10px; font-size: 13px; }
   .resumen-cat span { font-weight: 700; color: #b85c00; display: block; }
-
   .acciones { padding: 14px; display: flex; flex-direction: column; gap: 10px; }
-
   #progress-wrap { display: none; margin: 14px 14px 0; background: #fff; border: 1px solid #dde8da; border-radius: 10px; padding: 14px; }
   #progress-wrap p { font-size: 13px; color: #556; margin-bottom: 8px; }
   #progress-bar-bg { background: #eef3ec; border-radius: 20px; height: 10px; }
   #progress-bar { background: #1e4d2b; height: 10px; border-radius: 20px; width: 0%; transition: width .4s; }
-
   #toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #1e4d2b; color: #fff; padding: 12px 24px; border-radius: 30px; font-size: 14px; font-weight: 600; opacity: 0; transition: opacity .3s; pointer-events: none; z-index: 999; white-space: nowrap; box-shadow: 0 4px 16px rgba(0,0,0,.2); }
   #toast.show { opacity: 1; }
 </style>
@@ -99,16 +87,15 @@
 <div class="section">
   <div class="section-title">Gastos del viaje</div>
   <div id="gastos-lista"></div>
-
   <div class="add-gasto-form" id="form-gasto">
     <div style="font-size:13px;font-weight:700;color:#1e4d2b;margin-bottom:10px;">Nuevo gasto</div>
     <div class="cat-grid">
       <button class="cat-btn active" data-cat="combustible" onclick="selCat(this)">⛽<br>Combustible</button>
-      <button class="cat-btn" data-cat="peaje"       onclick="selCat(this)">🛣️<br>Peaje/Pesaje</button>
-      <button class="cat-btn" data-cat="comida"      onclick="selCat(this)">🍱<br>Comida</button>
-      <button class="cat-btn" data-cat="viatico"     onclick="selCat(this)">💵<br>Viático</button>
-      <button class="cat-btn" data-cat="imprevisto"  onclick="selCat(this)">⚠️<br>Imprevisto</button>
-      <button class="cat-btn" data-cat="otro"        onclick="selCat(this)">📋<br>Otro</button>
+      <button class="cat-btn" data-cat="peaje"      onclick="selCat(this)">🛣️<br>Peaje/Pesaje</button>
+      <button class="cat-btn" data-cat="comida"     onclick="selCat(this)">🍱<br>Comida</button>
+      <button class="cat-btn" data-cat="viatico"    onclick="selCat(this)">💵<br>Viático</button>
+      <button class="cat-btn" data-cat="imprevisto" onclick="selCat(this)">⚠️<br>Imprevisto</button>
+      <button class="cat-btn" data-cat="otro"       onclick="selCat(this)">📋<br>Otro</button>
     </div>
     <div class="field"><label>Descripción</label><input type="text" id="g-desc" placeholder="Ej: Gasolina Estación del Norte"></div>
     <div class="field"><label>Monto (COP $)</label><input type="number" id="g-monto" placeholder="Ej: 80000" inputmode="numeric"></div>
@@ -122,7 +109,6 @@
       <button class="btn btn-green btn-small" onclick="guardarGasto()" style="flex:1;">Guardar gasto ✓</button>
     </div>
   </div>
-
   <button class="btn btn-outline" id="btn-agregar" onclick="mostrarForm()" style="margin-top:4px;">+ Agregar gasto</button>
 </div>
 
@@ -148,25 +134,38 @@
 <script>
 const SHEETS_URL = "https://script.google.com/macros/s/AKfycbw2Jn-PXmRasYa9MmixxlnDAtg4Xkvx-5wv1qrOHzti2MBbhgng7qNPn-qnzl4i0RofAA/exec";
 
+// Nombre de categoría para Drive (carpeta) y para mostrar
 const CATS = {
-  combustible: "⛽ Combustible",
-  peaje:       "🛣️ Peaje/Pesaje",
-  comida:      "🍱 Comida",
-  viatico:     "💵 Viático",
-  imprevisto:  "⚠️ Imprevisto",
-  otro:        "📋 Otro"
+  combustible: { label: "⛽ Combustible",   carpeta: "Combustible"  },
+  peaje:       { label: "🛣️ Peaje/Pesaje",  carpeta: "Peaje-Pesaje" },
+  comida:      { label: "🍱 Comida",         carpeta: "Comida"       },
+  viatico:     { label: "💵 Viático",        carpeta: "Viatico"      },
+  imprevisto:  { label: "⚠️ Imprevisto",     carpeta: "Imprevisto"   },
+  otro:        { label: "📋 Otro",           carpeta: "Otro"         }
 };
 
-let gastos = [];
+let gastos    = [];
 let catActiva = "combustible";
 
 document.getElementById("fecha").value = new Date().toISOString().split("T")[0];
 
+// Nombre único del viaje (también nombre de la carpeta en Drive)
 function nombreViaje() {
   const conductor = document.getElementById("conductor").value.trim() || "Sin conductor";
   const destino   = document.getElementById("destino").value.trim()   || "Sin destino";
   const fecha     = document.getElementById("fecha").value            || new Date().toISOString().split("T")[0];
   return `${conductor} - ${destino} - ${fecha}`;
+}
+
+// Convierte la descripción en nombre de archivo válido
+function nombreArchivo(desc, mimeType) {
+  const ext  = mimeType ? "." + mimeType.split("/")[1].replace("jpeg","jpg") : ".jpg";
+  const base = desc.trim()
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // quitar tildes
+    .replace(/[^a-zA-Z0-9 _\-]/g, "")                // solo alfanumérico
+    .replace(/\s+/g, "_")
+    .substring(0, 80);
+  return base + ext;
 }
 
 function selCat(btn) {
@@ -196,8 +195,18 @@ function guardarGasto() {
 
   const file = document.getElementById("g-foto").files[0];
 
-  const agregar = (base64, mimeType, fileName) => {
-    gastos.push({ id: Date.now(), cat: catActiva, desc, monto, base64: base64||null, mimeType: mimeType||null, fileName: fileName||null, driveUrl: null });
+  const agregar = (base64, mimeType) => {
+    gastos.push({
+      id:       Date.now(),
+      cat:      catActiva,
+      desc,
+      monto,
+      base64:   base64  || null,
+      mimeType: mimeType || null,
+      // Nombre del archivo = descripción del gasto
+      fileName: base64 ? nombreArchivo(desc, mimeType) : null,
+      driveUrl: null
+    });
     renderGastos();
     actualizarBalance();
     cancelarGasto();
@@ -205,10 +214,10 @@ function guardarGasto() {
 
   if (file) {
     const reader = new FileReader();
-    reader.onload = e => agregar(e.target.result.split(",")[1], file.type, `${Date.now()}_${file.name}`);
+    reader.onload = e => agregar(e.target.result.split(",")[1], file.type);
     reader.readAsDataURL(file);
   } else {
-    agregar(null, null, null);
+    agregar(null, null);
   }
 }
 
@@ -222,11 +231,14 @@ function cop(n) { return "$ " + Math.abs(n).toLocaleString("es-CO"); }
 
 function renderGastos() {
   const lista = document.getElementById("gastos-lista");
-  if (!gastos.length) { lista.innerHTML = '<p style="color:#aaa;font-size:13px;text-align:center;padding:10px 0;">Sin gastos aún</p>'; return; }
+  if (!gastos.length) {
+    lista.innerHTML = '<p style="color:#aaa;font-size:13px;text-align:center;padding:10px 0;">Sin gastos aún</p>';
+    return;
+  }
   lista.innerHTML = gastos.map(g => `
     <div class="gasto-item" id="gi-${g.id}">
       <div class="gasto-head">
-        <span class="cat-tag">${CATS[g.cat]}</span>
+        <span class="cat-tag">${CATS[g.cat].label}</span>
         <button class="eliminar" onclick="eliminarGasto(${g.id})">✕</button>
       </div>
       <div class="gasto-desc">${g.desc}</div>
@@ -242,9 +254,9 @@ function actualizarBalance() {
   const presupuesto  = parseFloat(document.getElementById("presupuesto").value) || 0;
   const totalGastado = gastos.reduce((s,g) => s + g.monto, 0);
   const balance      = presupuesto - totalGastado;
-  const valEl  = document.getElementById("balance-valor");
-  const detEl  = document.getElementById("balance-det");
-  const resEl  = document.getElementById("resumen-cats");
+  const valEl = document.getElementById("balance-valor");
+  const detEl = document.getElementById("balance-det");
+  const resEl = document.getElementById("resumen-cats");
 
   if (!presupuesto) {
     valEl.textContent = "$ —"; valEl.className = "balance-valor balance-zero";
@@ -266,7 +278,9 @@ function actualizarBalance() {
   gastos.forEach(g => { cats[g.cat] = (cats[g.cat]||0) + g.monto; });
   const entries = Object.entries(cats);
   resEl.style.display = entries.length ? "grid" : "none";
-  resEl.innerHTML = entries.map(([k,v]) => `<div class="resumen-cat">${CATS[k]}<span>${cop(v)}</span></div>`).join("");
+  resEl.innerHTML = entries.map(([k,v]) =>
+    `<div class="resumen-cat">${CATS[k].label}<span>${cop(v)}</span></div>`
+  ).join("");
 }
 
 function mostrarToast(msg, color) {
@@ -282,24 +296,25 @@ function setProgreso(pct, txt) {
 }
 function ocultarProgreso() { document.getElementById("progress-wrap").style.display = "none"; }
 
-// ── Subir UNA imagen — fetch normal (con respuesta legible) ──
+// Subir imagen — fetch normal para leer respuesta
 async function subirImagen(gasto, viaje) {
   const resp = await fetch(SHEETS_URL, {
     method: "POST",
-    headers: { "Content-Type": "text/plain" },   // text/plain evita preflight CORS
+    headers: { "Content-Type": "text/plain" },
     body: JSON.stringify({
-      tipo:        "imagen",
-      base64:      gasto.base64,
-      mimeType:    gasto.mimeType,
-      nombre:      gasto.fileName,
-      nombreViaje: viaje
+      tipo:            "imagen",
+      base64:          gasto.base64,
+      mimeType:        gasto.mimeType,
+      nombreArchivo:   gasto.fileName,        // descripción del gasto
+      nombreCategoria: CATS[gasto.cat].carpeta, // nombre carpeta de categoría
+      nombreViaje:     viaje
     })
   });
   const data = await resp.json();
   return data.ok ? data.url : null;
 }
 
-// ── Enviar registro al Sheets — no-cors (sin leer respuesta) ──
+// Enviar fila al Sheets — no-cors
 async function enviarFila(payload) {
   await fetch(SHEETS_URL, {
     method: "POST",
@@ -318,25 +333,27 @@ async function enviarRegistro() {
   const btn   = document.getElementById("btn-enviar");
   btn.disabled = true; btn.textContent = "⏳ Enviando…";
 
-  // 1 — Subir imágenes una por una
+  // 1 — Subir imágenes una por una a su carpeta de categoría
   const conImg = gastos.filter(g => g.base64 && !g.driveUrl);
   for (let i = 0; i < conImg.length; i++) {
-    setProgreso(Math.round((i / Math.max(conImg.length,1)) * 70), `Subiendo factura ${i+1} de ${conImg.length}…`);
+    setProgreso(
+      Math.round((i / Math.max(conImg.length,1)) * 70),
+      `Subiendo evidencia ${i+1} de ${conImg.length}: "${conImg[i].desc}"…`
+    );
     try {
       const url = await subirImagen(conImg[i], viaje);
       const idx = gastos.findIndex(x => x.id === conImg[i].id);
       if (idx !== -1) {
         gastos[idx].driveUrl = url;
-        // Actualizar etiqueta en pantalla
         const st = document.getElementById("st-" + conImg[i].id);
         if (st && url) { st.className = "upload-status status-ok"; st.textContent = "✓ Subida a Drive"; }
       }
     } catch(err) { console.warn("Error imagen", err); }
   }
 
-  // 2 — Armar detalle
+  // 2 — Armar detalle de gastos
   const detalleGastos = gastos.map(g =>
-    `${CATS[g.cat].replace(/\p{Emoji}/gu,"").trim()}: ${g.desc} (${cop(g.monto)})${g.driveUrl ? " -> "+g.driveUrl : ""}`
+    `${CATS[g.cat].carpeta}: ${g.desc} (${cop(g.monto)})${g.driveUrl ? " -> "+g.driveUrl : ""}`
   ).join(" | ");
 
   const totalGastado = gastos.reduce((s,g) => s+g.monto, 0);
@@ -346,7 +363,7 @@ async function enviarRegistro() {
 
   setProgreso(85, "Guardando en Google Sheets…");
 
-  // 3 — Enviar fila (no-cors, sin leer respuesta)
+  // 3 — Enviar fila
   await enviarFila({
     tipo:         "registro",
     nombreViaje:  viaje,
@@ -357,10 +374,12 @@ async function enviarRegistro() {
     presupuesto,
     totalGastado,
     balance,
-    estado:       balance >= 0 ? `Sobró $${balance.toLocaleString("es-CO")}` : `Faltaron $${Math.abs(balance).toLocaleString("es-CO")}`,
+    estado:       balance >= 0
+      ? `Sobró $${balance.toLocaleString("es-CO")}`
+      : `Faltaron $${Math.abs(balance).toLocaleString("es-CO")}`,
     cats,
     detalleGastos,
-    notas:        document.getElementById("notas").value.trim()
+    notas: document.getElementById("notas").value.trim()
   });
 
   setProgreso(100, "¡Listo!");
