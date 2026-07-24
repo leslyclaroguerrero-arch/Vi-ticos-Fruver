@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Planilla de Viáticos – Fruver Barranquilla</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: #f5f7f2; color: #1a2a1a; min-height: 100vh; }
+
+  header { background: #1e4d2b; color: #fff; padding: 18px 20px 14px; display: flex; align-items: center; gap: 12px; }
+  header .logo { font-size: 28px; }
+  header h1 { font-size: 18px; font-weight: 700; line-height: 1.2; }
+  header p { font-size: 11px; opacity: .7; margin-top: 2px; }
+
+  .section { background: #fff; margin: 14px 14px 0; border-radius: 12px; padding: 16px; border: 1px solid #dde8da; }
+  .section-title { font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #1e4d2b; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #eef3ec; }
+
+  .field { margin-bottom: 12px; }
+  .field label { display: block; font-size: 12px; color: #556; margin-bottom: 4px; font-weight: 600; }
+  .field input, .field select, .field textarea { width: 100%; border: 1.5px solid #cdd8ca; border-radius: 8px; padding: 10px 12px; font-size: 15px; color: #1a2a1a; background: #f9fbf8; outline: none; transition: border-color .15s; font-family: inherit; }
+  .field input:focus, .field select:focus, .field textarea:focus { border-color: #1e4d2b; background: #fff; }
+  .field textarea { resize: vertical; min-height: 60px; }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+  .gasto-item { border: 1px solid #dde8da; border-radius: 10px; padding: 12px; margin-bottom: 8px; background: #f9fbf8; }
+  .gasto-item .gasto-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .gasto-item .cat-tag { font-size: 12px; background: #e8f2e8; color: #1e4d2b; border-radius: 20px; padding: 2px 10px; font-weight: 600; }
+  .gasto-item .eliminar { background: none; border: none; color: #b55; font-size: 18px; cursor: pointer; line-height: 1; padding: 0 4px; }
+  .gasto-item .gasto-desc { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+  .gasto-item .gasto-monto { font-size: 18px; font-weight: 700; color: #b85c00; }
+  .gasto-item .evidencia-thumb { width: 100%; max-height: 130px; object-fit: cover; border-radius: 6px; margin-top: 8px; border: 1px solid #dde8da; }
+
+  .add-gasto-form { border: 1.5px dashed #1e4d2b; border-radius: 10px; padding: 14px; background: #f0f7f0; margin-bottom: 10px; display: none; }
+  .add-gasto-form.visible { display: block; }
+
+  .cat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 10px; }
+  .cat-btn { border: 1.5px solid #cdd8ca; background: #fff; border-radius: 8px; padding: 7px 4px; font-size: 11px; cursor: pointer; text-align: center; color: #1a2a1a; transition: all .15s; line-height: 1.4; }
+  .cat-btn.active { border-color: #1e4d2b; background: #1e4d2b; color: #fff; }
+
+  .btn { display: block; width: 100%; padding: 13px; border: none; border-radius: 10px; font-size: 15px; font-weight: 700; cursor: pointer; font-family: inherit; transition: opacity .15s; }
+  .btn:active { opacity: .8; }
+  .btn-green { background: #1e4d2b; color: #fff; }
+  .btn-outline { background: #fff; color: #1e4d2b; border: 1.5px solid #1e4d2b; }
+  .btn-small { padding: 9px 14px; font-size: 13px; width: auto; display: inline-block; }
+
+  #balance-box { margin: 14px 14px 0; border-radius: 12px; padding: 20px; border: 2px solid #1e4d2b; background: #fff; text-align: center; }
+  #balance-box .balance-label { font-size: 12px; color: #556; text-transform: uppercase; letter-spacing: 1px; }
+  #balance-box .balance-valor { font-size: 38px; font-weight: 800; margin: 4px 0 2px; line-height: 1; }
+  #balance-box .balance-det { font-size: 13px; color: #778; margin-top: 4px; }
+  .balance-pos { color: #1e7a3a; }
+  .balance-neg { color: #c0392b; }
+  .balance-zero { color: #888; }
+
+  .resumen-cats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 14px; }
+  .resumen-cat { background: #f5f7f2; border: 1px solid #dde8da; border-radius: 8px; padding: 8px 10px; font-size: 13px; }
+  .resumen-cat span { font-weight: 700; color: #b85c00; display: block; }
+
+  .acciones { padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+
+  /* Toast */
+  #toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #1e4d2b; color: #fff; padding: 12px 24px; border-radius: 30px; font-size: 14px; font-weight: 600; opacity: 0; transition: opacity .3s; pointer-events: none; z-index: 999; white-space: nowrap; }
+  #toast.show { opacity: 1; }
+
+  @media print {
+    header { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .no-print { display: none !important; }
+    .section, #balance-box { break-inside: avoid; }
+    body { background: #fff; }
+  }
+</style>
+</head>
+<body>
+
+<div id="toast"></div>
+
+<header>
+  <div class="logo">🥦</div>
+  <div>
+    <h1>Planilla de Viáticos</h1>
+    <p>Fruver Barranquilla · Entregas al Batallón</p>
+  </div>
+</header>
+
+<!-- Info del viaje -->
+<div class="section">
+  <div class="section-title">Información del viaje</div>
+  <div class="row2">
+    <div class="field">
+      <label>Fecha</label>
+      <input type="date" id="fecha">
+    </div>
+    <div class="field">
+      <label>Destino</label>
+      <input type="text" id="destino" value="Batallón" placeholder="Ej: Batallón No. 4">
+    </div>
+  </div>
+  <div class="field">
+    <label>Conductor</label>
+    <input type="text" id="conductor" placeholder="Nombre completo">
+  </div>
+  <div class="field">
+    <label>Encargada de entrega</label>
+    <input type="text" id="encargada" placeholder="Nombre completo">
+  </div>
+  <div class="field">
+    <label>Dinero entregado (COP $)</label>
+    <input type="number" id="presupuesto" placeholder="Ej: 300000" inputmode="numeric" oninput="actualizarBalance()">
+  </div>
+  <div class="field">
+    <label>Observaciones</label>
+    <textarea id="notas" placeholder="Notas del viaje (opcional)"></textarea>
+  </div>
+</div>
+
+<!-- Gastos -->
+<div class="section">
+  <div class="section-title">Gastos del viaje</div>
+  <div id="gastos-lista"></div>
+
+  <div class="add-gasto-form" id="form-gasto">
+    <div style="font-size:13px;font-weight:700;color:#1e4d2b;margin-bottom:10px;">Nuevo gasto</div>
+    <div class="cat-grid">
+      <button class="cat-btn active" data-cat="combustible" onclick="selCat(this)">⛽<br>Combustible</button>
+      <button class="cat-btn" data-cat="peaje" onclick="selCat(this)">🛣️<br>Peaje/Pesaje</button>
+      <button class="cat-btn" data-cat="comida" onclick="selCat(this)">🍱<br>Comida</button>
+      <button class="cat-btn" data-cat="viatico" onclick="selCat(this)">💵<br>Viático</button>
+      <button class="cat-btn" data-cat="imprevisto" onclick="selCat(this)">⚠️<br>Imprevisto</button>
+      <button class="cat-btn" data-cat="otro" onclick="selCat(this)">📋<br>Otro</button>
+    </div>
+    <div class="field">
+      <label>Descripción</label>
+      <input type="text" id="g-desc" placeholder="Ej: Gasolina Estación del Norte">
+    </div>
+    <div class="field">
+      <label>Monto (COP $)</label>
+      <input type="number" id="g-monto" placeholder="Ej: 80000" inputmode="numeric">
+    </div>
+    <div class="field">
+      <label>Evidencia (foto de factura, pesaje…)</label>
+      <input type="file" id="g-foto" accept="image/*" capture="environment"
+        style="font-size:13px;background:#fff;border:1.5px solid #cdd8ca;border-radius:8px;padding:8px 10px;">
+    </div>
+    <div style="display:flex;gap:8px;margin-top:4px;">
+      <button class="btn btn-outline btn-small" onclick="cancelarGasto()">Cancelar</button>
+      <button class="btn btn-green btn-small" onclick="guardarGasto()" style="flex:1;">Guardar gasto ✓</button>
+    </div>
+  </div>
+
+  <button class="btn btn-outline no-print" id="btn-agregar" onclick="mostrarForm()" style="margin-top:4px;">
+    + Agregar gasto
+  </button>
+</div>
+
+<!-- Balance -->
+<div id="balance-box">
+  <div class="balance-label">Balance del viaje</div>
+  <div class="balance-valor balance-zero" id="balance-valor">$ —</div>
+  <div class="balance-det" id="balance-det">Ingresa el dinero entregado y los gastos</div>
+  <div class="resumen-cats" id="resumen-cats" style="display:none;"></div>
+</div>
+
+<!-- Acciones -->
+<div class="acciones no-print">
+  <button class="btn btn-green" id="btn-enviar" onclick="enviarASheets()">
+    📊 Enviar al registro de Google Sheets
+  </button>
+  <button class="btn btn-outline" onclick="imprimirPlanilla()">📄 Imprimir / Guardar PDF</button>
+  <button class="btn" onclick="limpiarTodo()" style="background:#fff;color:#b55;border:1.5px solid #b55;">🗑 Limpiar planilla</button>
+</div>
+
+<div style="height:30px;"></div>
+
+<script>
+const SHEETS_URL = "https://script.google.com/macros/s/AKfycbw2Jn-PXmRasYa9MmixxlnDAtg4Xkvx-5wv1qrOHzti2MBbhgng7qNPn-qnzl4i0RofAA/exec";
+
+const CATS = {
+  combustible: "⛽ Combustible",
+  peaje:       "🛣️ Peaje/Pesaje",
+  comida:      "🍱 Comida",
+  viatico:     "💵 Viático",
+  imprevisto:  "⚠️ Imprevisto",
+  otro:        "📋 Otro"
+};
+
+let gastos = [];
+let catActiva = "combustible";
+
+document.getElementById("fecha").value = new Date().toISOString().split("T")[0];
+
+function selCat(btn) {
+  document.querySelectorAll(".cat-btn").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+  catActiva = btn.dataset.cat;
+}
+
+function mostrarForm() {
+  document.getElementById("form-gasto").classList.add("visible");
+  document.getElementById("btn-agregar").style.display = "none";
+  document.getElementById("g-desc").focus();
+}
+
+function cancelarGasto() {
+  document.getElementById("form-gasto").classList.remove("visible");
+  document.getElementById("btn-agregar").style.display = "block";
+  limpiarFormGasto();
+}
+
+function limpiarFormGasto() {
+  document.getElementById("g-desc").value = "";
+  document.getElementById("g-monto").value = "";
+  document.getElementById("g-foto").value = "";
+}
+
+function guardarGasto() {
+  const desc  = document.getElementById("g-desc").value.trim();
+  const monto = parseFloat(document.getElementById("g-monto").value);
+  if (!desc || isNaN(monto) || monto <= 0) {
+    alert("Por favor ingresa la descripción y el monto.");
+    return;
+  }
+  const fileInput = document.getElementById("g-foto");
+  const file = fileInput.files[0];
+
+  const finalizar = (imgData) => {
+    gastos.push({ id: Date.now(), cat: catActiva, desc, monto, img: imgData || null, fileName: file ? file.name : null });
+    renderGastos();
+    actualizarBalance();
+    cancelarGasto();
+  };
+
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = e => finalizar(e.target.result);
+    reader.readAsDataURL(file);
+  } else {
+    finalizar(null);
+  }
+}
+
+function eliminarGasto(id) {
+  gastos = gastos.filter(g => g.id !== id);
+  renderGastos();
+  actualizarBalance();
+}
+
+function cop(n) {
+  return "$ " + Math.abs(n).toLocaleString("es-CO");
+}
+
+function renderGastos() {
+  const lista = document.getElementById("gastos-lista");
+  if (gastos.length === 0) {
+    lista.innerHTML = '<p style="color:#aaa;font-size:13px;text-align:center;padding:10px 0;">Sin gastos aún</p>';
+    return;
+  }
+  lista.innerHTML = gastos.map(g => `
+    <div class="gasto-item">
+      <div class="gasto-head">
+        <span class="cat-tag">${CATS[g.cat]}</span>
+        <button class="eliminar no-print" onclick="eliminarGasto(${g.id})">✕</button>
+      </div>
+      <div class="gasto-desc">${g.desc}</div>
+      <div class="gasto-monto">${cop(g.monto)}</div>
+      ${g.img ? `<img src="${g.img}" class="evidencia-thumb" alt="Evidencia">` : ""}
+      ${!g.img && g.fileName ? `<div style="font-size:12px;color:#1e4d2b;margin-top:6px;">📎 ${g.fileName}</div>` : ""}
+    </div>
+  `).join("");
+}
+
+function actualizarBalance() {
+  const presupuesto  = parseFloat(document.getElementById("presupuesto").value) || 0;
+  const totalGastado = gastos.reduce((s, g) => s + g.monto, 0);
+  const balance      = presupuesto - totalGastado;
+
+  const valEl   = document.getElementById("balance-valor");
+  const detEl   = document.getElementById("balance-det");
+  const resumen = document.getElementById("resumen-cats");
+
+  if (presupuesto === 0) {
+    valEl.textContent = "$ —";
+    valEl.className = "balance-valor balance-zero";
+    detEl.textContent = "Ingresa el dinero entregado y los gastos";
+    resumen.style.display = "none";
+    return;
+  }
+
+  valEl.textContent = cop(balance);
+  if (balance > 0) {
+    valEl.className = "balance-valor balance-pos";
+    detEl.innerHTML = `<b style="color:#1e7a3a">✓ Sobró ${cop(balance)}</b><br><span style="font-size:12px;">Entregado ${cop(presupuesto)} · Gastado ${cop(totalGastado)}</span>`;
+  } else if (balance < 0) {
+    valEl.className = "balance-valor balance-neg";
+    detEl.innerHTML = `<b style="color:#c0392b">⚠ Se pasaron ${cop(Math.abs(balance))}</b><br><span style="font-size:12px;">Entregado ${cop(presupuesto)} · Gastado ${cop(totalGastado)}</span>`;
+  } else {
+    valEl.className = "balance-valor balance-zero";
+    detEl.innerHTML = `Gastado exacto: ${cop(totalGastado)}`;
+  }
+
+  const cats = {};
+  gastos.forEach(g => { cats[g.cat] = (cats[g.cat] || 0) + g.monto; });
+  const entries = Object.entries(cats);
+  if (entries.length > 0) {
+    resumen.style.display = "grid";
+    resumen.innerHTML = entries.map(([k, v]) => `
+      <div class="resumen-cat">${CATS[k]}<span>${cop(v)}</span></div>
+    `).join("");
+  } else {
+    resumen.style.display = "none";
+  }
+}
+
+function mostrarToast(msg, color) {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.style.background = color || "#1e4d2b";
+  t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), 3500);
+}
+
+async function enviarASheets() {
+  const conductor  = document.getElementById("conductor").value.trim();
+  const presupuesto = parseFloat(document.getElementById("presupuesto").value) || 0;
+
+  if (!conductor || presupuesto === 0) {
+    alert("Por favor completa al menos el nombre del conductor y el dinero entregado.");
+    return;
+  }
+
+  const totalGastado = gastos.reduce((s, g) => s + g.monto, 0);
+  const balance      = presupuesto - totalGastado;
+
+  const cats = {};
+  gastos.forEach(g => { cats[g.cat] = (cats[g.cat] || 0) + g.monto; });
+
+  const datos = {
+    fecha:        document.getElementById("fecha").value,
+    destino:      document.getElementById("destino").value,
+    conductor,
+    encargada:    document.getElementById("encargada").value.trim(),
+    presupuesto,
+    totalGastado,
+    balance,
+    estado:       balance >= 0 ? `Sobró $${balance.toLocaleString("es-CO")}` : `Faltaron $${Math.abs(balance).toLocaleString("es-CO")}`,
+    cats,
+    notas:        document.getElementById("notas").value.trim()
+  };
+
+  const btn = document.getElementById("btn-enviar");
+  btn.textContent = "⏳ Enviando...";
+  btn.disabled = true;
+
+  try {
+    await fetch(SHEETS_URL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(datos)
+    });
+    mostrarToast("✓ Registro enviado a Google Sheets", "#1e4d2b");
+    btn.textContent = "✓ Enviado correctamente";
+    btn.style.background = "#1e7a3a";
+  } catch (err) {
+    mostrarToast("❌ Error al enviar. Revisa tu conexión.", "#c0392b");
+    btn.textContent = "📊 Enviar al registro de Google Sheets";
+    btn.disabled = false;
+  }
+}
+
+function imprimirPlanilla() {
+  window.print();
+}
+
+function limpiarTodo() {
+  if (!confirm("¿Borrar todos los datos de la planilla?")) return;
+  gastos = [];
+  document.getElementById("fecha").value = new Date().toISOString().split("T")[0];
+  ["conductor","encargada","presupuesto","notas"].forEach(id => document.getElementById(id).value = "");
+  document.getElementById("destino").value = "Batallón";
+  const btn = document.getElementById("btn-enviar");
+  btn.textContent = "📊 Enviar al registro de Google Sheets";
+  btn.disabled = false;
+  btn.style.background = "#1e4d2b";
+  renderGastos();
+  actualizarBalance();
+}
+
+renderGastos();
+</script>
+</body>
+</html>
