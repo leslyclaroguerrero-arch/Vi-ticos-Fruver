@@ -80,7 +80,7 @@
   </div>
   <div class="field"><label>Conductor</label><input type="text" id="conductor" placeholder="Nombre completo"></div>
   <div class="field"><label>Encargada de entrega</label><input type="text" id="encargada" placeholder="Nombre completo"></div>
-  <div class="field"><label>Dinero entregado (COP $)</label><input type="number" id="presupuesto" placeholder="Ej: 300000" inputmode="numeric" oninput="actualizarBalance()"></div>
+  <div class="field"><label>Dinero entregado (COP $)</label><input type="text" id="presupuesto" value="0" inputmode="numeric" oninput="formatearCampo(this); actualizarBalance()"></div>
   <div class="field"><label>Observaciones</label><textarea id="notas" placeholder="Notas del viaje (opcional)"></textarea></div>
 </div>
 
@@ -98,7 +98,7 @@
       <button class="cat-btn" data-cat="otro"       onclick="selCat(this)">📋<br>Otro</button>
     </div>
     <div class="field"><label>Descripción</label><input type="text" id="g-desc" placeholder="Ej: Gasolina Estación del Norte"></div>
-    <div class="field"><label>Monto (COP $)</label><input type="number" id="g-monto" placeholder="Ej: 80000" inputmode="numeric"></div>
+    <div class="field"><label>Monto (COP $)</label><input type="text" id="g-monto" placeholder="Ej: 80.000" inputmode="numeric" oninput="formatearCampo(this)"></div>
     <div class="field">
       <label>Foto de factura o evidencia</label>
       <input type="file" id="g-foto" accept="image/*" capture="environment"
@@ -149,6 +149,22 @@ let catActiva = "combustible";
 
 document.getElementById("fecha").value = new Date().toISOString().split("T")[0];
 
+// ── Formateo de campos COP ────────────────────────────────
+function formatearCampo(input) {
+  const pos   = input.selectionStart;
+  const antes = input.value.length;
+  const soloDigitos = input.value.replace(/\D/g, "");
+  if (!soloDigitos) { input.value = ""; return; }
+  input.value = parseInt(soloDigitos, 10).toLocaleString("es-CO");
+  const nuevaPos = pos + (input.value.length - antes);
+  try { input.setSelectionRange(nuevaPos, nuevaPos); } catch(e) {}
+}
+
+// Leer valor numérico limpio desde campo formateado
+function leerValor(id) {
+  return parseFloat(document.getElementById(id).value.replace(/\./g, "").replace(",", ".")) || 0;
+}
+
 // Nombre único del viaje (también nombre de la carpeta en Drive)
 function nombreViaje() {
   const conductor = document.getElementById("conductor").value.trim() || "Sin conductor";
@@ -186,11 +202,12 @@ function cancelarGasto() {
   document.getElementById("g-desc").value  = "";
   document.getElementById("g-monto").value = "";
   document.getElementById("g-foto").value  = "";
+  document.getElementById("presupuesto").value = document.getElementById("presupuesto").value; // mantener
 }
 
 function guardarGasto() {
   const desc  = document.getElementById("g-desc").value.trim();
-  const monto = parseFloat(document.getElementById("g-monto").value);
+  const monto = leerValor("g-monto");
   if (!desc || isNaN(monto) || monto <= 0) { alert("Ingresa la descripción y el monto."); return; }
 
   const file = document.getElementById("g-foto").files[0];
@@ -251,7 +268,7 @@ function renderGastos() {
 }
 
 function actualizarBalance() {
-  const presupuesto  = parseFloat(document.getElementById("presupuesto").value) || 0;
+  const presupuesto  = leerValor("presupuesto");
   const totalGastado = gastos.reduce((s,g) => s + g.monto, 0);
   const balance      = presupuesto - totalGastado;
   const valEl = document.getElementById("balance-valor");
@@ -326,7 +343,7 @@ async function enviarFila(payload) {
 
 async function enviarRegistro() {
   const conductor  = document.getElementById("conductor").value.trim();
-  const presupuesto = parseFloat(document.getElementById("presupuesto").value) || 0;
+  const presupuesto = leerValor("presupuesto");
   if (!conductor || !presupuesto) { alert("Completa el nombre del conductor y el dinero entregado."); return; }
 
   const viaje = nombreViaje();
@@ -394,7 +411,8 @@ function limpiarTodo(silencioso) {
   if (!silencioso && !confirm("¿Borrar todos los datos de la planilla?")) return;
   gastos = [];
   document.getElementById("fecha").value = new Date().toISOString().split("T")[0];
-  ["conductor","encargada","presupuesto","notas"].forEach(id => document.getElementById(id).value = "");
+  ["conductor","encargada","notas"].forEach(id => document.getElementById(id).value = "");
+  document.getElementById("presupuesto").value = "0";
   document.getElementById("destino").value = "Batallón";
   const btn = document.getElementById("btn-enviar");
   btn.textContent = "📊 Enviar registro a Google Sheets";
