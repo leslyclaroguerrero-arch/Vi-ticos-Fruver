@@ -20,8 +20,10 @@
     --texto: #1A1A18;
     --suave: #6B6B65;
     --rojo: #C0392B;
+    --azul-claro: #EBF3FC;
+    --azul: #2563EB;
   }
-  body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--texto); min-height:100vh; display:flex; flex-direction:column; }
+  *, body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--texto); min-height:100vh; display:flex; flex-direction:column; }
 
   header {
     background:var(--verde); padding:0 20px; height:60px;
@@ -42,16 +44,33 @@
 
   .card { background:var(--blanco); border-radius:16px; padding:24px 20px; width:100%; max-width:460px; box-shadow:0 2px 12px rgba(0,0,0,.07); }
 
+  /* Sección con color de acento */
+  .sec-block {
+    border-radius:12px; padding:18px 16px; margin-bottom:20px;
+  }
+  .sec-block.compras { background:#F0FAF4; border:1.5px solid #B7DFCA; }
+  .sec-block.gastos  { background:#FFF8EB; border:1.5px solid #F0D58C; }
+
   .sec-label {
     font-size:10px; font-weight:700; letter-spacing:1.1px; text-transform:uppercase;
-    color:var(--verde-med); margin-bottom:14px; padding-bottom:8px; border-bottom:1px solid var(--borde);
+    margin-bottom:14px; padding-bottom:8px; border-bottom:1px solid rgba(0,0,0,.08);
+    display:flex; align-items:center; gap:6px;
   }
-  .field-group { display:flex; flex-direction:column; gap:14px; margin-bottom:24px; }
+  .sec-block.compras .sec-label { color:var(--verde-med); }
+  .sec-block.gastos  .sec-label { color:#92630A; }
+
+  .sec-label-top {
+    font-size:10px; font-weight:700; letter-spacing:1.1px; text-transform:uppercase;
+    color:var(--verde-med); margin-bottom:14px; padding-bottom:8px;
+    border-bottom:1px solid var(--borde);
+  }
+
+  .field-group { display:flex; flex-direction:column; gap:14px; margin-bottom:0; }
   .field { display:flex; flex-direction:column; gap:6px; }
   label { font-size:12px; font-weight:600; }
   .req { color:var(--rojo); margin-left:2px; }
 
-  select, input[type="number"], input[type="text"] {
+  select, input[type="text"] {
     font-family:'Inter',sans-serif; font-size:15px; padding:11px 13px;
     border:1.5px solid var(--borde); border-radius:10px; background:#fff;
     color:var(--texto); width:100%; -webkit-appearance:none; appearance:none;
@@ -66,47 +85,46 @@
 
   /* FOTO AREA */
   .foto-area {
-    border:2px dashed var(--borde); border-radius:14px; padding:0;
-    overflow:hidden; transition:border-color .2s;
+    border:2px dashed var(--borde); border-radius:12px;
+    overflow:hidden; transition:border-color .2s; margin-top:14px;
   }
   .foto-area.has-files { border-color:var(--verde-med); }
 
   .foto-trigger {
     display:flex; flex-direction:column; align-items:center; justify-content:center;
-    gap:8px; padding:28px 20px; cursor:pointer; position:relative;
-    transition:background .2s;
+    gap:6px; padding:22px 16px; cursor:pointer; position:relative; transition:background .2s;
   }
   .foto-trigger:hover { background:var(--verde-claro); }
   .foto-trigger input { position:absolute; inset:0; opacity:0; cursor:pointer; width:100%; height:100%; }
-  .foto-trigger-icon { font-size:32px; }
-  .foto-trigger-text { font-size:13px; color:var(--suave); text-align:center; line-height:1.5; }
-  .foto-trigger-text strong { color:var(--verde-med); display:block; font-size:14px; margin-bottom:2px; }
+  .foto-trigger-icon { font-size:26px; }
+  .foto-trigger-text { font-size:12px; color:var(--suave); text-align:center; line-height:1.5; }
+  .foto-trigger-text strong { color:var(--verde-med); display:block; font-size:13px; margin-bottom:1px; }
 
   .foto-count-bar {
-    display:none; background:var(--verde-claro); padding:10px 16px;
-    border-top:1px solid #c5e3d0;
-    font-size:13px; font-weight:600; color:var(--verde-med);
+    display:none; background:var(--verde-claro); padding:9px 14px;
+    border-top:1px solid #c5e3d0; font-size:12px; font-weight:600; color:var(--verde-med);
     justify-content:space-between; align-items:center;
   }
   .foto-count-bar.show { display:flex; }
-  .btn-ver-fotos { background:none; border:none; color:var(--verde-med); font-size:13px; font-weight:700; cursor:pointer; text-decoration:underline; }
+  .btn-ver-fotos { background:none; border:none; color:var(--verde-med); font-size:12px; font-weight:700; cursor:pointer; text-decoration:underline; }
 
-  /* grid de previews */
-  .preview-grid { display:none; grid-template-columns:repeat(3,1fr); gap:6px; padding:12px; background:#fff; }
+  .preview-grid { display:none; grid-template-columns:repeat(3,1fr); gap:6px; padding:10px; background:#fff; }
   .preview-grid.show { display:grid; }
   .prev-item { position:relative; aspect-ratio:1; border-radius:8px; overflow:hidden; background:var(--bg); }
   .prev-item img { width:100%; height:100%; object-fit:cover; }
-  .prev-del { position:absolute; top:4px; right:4px; background:rgba(0,0,0,.6); color:#fff; border:none; border-radius:50%; width:22px; height:22px; font-size:13px; cursor:pointer; display:grid; place-items:center; }
+  .prev-del { position:absolute; top:3px; right:3px; background:rgba(0,0,0,.6); color:#fff; border:none; border-radius:50%; width:20px; height:20px; font-size:12px; cursor:pointer; display:grid; place-items:center; }
 
-  /* agregar más */
   .btn-agregar-mas {
-    display:none; width:100%; padding:11px; background:none; border:none;
+    display:none; width:100%; padding:10px; background:none; border:none;
     border-top:1px solid var(--borde); color:var(--verde-med); font-family:'Inter',sans-serif;
-    font-size:13px; font-weight:700; cursor:pointer; position:relative;
+    font-size:12px; font-weight:700; cursor:pointer; position:relative;
   }
   .btn-agregar-mas input { position:absolute; inset:0; opacity:0; cursor:pointer; width:100%; height:100%; }
   .btn-agregar-mas.show { display:block; }
   .btn-agregar-mas:hover { background:var(--verde-claro); }
+
+  /* divider */
+  .divider { height:1px; background:var(--borde); margin:4px 0 20px; }
 
   /* SUBMIT */
   .btn-submit {
@@ -161,14 +179,14 @@
 <main>
   <div class="heading">
     <h1>Registro de facturas</h1>
-    <p>Selecciona tu nombre, escribe el total y adjunta las fotos de las facturas que pagaste hoy.</p>
+    <p>Selecciona tu nombre, registra compras y gastos con sus respectivas fotos.</p>
   </div>
 
   <div class="card">
 
     <!-- CAJERA -->
-    <div class="sec-label">👤 ¿Quién hace el cierre?</div>
-    <div class="field-group">
+    <div class="sec-label-top">👤 ¿Quién hace el cierre?</div>
+    <div class="field-group" style="margin-bottom:24px;">
       <div class="field">
         <label for="cajera">Tu nombre <span class="req">*</span></label>
         <select id="cajera">
@@ -182,48 +200,77 @@
       </div>
     </div>
 
-    <!-- TOTAL -->
-    <div class="sec-label">💰 Total de facturas pagadas</div>
-    <div class="field-group">
-      <div class="field">
-        <label for="total">Valor total <span class="req">*</span></label>
-        <div class="prefix-wrap">
-          <span class="prefix">$</span>
-          <input type="text" id="total" placeholder="0" inputmode="numeric" autocomplete="off" />
+    <div class="divider"></div>
+
+    <!-- COMPRAS -->
+    <div class="sec-block compras">
+      <div class="sec-label">🛒 Total compras</div>
+      <div class="field-group">
+        <div class="field">
+          <label for="totalCompras">Valor total compras <span class="req">*</span></label>
+          <div class="prefix-wrap">
+            <span class="prefix">$</span>
+            <input type="text" id="totalCompras" placeholder="0" inputmode="numeric" autocomplete="off" />
+          </div>
+        </div>
+        <div class="field">
+          <label>Fotos facturas de compras <span class="req">*</span></label>
+          <div class="foto-area" id="fotoAreaCompras">
+            <div class="foto-trigger" id="fotoTriggerCompras">
+              <input type="file" accept="image/*" multiple onchange="handleFiles('compras', this.files)" />
+              <div class="foto-trigger-icon">🧾</div>
+              <div class="foto-trigger-text">
+                <strong>Adjuntar fotos de compras</strong>
+                Puedes seleccionar varias a la vez
+              </div>
+            </div>
+            <div class="foto-count-bar" id="countBarCompras">
+              <span id="countTextCompras">0 fotos</span>
+              <button class="btn-ver-fotos" onclick="togglePreviews('compras')">Ver fotos ▾</button>
+            </div>
+            <div class="preview-grid" id="previewGridCompras"></div>
+            <button class="btn-agregar-mas" id="btnMasCompras">
+              <input type="file" accept="image/*" multiple onchange="handleFiles('compras', this.files)" />
+              + Agregar más fotos
+            </button>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- FOTOS -->
-    <div class="sec-label">📷 Fotos de las facturas</div>
-    <div class="field-group">
-      <div class="foto-area" id="fotoArea">
-
-        <!-- Trigger inicial -->
-        <div class="foto-trigger" id="fotoTrigger">
-          <input type="file" accept="image/*" multiple onchange="handleFiles(this.files)" id="fotoInput" />
-          <div class="foto-trigger-icon">📄</div>
-          <div class="foto-trigger-text">
-            <strong>Toca para adjuntar o tomar fotos</strong>
-            Puedes seleccionar varias a la vez
+    <!-- GASTOS -->
+    <div class="sec-block gastos">
+      <div class="sec-label">💸 Total gastos</div>
+      <div class="field-group">
+        <div class="field">
+          <label for="totalGastos">Valor total gastos <span class="req">*</span></label>
+          <div class="prefix-wrap">
+            <span class="prefix">$</span>
+            <input type="text" id="totalGastos" placeholder="0" inputmode="numeric" autocomplete="off" />
           </div>
         </div>
-
-        <!-- Barra de conteo -->
-        <div class="foto-count-bar" id="countBar">
-          <span id="countText">0 fotos adjuntas</span>
-          <button class="btn-ver-fotos" onclick="togglePreviews()">Ver fotos ▾</button>
+        <div class="field">
+          <label>Fotos facturas de gastos <span class="req">*</span></label>
+          <div class="foto-area" id="fotoAreaGastos">
+            <div class="foto-trigger" id="fotoTriggerGastos">
+              <input type="file" accept="image/*" multiple onchange="handleFiles('gastos', this.files)" />
+              <div class="foto-trigger-icon">🧾</div>
+              <div class="foto-trigger-text">
+                <strong>Adjuntar fotos de gastos</strong>
+                Puedes seleccionar varias a la vez
+              </div>
+            </div>
+            <div class="foto-count-bar" id="countBarGastos">
+              <span id="countTextGastos">0 fotos</span>
+              <button class="btn-ver-fotos" onclick="togglePreviews('gastos')">Ver fotos ▾</button>
+            </div>
+            <div class="preview-grid" id="previewGridGastos"></div>
+            <button class="btn-agregar-mas" id="btnMasGastos">
+              <input type="file" accept="image/*" multiple onchange="handleFiles('gastos', this.files)" />
+              + Agregar más fotos
+            </button>
+          </div>
         </div>
-
-        <!-- Grid de previews (colapsable) -->
-        <div class="preview-grid" id="previewGrid"></div>
-
-        <!-- Botón agregar más -->
-        <button class="btn-agregar-mas" id="btnAgregarMas">
-          <input type="file" accept="image/*" multiple onchange="handleFiles(this.files)" />
-          + Agregar más fotos
-        </button>
-
       </div>
     </div>
 
@@ -249,74 +296,76 @@
 </div>
 
 <script>
-// ── CONFIG ───────────────────────────────────────────
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwf72WWUesrr9__4TYgXrm-cYwnl9rplw3KjMWTv06OM1iYFVYebAr2P_iVFjfurYyc/exec";
-// ────────────────────────────────────────────────────
-
-// ── FORMATO MILES ────────────────────────────────────
-const totalInput = document.getElementById('total');
-totalInput.addEventListener('input', function() {
-  // Quitar todo lo que no sea dígito
-  let raw = this.value.replace(/\D/g, '');
-  if (raw === '') { this.value = ''; return; }
-  // Formatear con puntos de miles
-  this.value = Number(raw).toLocaleString('es-CO');
-});
-// Al pegar también formatea
-totalInput.addEventListener('paste', function() {
-  setTimeout(() => {
-    let raw = this.value.replace(/\D/g, '');
-    this.value = raw ? Number(raw).toLocaleString('es-CO') : '';
-  }, 10);
-});
 
 // Fecha header
 const hoy = new Date();
 document.getElementById('hdrDate').textContent =
   hoy.toLocaleDateString('es-CO', { weekday:'short', day:'numeric', month:'short' });
 
-// ── FOTOS ────────────────────────────────────────────
-let archivos = [];
-let previewsVisible = false;
+// ── FORMATO MILES ─────────────────────────────────────
+function attachMiles(id) {
+  const el = document.getElementById(id);
+  el.addEventListener('input', function() {
+    const raw = this.value.replace(/\D/g, '');
+    this.value = raw ? Number(raw).toLocaleString('es-CO') : '';
+  });
+  el.addEventListener('paste', function() {
+    setTimeout(() => {
+      const raw = this.value.replace(/\D/g, '');
+      this.value = raw ? Number(raw).toLocaleString('es-CO') : '';
+    }, 10);
+  });
+}
+attachMiles('totalCompras');
+attachMiles('totalGastos');
 
-function handleFiles(files) {
+// ── FOTOS ─────────────────────────────────────────────
+const state = {
+  compras: { archivos: [], previews: false },
+  gastos:  { archivos: [], previews: false }
+};
+
+function handleFiles(tipo, files) {
+  const arr = state[tipo].archivos;
   for (const f of files) {
-    if (!archivos.find(x => x.name === f.name && x.size === f.size)) archivos.push(f);
+    if (!arr.find(x => x.name === f.name && x.size === f.size)) arr.push(f);
   }
-  renderUI();
+  renderUI(tipo);
 }
 
-function renderUI() {
-  const n = archivos.length;
-  const area = document.getElementById('fotoArea');
-  const trigger = document.getElementById('fotoTrigger');
-  const countBar = document.getElementById('countBar');
-  const btnMas = document.getElementById('btnAgregarMas');
+function renderUI(tipo) {
+  const n       = state[tipo].archivos.length;
+  const cap     = tipo === 'compras' ? 'Compras' : 'Gastos';
+  const area    = document.getElementById(`fotoArea${cap}`);
+  const trigger = document.getElementById(`fotoTrigger${cap}`);
+  const countBar= document.getElementById(`countBar${cap}`);
+  const btnMas  = document.getElementById(`btnMas${cap}`);
 
   if (n === 0) {
     trigger.style.display = 'flex';
     countBar.classList.remove('show');
     btnMas.classList.remove('show');
-    document.getElementById('previewGrid').classList.remove('show');
+    document.getElementById(`previewGrid${cap}`).classList.remove('show');
     area.classList.remove('has-files');
   } else {
     trigger.style.display = 'none';
     countBar.classList.add('show');
     btnMas.classList.add('show');
     area.classList.add('has-files');
-    document.getElementById('countText').textContent =
+    document.getElementById(`countText${cap}`).textContent =
       `${n} foto${n > 1 ? 's' : ''} adjunta${n > 1 ? 's' : ''}`;
-    if (previewsVisible) renderPreviews();
-    document.getElementById('btnVerFotos') && null;
+    if (state[tipo].previews) renderPreviews(tipo);
   }
 }
 
-function togglePreviews() {
-  previewsVisible = !previewsVisible;
-  const grid = document.getElementById('previewGrid');
-  const btn = document.querySelector('.btn-ver-fotos');
-  if (previewsVisible) {
-    renderPreviews();
+function togglePreviews(tipo) {
+  state[tipo].previews = !state[tipo].previews;
+  const cap  = tipo === 'compras' ? 'Compras' : 'Gastos';
+  const grid = document.getElementById(`previewGrid${cap}`);
+  const btn  = document.querySelector(`#countBar${cap} .btn-ver-fotos`);
+  if (state[tipo].previews) {
+    renderPreviews(tipo);
     grid.classList.add('show');
     btn.textContent = 'Ocultar ▴';
   } else {
@@ -325,33 +374,39 @@ function togglePreviews() {
   }
 }
 
-function renderPreviews() {
-  const grid = document.getElementById('previewGrid');
+function renderPreviews(tipo) {
+  const cap  = tipo === 'compras' ? 'Compras' : 'Gastos';
+  const grid = document.getElementById(`previewGrid${cap}`);
   grid.innerHTML = '';
-  archivos.forEach((f, i) => {
+  state[tipo].archivos.forEach((f, i) => {
     const url = URL.createObjectURL(f);
     const div = document.createElement('div');
     div.className = 'prev-item';
-    div.innerHTML = `<img src="${url}" /><button class="prev-del" onclick="quitarFoto(${i})">✕</button>`;
+    div.innerHTML = `<img src="${url}" /><button class="prev-del" onclick="quitarFoto('${tipo}',${i})">✕</button>`;
     grid.appendChild(div);
   });
 }
 
-function quitarFoto(i) {
-  archivos.splice(i, 1);
-  renderPreviews();
-  renderUI();
-  if (archivos.length === 0) previewsVisible = false;
+function quitarFoto(tipo, i) {
+  state[tipo].archivos.splice(i, 1);
+  if (state[tipo].archivos.length === 0) state[tipo].previews = false;
+  renderPreviews(tipo);
+  renderUI(tipo);
 }
 
-// ── ENVIAR ───────────────────────────────────────────
+// ── ENVIAR ────────────────────────────────────────────
 async function enviar() {
-  const cajera   = document.getElementById('cajera').value;
-  const totalRaw = document.getElementById('total').value.replace(/\D/g, '');
+  const cajera        = document.getElementById('cajera').value;
+  const totalCompras  = document.getElementById('totalCompras').value.replace(/\D/g, '');
+  const totalGastos   = document.getElementById('totalGastos').value.replace(/\D/g, '');
+  const fotosCompras  = state.compras.archivos;
+  const fotosGastos   = state.gastos.archivos;
 
-  if (!cajera)   return showError('Selecciona tu nombre antes de enviar.');
-  if (!totalRaw) return showError('Escribe el valor total de las facturas.');
-  if (archivos.length === 0) return showError('Adjunta al menos una foto de las facturas.');
+  if (!cajera)       return showError('Selecciona tu nombre antes de enviar.');
+  if (!totalCompras) return showError('Escribe el valor total de compras.');
+  if (!totalGastos)  return showError('Escribe el valor total de gastos.');
+  if (fotosCompras.length === 0) return showError('Adjunta al menos una foto de las facturas de compras.');
+  if (fotosGastos.length === 0)  return showError('Adjunta al menos una foto de las facturas de gastos.');
 
   const btn = document.getElementById('btnSubmit');
   btn.disabled = true;
@@ -360,18 +415,32 @@ async function enviar() {
 
   const fecha = hoy.toISOString().split('T')[0];
   const hora  = hoy.toTimeString().slice(0,5).replace(':','-');
-  const total_n = archivos.length;
-  const urls = [];
+  const urlsCompras = [];
+  const urlsGastos  = [];
 
-  for (let i = 0; i < total_n; i++) {
-    setStatus(`Subiendo foto ${i + 1} de ${total_n}…`);
-    setProgress(Math.round((i / total_n) * 85));
+  // Subir fotos compras
+  const totalFotos = fotosCompras.length + fotosGastos.length;
+  let subidas = 0;
+
+  for (let i = 0; i < fotosCompras.length; i++) {
+    setStatus(`Subiendo compra ${i+1} de ${fotosCompras.length}…`);
+    setProgress(Math.round((subidas / totalFotos) * 80));
     try {
-      const url = await subirFoto(archivos[i], cajera, fecha, hora, i + 1);
-      urls.push(url);
-    } catch(e) {
-      urls.push('');
-    }
+      const url = await subirFoto(fotosCompras[i], cajera, fecha, hora, 'Compras', i+1);
+      urlsCompras.push(url);
+    } catch(e) { urlsCompras.push(''); }
+    subidas++;
+  }
+
+  // Subir fotos gastos
+  for (let i = 0; i < fotosGastos.length; i++) {
+    setStatus(`Subiendo gasto ${i+1} de ${fotosGastos.length}…`);
+    setProgress(Math.round((subidas / totalFotos) * 80));
+    try {
+      const url = await subirFoto(fotosGastos[i], cajera, fecha, hora, 'Gastos', i+1);
+      urlsGastos.push(url);
+    } catch(e) { urlsGastos.push(''); }
+    subidas++;
   }
 
   setStatus('Guardando registro…');
@@ -379,9 +448,12 @@ async function enviar() {
 
   const payload = {
     accion: 'registrarCierre',
-    cajera, fecha, hora, total: totalRaw,
-    cantFotos: total_n,
-    fotoUrls: urls.join(','),
+    cajera, fecha, hora,
+    totalCompras, totalGastos,
+    cantCompras: fotosCompras.length,
+    cantGastos:  fotosGastos.length,
+    urlsCompras: urlsCompras.join(','),
+    urlsGastos:  urlsGastos.join(','),
     timestamp: new Date().toISOString()
   };
 
@@ -393,29 +465,29 @@ async function enviar() {
     });
     setProgress(100);
     setTimeout(() => {
-      hideProgress();
-      setStatus('');
-      const n = new Intl.NumberFormat('es-CO').format(totalRaw);
+      hideProgress(); setStatus('');
+      const nc = new Intl.NumberFormat('es-CO').format(totalCompras);
+      const ng = new Intl.NumberFormat('es-CO').format(totalGastos);
       document.getElementById('ovMsg').textContent =
-        `${total_n} foto${total_n > 1 ? 's' : ''} guardada${total_n > 1 ? 's' : ''} en Drive. Total: $${n}.`;
+        `Compras: $${nc} · Gastos: $${ng}\nFotos guardadas en Drive.`;
       document.getElementById('overlay').classList.add('show');
     }, 400);
   } catch(e) {
-    showError('Error al guardar el registro. Verifica tu conexión.');
+    showError('Error al guardar. Verifica tu conexión.');
     resetBtn();
   }
 }
 
-async function subirFoto(file, cajera, fecha, hora, num) {
+async function subirFoto(file, cajera, fecha, hora, subcarpeta, num) {
   const b64 = await toBase64(file);
   const res = await fetch(SCRIPT_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'text/plain' },
     body: JSON.stringify({
       accion: 'subirFoto',
-      cajera, fecha, hora,
+      cajera, fecha, hora, subcarpeta,
       num,
-      nombreArchivo: `Factura-${num}.${file.name.split('.').pop()}`,
+      nombreArchivo: `${subcarpeta}-${num}.${file.name.split('.').pop()}`,
       tipo: file.type,
       datos: b64
     })
@@ -453,10 +525,11 @@ function resetBtn() {
 function resetForm() {
   document.getElementById('overlay').classList.remove('show');
   document.getElementById('cajera').value = '';
-  document.getElementById('total').value = '';
-  archivos = [];
-  previewsVisible = false;
-  renderUI();
+  document.getElementById('totalCompras').value = '';
+  document.getElementById('totalGastos').value = '';
+  state.compras = { archivos: [], previews: false };
+  state.gastos  = { archivos: [], previews: false };
+  renderUI('compras'); renderUI('gastos');
   hideError(); hideProgress(); setStatus(''); resetBtn();
 }
 </script>
