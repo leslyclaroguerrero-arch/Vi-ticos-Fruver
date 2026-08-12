@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Cierre de Caja – Fruver</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --verde: #1B3A2D;
+    --verde-med: #2D6A4F;
+    --verde-claro: #E8F5EE;
+    --amarillo: #F5C842;
+    --amarillo-h: #e0b430;
+    --bg: #F4F4F0;
+    --borde: #D8D8D2;
+    --blanco: #FAFAF8;
+    --texto: #1A1A18;
+    --suave: #6B6B65;
+    --rojo: #C0392B;
+  }
+  body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--texto); min-height:100vh; display:flex; flex-direction:column; }
+
+  header {
+    background:var(--verde); padding:0 20px; height:60px;
+    display:flex; align-items:center; justify-content:space-between;
+    position:sticky; top:0; z-index:10;
+  }
+  .brand { display:flex; align-items:center; gap:10px; }
+  .brand-icon { width:32px; height:32px; background:var(--amarillo); border-radius:8px; display:grid; place-items:center; font-size:17px; }
+  .brand-name { color:#fff; font-size:15px; font-weight:700; }
+  .brand-sub { color:rgba(255,255,255,0.5); font-size:10px; font-weight:600; letter-spacing:.8px; text-transform:uppercase; }
+  .hdr-date { color:rgba(255,255,255,0.55); font-size:12px; font-weight:500; }
+
+  main { flex:1; padding:28px 16px 60px; display:flex; flex-direction:column; align-items:center; gap:20px; }
+
+  .heading { text-align:center; max-width:400px; }
+  .heading h1 { font-size:21px; font-weight:800; color:var(--verde); letter-spacing:-.4px; }
+  .heading p { margin-top:6px; font-size:13px; color:var(--suave); line-height:1.5; }
+
+  .card { background:var(--blanco); border-radius:16px; padding:24px 20px; width:100%; max-width:460px; box-shadow:0 2px 12px rgba(0,0,0,.07); }
+
+  .sec-label {
+    font-size:10px; font-weight:700; letter-spacing:1.1px; text-transform:uppercase;
+    color:var(--verde-med); margin-bottom:14px; padding-bottom:8px; border-bottom:1px solid var(--borde);
+  }
+  .field-group { display:flex; flex-direction:column; gap:14px; margin-bottom:24px; }
+  .field { display:flex; flex-direction:column; gap:6px; }
+  label { font-size:12px; font-weight:600; }
+  .req { color:var(--rojo); margin-left:2px; }
+
+  select, input[type="number"], input[type="text"] {
+    font-family:'Inter',sans-serif; font-size:15px; padding:11px 13px;
+    border:1.5px solid var(--borde); border-radius:10px; background:#fff;
+    color:var(--texto); width:100%; -webkit-appearance:none; appearance:none;
+    transition:border-color .15s;
+  }
+  select { background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236B6B65' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 13px center; padding-right:36px; }
+  select:focus, input:focus { outline:none; border-color:var(--verde-med); box-shadow:0 0 0 3px rgba(45,106,79,.1); }
+
+  .prefix-wrap { position:relative; }
+  .prefix { position:absolute; left:13px; top:50%; transform:translateY(-50%); font-size:15px; font-weight:600; color:var(--suave); pointer-events:none; }
+  .prefix-wrap input { padding-left:28px; }
+
+  /* FOTO AREA */
+  .foto-area {
+    border:2px dashed var(--borde); border-radius:14px; padding:0;
+    overflow:hidden; transition:border-color .2s;
+  }
+  .foto-area.has-files { border-color:var(--verde-med); }
+
+  .foto-trigger {
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:8px; padding:28px 20px; cursor:pointer; position:relative;
+    transition:background .2s;
+  }
+  .foto-trigger:hover { background:var(--verde-claro); }
+  .foto-trigger input { position:absolute; inset:0; opacity:0; cursor:pointer; width:100%; height:100%; }
+  .foto-trigger-icon { font-size:32px; }
+  .foto-trigger-text { font-size:13px; color:var(--suave); text-align:center; line-height:1.5; }
+  .foto-trigger-text strong { color:var(--verde-med); display:block; font-size:14px; margin-bottom:2px; }
+
+  .foto-count-bar {
+    display:none; background:var(--verde-claro); padding:10px 16px;
+    border-top:1px solid #c5e3d0;
+    font-size:13px; font-weight:600; color:var(--verde-med);
+    justify-content:space-between; align-items:center;
+  }
+  .foto-count-bar.show { display:flex; }
+  .btn-ver-fotos { background:none; border:none; color:var(--verde-med); font-size:13px; font-weight:700; cursor:pointer; text-decoration:underline; }
+
+  /* grid de previews */
+  .preview-grid { display:none; grid-template-columns:repeat(3,1fr); gap:6px; padding:12px; background:#fff; }
+  .preview-grid.show { display:grid; }
+  .prev-item { position:relative; aspect-ratio:1; border-radius:8px; overflow:hidden; background:var(--bg); }
+  .prev-item img { width:100%; height:100%; object-fit:cover; }
+  .prev-del { position:absolute; top:4px; right:4px; background:rgba(0,0,0,.6); color:#fff; border:none; border-radius:50%; width:22px; height:22px; font-size:13px; cursor:pointer; display:grid; place-items:center; }
+
+  /* agregar más */
+  .btn-agregar-mas {
+    display:none; width:100%; padding:11px; background:none; border:none;
+    border-top:1px solid var(--borde); color:var(--verde-med); font-family:'Inter',sans-serif;
+    font-size:13px; font-weight:700; cursor:pointer; position:relative;
+  }
+  .btn-agregar-mas input { position:absolute; inset:0; opacity:0; cursor:pointer; width:100%; height:100%; }
+  .btn-agregar-mas.show { display:block; }
+  .btn-agregar-mas:hover { background:var(--verde-claro); }
+
+  /* SUBMIT */
+  .btn-submit {
+    width:100%; padding:15px; background:var(--amarillo); color:var(--verde);
+    border:none; border-radius:12px; font-family:'Inter',sans-serif; font-size:15px;
+    font-weight:800; cursor:pointer; display:flex; align-items:center; justify-content:center;
+    gap:8px; transition:background .2s, transform .1s; margin-top:4px;
+  }
+  .btn-submit:hover { background:var(--amarillo-h); }
+  .btn-submit:active { transform:scale(.98); }
+  .btn-submit:disabled { background:var(--borde); color:var(--suave); cursor:not-allowed; transform:none; }
+
+  .spinner { width:18px; height:18px; border:2.5px solid rgba(27,58,45,.25); border-top-color:var(--verde); border-radius:50%; animation:spin .7s linear infinite; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+
+  .progress-wrap { height:4px; background:var(--borde); border-radius:999px; margin-top:14px; display:none; overflow:hidden; }
+  .progress-wrap.show { display:block; }
+  .progress-bar { height:100%; background:var(--verde-med); border-radius:999px; width:0%; transition:width .3s; }
+
+  .status-msg { font-size:12px; color:var(--suave); text-align:center; margin-top:8px; min-height:18px; }
+
+  .error-msg { display:none; background:#fdecea; color:var(--rojo); border-radius:10px; padding:12px 14px; font-size:13px; font-weight:500; margin-top:10px; }
+  .error-msg.show { display:block; }
+
+  /* OVERLAY */
+  .overlay { display:none; position:fixed; inset:0; background:rgba(27,58,45,.88); z-index:100; place-items:center; backdrop-filter:blur(4px); }
+  .overlay.show { display:grid; }
+  .ov-card { background:var(--blanco); border-radius:20px; padding:36px 28px; text-align:center; max-width:300px; width:90%; animation:pop .3s cubic-bezier(.34,1.56,.64,1); }
+  @keyframes pop { from{transform:scale(.8);opacity:0} to{transform:scale(1);opacity:1} }
+  .sello { width:68px; height:68px; background:var(--verde-med); border-radius:50%; display:grid; place-items:center; margin:0 auto 14px; font-size:30px; }
+  .ov-card h2 { font-size:19px; font-weight:800; color:var(--verde); margin-bottom:8px; }
+  .ov-card p { font-size:13px; color:var(--suave); line-height:1.5; margin-bottom:22px; }
+  .btn-nueva { background:var(--amarillo); color:var(--verde); border:none; border-radius:10px; padding:12px 22px; font-family:'Inter',sans-serif; font-size:14px; font-weight:700; cursor:pointer; }
+  .btn-nueva:hover { background:var(--amarillo-h); }
+
+  @media(max-width:380px){ .card{padding:18px 14px;} }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <div class="brand-icon">🥬</div>
+    <div>
+      <div class="brand-name">Fruver</div>
+      <div class="brand-sub">Cierre de Caja</div>
+    </div>
+  </div>
+  <div class="hdr-date" id="hdrDate"></div>
+</header>
+
+<main>
+  <div class="heading">
+    <h1>Registro de facturas</h1>
+    <p>Selecciona tu nombre, escribe el total y adjunta las fotos de las facturas que pagaste hoy.</p>
+  </div>
+
+  <div class="card">
+
+    <!-- CAJERA -->
+    <div class="sec-label">👤 ¿Quién hace el cierre?</div>
+    <div class="field-group">
+      <div class="field">
+        <label for="cajera">Tu nombre <span class="req">*</span></label>
+        <select id="cajera">
+          <option value="">— Selecciona tu nombre —</option>
+          <option>Jennifer</option>
+          <option>Mayra</option>
+          <option>Heidy</option>
+          <option>Deyaniris</option>
+          <option>Iris</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- TOTAL -->
+    <div class="sec-label">💰 Total de facturas pagadas</div>
+    <div class="field-group">
+      <div class="field">
+        <label for="total">Valor total <span class="req">*</span></label>
+        <div class="prefix-wrap">
+          <span class="prefix">$</span>
+          <input type="text" id="total" placeholder="0" inputmode="numeric" autocomplete="off" />
+        </div>
+      </div>
+    </div>
+
+    <!-- FOTOS -->
+    <div class="sec-label">📷 Fotos de las facturas</div>
+    <div class="field-group">
+      <div class="foto-area" id="fotoArea">
+
+        <!-- Trigger inicial -->
+        <div class="foto-trigger" id="fotoTrigger">
+          <input type="file" accept="image/*" multiple onchange="handleFiles(this.files)" id="fotoInput" />
+          <div class="foto-trigger-icon">📄</div>
+          <div class="foto-trigger-text">
+            <strong>Toca para adjuntar o tomar fotos</strong>
+            Puedes seleccionar varias a la vez
+          </div>
+        </div>
+
+        <!-- Barra de conteo -->
+        <div class="foto-count-bar" id="countBar">
+          <span id="countText">0 fotos adjuntas</span>
+          <button class="btn-ver-fotos" onclick="togglePreviews()">Ver fotos ▾</button>
+        </div>
+
+        <!-- Grid de previews (colapsable) -->
+        <div class="preview-grid" id="previewGrid"></div>
+
+        <!-- Botón agregar más -->
+        <button class="btn-agregar-mas" id="btnAgregarMas">
+          <input type="file" accept="image/*" multiple onchange="handleFiles(this.files)" />
+          + Agregar más fotos
+        </button>
+
+      </div>
+    </div>
+
+    <!-- PROGRESS + SUBMIT -->
+    <div class="progress-wrap" id="progressWrap"><div class="progress-bar" id="progressBar"></div></div>
+    <div class="status-msg" id="statusMsg"></div>
+    <button class="btn-submit" id="btnSubmit" onclick="enviar()">
+      <span>Enviar cierre</span><span>→</span>
+    </button>
+    <div class="error-msg" id="errorMsg"></div>
+
+  </div>
+</main>
+
+<!-- OVERLAY ÉXITO -->
+<div class="overlay" id="overlay">
+  <div class="ov-card">
+    <div class="sello">✓</div>
+    <h2>¡Cierre enviado!</h2>
+    <p id="ovMsg">Las fotos fueron guardadas correctamente en Drive.</p>
+    <button class="btn-nueva" onclick="resetForm()">Nuevo registro</button>
+  </div>
+</div>
+
+<script>
+// ── CONFIG ───────────────────────────────────────────
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwf72WWUesrr9__4TYgXrm-cYwnl9rplw3KjMWTv06OM1iYFVYebAr2P_iVFjfurYyc/exec";
+// ────────────────────────────────────────────────────
+
+// ── FORMATO MILES ────────────────────────────────────
+const totalInput = document.getElementById('total');
+totalInput.addEventListener('input', function() {
+  // Quitar todo lo que no sea dígito
+  let raw = this.value.replace(/\D/g, '');
+  if (raw === '') { this.value = ''; return; }
+  // Formatear con puntos de miles
+  this.value = Number(raw).toLocaleString('es-CO');
+});
+// Al pegar también formatea
+totalInput.addEventListener('paste', function() {
+  setTimeout(() => {
+    let raw = this.value.replace(/\D/g, '');
+    this.value = raw ? Number(raw).toLocaleString('es-CO') : '';
+  }, 10);
+});
+
+// Fecha header
+const hoy = new Date();
+document.getElementById('hdrDate').textContent =
+  hoy.toLocaleDateString('es-CO', { weekday:'short', day:'numeric', month:'short' });
+
+// ── FOTOS ────────────────────────────────────────────
+let archivos = [];
+let previewsVisible = false;
+
+function handleFiles(files) {
+  for (const f of files) {
+    if (!archivos.find(x => x.name === f.name && x.size === f.size)) archivos.push(f);
+  }
+  renderUI();
+}
+
+function renderUI() {
+  const n = archivos.length;
+  const area = document.getElementById('fotoArea');
+  const trigger = document.getElementById('fotoTrigger');
+  const countBar = document.getElementById('countBar');
+  const btnMas = document.getElementById('btnAgregarMas');
+
+  if (n === 0) {
+    trigger.style.display = 'flex';
+    countBar.classList.remove('show');
+    btnMas.classList.remove('show');
+    document.getElementById('previewGrid').classList.remove('show');
+    area.classList.remove('has-files');
+  } else {
+    trigger.style.display = 'none';
+    countBar.classList.add('show');
+    btnMas.classList.add('show');
+    area.classList.add('has-files');
+    document.getElementById('countText').textContent =
+      `${n} foto${n > 1 ? 's' : ''} adjunta${n > 1 ? 's' : ''}`;
+    if (previewsVisible) renderPreviews();
+    document.getElementById('btnVerFotos') && null;
+  }
+}
+
+function togglePreviews() {
+  previewsVisible = !previewsVisible;
+  const grid = document.getElementById('previewGrid');
+  const btn = document.querySelector('.btn-ver-fotos');
+  if (previewsVisible) {
+    renderPreviews();
+    grid.classList.add('show');
+    btn.textContent = 'Ocultar ▴';
+  } else {
+    grid.classList.remove('show');
+    btn.textContent = 'Ver fotos ▾';
+  }
+}
+
+function renderPreviews() {
+  const grid = document.getElementById('previewGrid');
+  grid.innerHTML = '';
+  archivos.forEach((f, i) => {
+    const url = URL.createObjectURL(f);
+    const div = document.createElement('div');
+    div.className = 'prev-item';
+    div.innerHTML = `<img src="${url}" /><button class="prev-del" onclick="quitarFoto(${i})">✕</button>`;
+    grid.appendChild(div);
+  });
+}
+
+function quitarFoto(i) {
+  archivos.splice(i, 1);
+  renderPreviews();
+  renderUI();
+  if (archivos.length === 0) previewsVisible = false;
+}
+
+// ── ENVIAR ───────────────────────────────────────────
+async function enviar() {
+  const cajera   = document.getElementById('cajera').value;
+  const totalRaw = document.getElementById('total').value.replace(/\D/g, '');
+
+  if (!cajera)   return showError('Selecciona tu nombre antes de enviar.');
+  if (!totalRaw) return showError('Escribe el valor total de las facturas.');
+  if (archivos.length === 0) return showError('Adjunta al menos una foto de las facturas.');
+
+  const btn = document.getElementById('btnSubmit');
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spinner"></div><span>Enviando…</span>';
+  hideError();
+
+  const fecha = hoy.toISOString().split('T')[0];
+  const hora  = hoy.toTimeString().slice(0,5).replace(':','-');
+  const total_n = archivos.length;
+  const urls = [];
+
+  for (let i = 0; i < total_n; i++) {
+    setStatus(`Subiendo foto ${i + 1} de ${total_n}…`);
+    setProgress(Math.round((i / total_n) * 85));
+    try {
+      const url = await subirFoto(archivos[i], cajera, fecha, hora, i + 1);
+      urls.push(url);
+    } catch(e) {
+      urls.push('');
+    }
+  }
+
+  setStatus('Guardando registro…');
+  setProgress(92);
+
+  const payload = {
+    accion: 'registrarCierre',
+    cajera, fecha, hora, total: totalRaw,
+    cantFotos: total_n,
+    fotoUrls: urls.join(','),
+    timestamp: new Date().toISOString()
+  };
+
+  try {
+    await fetch(SCRIPT_URL, {
+      method: 'POST', mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify(payload)
+    });
+    setProgress(100);
+    setTimeout(() => {
+      hideProgress();
+      setStatus('');
+      const n = new Intl.NumberFormat('es-CO').format(totalRaw);
+      document.getElementById('ovMsg').textContent =
+        `${total_n} foto${total_n > 1 ? 's' : ''} guardada${total_n > 1 ? 's' : ''} en Drive. Total: $${n}.`;
+      document.getElementById('overlay').classList.add('show');
+    }, 400);
+  } catch(e) {
+    showError('Error al guardar el registro. Verifica tu conexión.');
+    resetBtn();
+  }
+}
+
+async function subirFoto(file, cajera, fecha, hora, num) {
+  const b64 = await toBase64(file);
+  const res = await fetch(SCRIPT_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain' },
+    body: JSON.stringify({
+      accion: 'subirFoto',
+      cajera, fecha, hora,
+      num,
+      nombreArchivo: `Factura-${num}.${file.name.split('.').pop()}`,
+      tipo: file.type,
+      datos: b64
+    })
+  });
+  const json = JSON.parse(await res.text());
+  return json.url || '';
+}
+
+function toBase64(file) {
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = () => res(r.result.split(',')[1]);
+    r.onerror = rej;
+    r.readAsDataURL(file);
+  });
+}
+
+// ── UI helpers ────────────────────────────────────────
+function setProgress(p) {
+  document.getElementById('progressWrap').classList.add('show');
+  document.getElementById('progressBar').style.width = p + '%';
+}
+function hideProgress() {
+  document.getElementById('progressWrap').classList.remove('show');
+  document.getElementById('progressBar').style.width = '0%';
+}
+function setStatus(msg) { document.getElementById('statusMsg').textContent = msg; }
+function showError(msg) { const e = document.getElementById('errorMsg'); e.textContent = msg; e.classList.add('show'); }
+function hideError() { document.getElementById('errorMsg').classList.remove('show'); }
+function resetBtn() {
+  const btn = document.getElementById('btnSubmit');
+  btn.disabled = false;
+  btn.innerHTML = '<span>Enviar cierre</span><span>→</span>';
+}
+function resetForm() {
+  document.getElementById('overlay').classList.remove('show');
+  document.getElementById('cajera').value = '';
+  document.getElementById('total').value = '';
+  archivos = [];
+  previewsVisible = false;
+  renderUI();
+  hideError(); hideProgress(); setStatus(''); resetBtn();
+}
+</script>
+</body>
+</html>
