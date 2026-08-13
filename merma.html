@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Registro de Merma – Fruver</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+  :root {
+    --verde: #2D6A4F;
+    --verde-claro: #52B788;
+    --verde-suave: #D8F3DC;
+    --naranja: #E76F1E;
+    --rojo: #C0392B;
+    --gris-fondo: #F4F7F4;
+    --gris-borde: #CBD5CB;
+    --texto: #1A2E1A;
+    --texto-suave: #5A705A;
+    --blanco: #FFFFFF;
+    --radio: 12px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--gris-fondo);
+    color: var(--texto);
+    min-height: 100vh;
+    padding: 0 0 40px 0;
+  }
+
+  header {
+    background: var(--verde);
+    color: white;
+    padding: 20px 20px 16px;
+    text-align: center;
+  }
+  header h1 { font-size: 1.1rem; font-weight: 700; letter-spacing: 0.02em; }
+  header p { font-size: 0.78rem; opacity: 0.75; margin-top: 4px; }
+
+  .card {
+    background: var(--blanco);
+    border-radius: var(--radio);
+    margin: 16px 16px 0;
+    padding: 20px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+  }
+
+  label {
+    display: block;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--texto-suave);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 6px;
+  }
+
+  select, input[type="text"] {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1.5px solid var(--gris-borde);
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-family: inherit;
+    color: var(--texto);
+    background: var(--blanco);
+  }
+  select {
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%235A705A' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+  }
+  select:focus, input[type="text"]:focus {
+    outline: none;
+    border-color: var(--verde-claro);
+    box-shadow: 0 0 0 3px rgba(82,183,136,0.15);
+  }
+  select:disabled, input[type="text"]:disabled {
+    background-color: #f0f0f0;
+    color: #aaa;
+    cursor: not-allowed;
+  }
+
+  .field { margin-bottom: 16px; }
+  .field:last-child { margin-bottom: 0; }
+  .hint { font-size: 0.75rem; color: var(--texto-suave); margin-top: 5px; }
+
+  /* ── Buscador de producto ── */
+  .buscador-wrap {
+    position: relative;
+  }
+  .buscador-wrap .icono-buscar {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.95rem;
+    pointer-events: none;
+    color: var(--texto-suave);
+  }
+  .buscador-wrap .icono-limpiar {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1rem;
+    cursor: pointer;
+    color: var(--gris-borde);
+    background: none;
+    border: none;
+    padding: 4px;
+    display: none;
+  }
+  #input-producto {
+    padding-left: 34px;
+    padding-right: 34px;
+  }
+
+  .dropdown-lista {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0; right: 0;
+    background: var(--blanco);
+    border: 1.5px solid var(--verde-claro);
+    border-radius: 10px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+    z-index: 100;
+    max-height: 240px;
+    overflow-y: auto;
+    display: none;
+  }
+  .dropdown-lista.visible { display: block; }
+
+  .dropdown-grupo {
+    padding: 6px 12px 2px;
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: var(--verde);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    border-top: 1px solid var(--gris-fondo);
+  }
+  .dropdown-grupo:first-child { border-top: none; }
+
+  .dropdown-item {
+    padding: 10px 14px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    color: var(--texto);
+    transition: background 0.1s;
+  }
+  .dropdown-item:hover, .dropdown-item.resaltado {
+    background: var(--verde-suave);
+    color: var(--verde);
+    font-weight: 600;
+  }
+  .dropdown-item mark {
+    background: transparent;
+    color: var(--verde);
+    font-weight: 700;
+  }
+
+  .dropdown-vacio {
+    padding: 14px;
+    font-size: 0.85rem;
+    color: var(--texto-suave);
+    text-align: center;
+  }
+
+  /* Chip producto seleccionado */
+  .chip-producto {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--verde-suave);
+    border: 1.5px solid var(--verde-claro);
+    border-radius: 8px;
+    padding: 10px 12px;
+    margin-top: 6px;
+  }
+  .chip-producto span { font-size: 0.9rem; font-weight: 600; color: var(--verde); flex: 1; }
+  .chip-producto small { font-size: 0.75rem; color: var(--texto-suave); }
+  .chip-limpiar {
+    background: none; border: none; cursor: pointer;
+    color: var(--texto-suave); font-size: 1rem; padding: 2px 4px;
+  }
+
+  /* Destino */
+  .destino-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .destino-btn {
+    border: 2px solid var(--gris-borde);
+    border-radius: 10px;
+    padding: 14px 10px;
+    text-align: center;
+    cursor: pointer;
+    background: var(--blanco);
+    transition: all 0.15s;
+    user-select: none;
+  }
+  .destino-btn .icon { font-size: 1.6rem; display: block; margin-bottom: 4px; }
+  .destino-btn .etiqueta { font-size: 0.82rem; font-weight: 600; color: var(--texto-suave); }
+  .destino-btn.activo-bota { border-color: var(--rojo); background: #FEF0EF; }
+  .destino-btn.activo-bota .etiqueta { color: var(--rojo); }
+  .destino-btn.activo-pulpa { border-color: var(--naranja); background: #FEF5EE; }
+  .destino-btn.activo-pulpa .etiqueta { color: var(--naranja); }
+
+  /* Foto */
+  .foto-area {
+    border: 2px dashed var(--gris-borde);
+    border-radius: 10px;
+    padding: 20px 16px;
+    text-align: center;
+    cursor: pointer;
+    position: relative;
+  }
+  .foto-area input[type="file"] {
+    position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
+  }
+  .foto-area .foto-icon { font-size: 1.8rem; display: block; margin-bottom: 4px; }
+  .foto-area p { font-size: 0.82rem; color: var(--texto-suave); }
+  .foto-area p strong { color: var(--verde); }
+
+  /* Botón agregar */
+  .btn-agregar {
+    width: 100%;
+    padding: 13px;
+    background: transparent;
+    color: var(--verde);
+    border: 2px solid var(--verde);
+    border-radius: var(--radio);
+    font-size: 0.95rem;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn-agregar:hover { background: var(--verde-suave); }
+  .btn-agregar:disabled { border-color: var(--gris-borde); color: var(--gris-borde); cursor: not-allowed; background: transparent; }
+
+  /* Lista registros */
+  .seccion-titulo {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--texto-suave);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 10px;
+  }
+  .contador-badge {
+    display: inline-block;
+    background: var(--verde);
+    color: white;
+    font-size: 0.72rem;
+    font-weight: 700;
+    border-radius: 20px;
+    padding: 2px 8px;
+    margin-left: 6px;
+    vertical-align: middle;
+  }
+  .registros-vacio {
+    text-align: center;
+    color: var(--gris-borde);
+    font-size: 0.85rem;
+    padding: 16px 0;
+  }
+  .registro-item {
+    background: var(--gris-fondo);
+    border: 1.5px solid var(--gris-borde);
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .registro-item:last-child { margin-bottom: 0; }
+  .registro-icono { font-size: 1.4rem; flex-shrink: 0; margin-top: 2px; }
+  .registro-info { flex: 1; }
+  .registro-nombre { font-weight: 700; font-size: 0.9rem; }
+  .registro-detalle { font-size: 0.78rem; color: var(--texto-suave); margin-top: 2px; }
+  .registro-fotos { font-size: 0.75rem; color: var(--verde); margin-top: 2px; }
+  .registro-eliminar {
+    background: none; border: none; color: var(--rojo);
+    font-size: 1.1rem; cursor: pointer; padding: 4px; flex-shrink: 0;
+  }
+
+  /* Submit */
+  .btn-submit {
+    width: calc(100% - 32px);
+    margin: 20px 16px 0;
+    padding: 16px;
+    background: var(--verde);
+    color: white;
+    border: none;
+    border-radius: var(--radio);
+    font-size: 1rem;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    letter-spacing: 0.03em;
+    transition: background 0.15s;
+  }
+  .btn-submit:hover { background: #235C40; }
+  .btn-submit:disabled { background: var(--gris-borde); cursor: not-allowed; }
+
+  .estado {
+    margin: 14px 16px 0;
+    padding: 14px 16px;
+    border-radius: 10px;
+    font-size: 0.88rem;
+    font-weight: 500;
+    display: none;
+  }
+  .estado.exito { background: var(--verde-suave); color: var(--verde); display: block; }
+  .estado.error { background: #FDEAEA; color: var(--rojo); display: block; }
+  .estado.cargando { background: #EEF4FF; color: #2563EB; display: block; }
+
+  .timestamp-info {
+    font-size: 0.75rem;
+    color: var(--texto-suave);
+    text-align: center;
+    margin-top: 12px;
+    padding: 0 16px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>📋 Registro de Merma</h1>
+  <p>Fruver — Control de pérdidas</p>
+</header>
+
+<!-- PUNTO -->
+<div class="card">
+  <div class="field">
+    <label>Punto de venta</label>
+    <select id="punto" onchange="alCambiarPunto()">
+      <option value="">— Selecciona el punto —</option>
+      <option value="GF">Gran Frutiver San Francisco</option>
+      <option value="TZ70">Todozuyo La 70</option>
+      <option value="TZCO">Todozuyo El Concor</option>
+    </select>
+  </div>
+
+  <div class="field">
+    <label>¿Quién registra?</label>
+    <select id="persona" disabled>
+      <option value="">— Primero selecciona el punto —</option>
+    </select>
+  </div>
+</div>
+
+<!-- FORMULARIO AGREGAR PRODUCTO -->
+<div class="card">
+  <p class="seccion-titulo">Agregar producto a la lista</p>
+
+  <!-- Buscador producto -->
+  <div class="field">
+    <label>Producto</label>
+    <div class="buscador-wrap" id="buscador-wrap">
+      <span class="icono-buscar">🔍</span>
+      <input type="text" id="input-producto"
+        placeholder="Escribe para buscar…"
+        autocomplete="off"
+        disabled
+        oninput="filtrarProductos()"
+        onfocus="abrirDropdown()"
+      />
+      <button class="icono-limpiar" id="btn-limpiar-prod" onclick="limpiarProducto()">✕</button>
+      <div class="dropdown-lista" id="dropdown-lista"></div>
+    </div>
+    <!-- Chip del producto seleccionado -->
+    <div class="chip-producto" id="chip-producto" style="display:none">
+      <span id="chip-nombre"></span>
+      <small id="chip-cat"></small>
+      <button class="chip-limpiar" onclick="limpiarProducto()">✕</button>
+    </div>
+  </div>
+
+  <div class="field">
+    <label>Cantidad</label>
+    <input type="text" id="cantidad" placeholder="—" inputmode="decimal" disabled />
+    <div class="hint" id="cantidad-hint"></div>
+  </div>
+
+  <div class="field">
+    <label>¿Qué pasa con este producto?</label>
+    <div class="destino-group">
+      <div class="destino-btn" id="btn-bota" onclick="seleccionarDestino('bota')">
+        <span class="icon">🗑️</span>
+        <span class="etiqueta">Se botó</span>
+      </div>
+      <div class="destino-btn" id="btn-pulpa" onclick="seleccionarDestino('pulpa')">
+        <span class="icon">🧃</span>
+        <span class="etiqueta">Va para pulpa</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="field">
+    <label>Evidencia (opcional)</label>
+    <div class="foto-area">
+      <input type="file" id="fotos" accept="image/*" multiple onchange="alSeleccionarFotos(event)" />
+      <span class="foto-icon">📷</span>
+      <p><strong>Toca para foto</strong> o galería</p>
+    </div>
+    <div class="hint" id="foto-hint"></div>
+  </div>
+
+  <button class="btn-agregar" id="btn-agregar" onclick="agregarProducto()" disabled>
+    + Agregar a la lista
+  </button>
+</div>
+
+<!-- LISTA -->
+<div class="card">
+  <p class="seccion-titulo">
+    Productos registrados
+    <span class="contador-badge" id="contador">0</span>
+  </p>
+  <div id="registros-lista">
+    <p class="registros-vacio">Aún no has agregado productos</p>
+  </div>
+</div>
+
+<button class="btn-submit" id="btn-enviar" onclick="enviarFormulario()" disabled>
+  Enviar registro
+</button>
+
+<div class="estado" id="estado"></div>
+<p class="timestamp-info">La fecha y hora se registran automáticamente ✓</p>
+
+<script>
+// ─── DATOS ────────────────────────────────────────────────────────────────
+
+const PRODUCTOS_POR_PUNTO = {
+  GF: {
+    "HORTALIZAS": ["ACELGA","BERENJENA","BROCOLI","CALABACIN","CHAMPIÑONES","CILANTRO","COLIFLOR","ESPINACA","GUASCA","LECHUGA BATAVIA","LECHUGA CRESPA","P. GUINEO","PEREJIL","PUERROS","RABANO","RAICES CHINAS","RAMA DE APIO","SABILA","YOTA","ZUKINI"],
+    "VERDURAS": ["AHUYAMA","AHUYAMIN","AJO CHILENO","ARVEJA","ARRACACHA","CEBOLLA BLANCA","CEBOLLA LARGA","CEBOLLA ROJA","FRIJOL","HABICHUELA","MAZORCA","PAPA CRIOLLA","PAPA PASTUSA","PAPA LAVADA","PEPINO COHOMBRO","PIMENTON","PLATANO MADURO","PLATANO VERDE","REMOLACHA","REPOLLO BLANCO","REPOLLO MORADO","TOMATE CHONTO","YUCA","ZANAHORIA"],
+    "FRUTAS": ["AGUACATE HASS","AGUACATE PAPELILLO","BANANO BOCADILLO","BANANO CRIOLLO","BANANO URABA","BOROJO","CIRUELA BANDEJA","COCO","CURUBA","DURAZNO","FRESA BANDEJA","GUANABANA","GUAYABA","KIWI","LIMON CRIOLLO","LIMON MANDARINO","LIMON TAHITI","LULO","MANDARINA","MANGO AZUCAR","MANGO TOMMY","MARACUYA","MELON","MORA","NARANJA TANGELO","NARANJA VALENCIANA","PAPAYA","PATILLA","PATILLA BABY","PERA NACIONAL","PIÑA COMUN","PIÑA ORO MIEL","TAMARINDO PEPA","TAMARINDO PULPA","TOMATE DE ARBOL","UCHUVA","ZAPOTE"],
+    "IMPORTADOS": ["AGRAZ","ARANDANOS","BANDEJA FREIJOA","BANDEJA MANZ G","BANDEJA MANZ V","GRANADILLA","JENGIBRE","MANZANA GALA","MANZANA ROJA","MANZANA VERDE","MIEL PEQUE","PERA CHILENA","PITALLA","UVA CHILENA","UVA ISABELLA","UVA REGLO","UVA VERDE"]
+  },
+  TZ70: {
+    "VERDURAS": ["AHUYAMA","AHUYAMIN","AJI TOPITO","AJO CAJA","APIO EN RAMA","ARRACACHA","BATATA","BERENJENA","BROCOLI","CALABAZA","CEBOLLA BLANCA","CEBOLLA LARGA","CEBOLLA ROJA","CILANTRO","COLIFLOR","COROZO","ESPINACA","GUINEO MADURO","GUINEO VERDE","HABICHUELA CORTA","HABICHUELA LARGA","LECHUGA BATAVIA","LECHUGA RISADA","LECHUGA ROMANA","MAZORCA","ÑAME","PAPA CRIOLLA","PAPA LAVADA","PAPA SUCIA","PAPAYA","PEPINO","PEREJIL CHURCO","PIM. AMARILLO","PIM. ROJO","PIM. VERDE","PLAT. AMARILLO","PLAT. VERDE","PLATANO MALLA","PUERRO","RABANO","REMOLACHA","REPOLLO MORADO","REPOLLO VERDE","TOMATE CHERRY","TOMATE COCINA","YUCA","ZANAHORIA","ZUKINI AMARILLO","ZUKINI VERDE"],
+    "FRUTAS": ["AGRAS","AGUACATE PAPELILLO","ARANDANOS","BANANO CRIOLLO","BANANO URABA","BOROJO","CAÑANDONGA","CIRUELA","COCO","CURUBA","DURAZNO","FRESA ESPECIAL","FRESA MEDIANA","FRESA PEQUEÑA","GRANADILLA","GUAYABA","KIWI","LIMON CRIOLLO","LIMON MANDARINO","LIMON TAHITI","LULO","MAN. ROJA","MAN. VERDE","MANDARINA","MANGO AZUCAR","MANGO TOMMY","MARACUYA","MELON","MORA","NARANJA TANGELO","NARANJA VALENCIANA","NISPERO","PAPAYA","PATILLA","PATILLA BABY","PERA","PIÑA COMUN","PIÑA ORO MIEL","PITAYA","PITAYA ROSADA","POMELO","SABILA","TAMARINDO PEPA","TAMARINDO PULPA","TOMATE DE ARBOL","UCHUVAS","UVA ISABELLA","UVA ROJA","UVA VERDE","ZAPOTE"]
+  }
+};
+PRODUCTOS_POR_PUNTO.TZCO = PRODUCTOS_POR_PUNTO.TZ70;
+
+const PERSONAS_POR_PUNTO = {
+  GF:   ["Silvia","Jesús","Maicol"],
+  TZ70: ["Mathew","Antonio"],
+  TZCO: ["Alex","Alfonso","Yeiner"]
+};
+
+const POR_UNIDAD = {
+  GF:   new Set(["CHAMPIÑONES","RAICES CHINAS","FRESA BANDEJA","UVA ISABELLA","MANZANA GALA","MANZANA ROJA","MANZANA VERDE","BANDEJA MANZ G","BANDEJA MANZ V","PERA CHILENA","GRANADILLA","JENGIBRE","ARANDANOS","UCHUVA","BANDEJA FREIJOA","CIRUELA BANDEJA"]),
+  TZ70: new Set(["PLAT. AMARILLO","PLAT. VERDE","PLATANO MALLA"]),
+  TZCO: new Set(["PLAT. AMARILLO","PLAT. VERDE","PLATANO MALLA"])
+};
+
+// ─── ESTADO ───────────────────────────────────────────────────────────────
+
+let productoSeleccionado = null; // { nombre, categoria, unidad }
+let destinoActual = null;
+let fotosActuales = [];
+let registros = [];
+let dropdownAbierto = false;
+
+// ─── BUSCADOR ─────────────────────────────────────────────────────────────
+
+function alCambiarPunto() {
+  limpiarProducto();
+  document.getElementById('cantidad').value = '';
+  document.getElementById('cantidad').disabled = true;
+  document.getElementById('cantidad-hint').textContent = '';
+  document.getElementById('fotos').value = '';
+  document.getElementById('foto-hint').textContent = '';
+  fotosActuales = [];
+  destinoActual = null;
+  document.getElementById('btn-bota').className = 'destino-btn';
+  document.getElementById('btn-pulpa').className = 'destino-btn';
+
+  const punto = document.getElementById('punto').value;
+
+  // Cargar personas
+  const selPersona = document.getElementById('persona');
+  selPersona.innerHTML = '<option value="">— Selecciona quién registra —</option>';
+  if (punto && PERSONAS_POR_PUNTO[punto]) {
+    PERSONAS_POR_PUNTO[punto].forEach(p => {
+      const o = document.createElement('option');
+      o.value = p; o.textContent = p;
+      selPersona.appendChild(o);
+    });
+    selPersona.disabled = false;
+  } else {
+    selPersona.disabled = true;
+  }
+
+  const input = document.getElementById('input-producto');
+  input.disabled = !punto;
+  if (punto) input.placeholder = 'Escribe para buscar…';
+  validarAgregar();
+}
+
+function abrirDropdown() {
+  const punto = document.getElementById('punto').value;
+  if (!punto) return;
+  filtrarProductos();
+}
+
+function filtrarProductos() {
+  const punto = document.getElementById('punto').value;
+  if (!punto || productoSeleccionado) return;
+
+  const query = document.getElementById('input-producto').value.trim().toLowerCase();
+  const dl = document.getElementById('dropdown-lista');
+  const btnLimpiar = document.getElementById('btn-limpiar-prod');
+
+  btnLimpiar.style.display = query ? 'block' : 'none';
+
+  const cats = PRODUCTOS_POR_PUNTO[punto];
+  let html = '';
+  let total = 0;
+
+  Object.entries(cats).forEach(([cat, prods]) => {
+    const filtrados = query
+      ? prods.filter(p => p.toLowerCase().includes(query))
+      : prods;
+
+    if (filtrados.length === 0) return;
+    total += filtrados.length;
+
+    html += `<div class="dropdown-grupo">${cat}</div>`;
+    filtrados.forEach(p => {
+      const resaltado = query
+        ? p.replace(new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')})`, 'gi'), '<mark>$1</mark>')
+        : p;
+      html += `<div class="dropdown-item" onclick="seleccionarProducto('${p}','${cat}')">${resaltado}</div>`;
+    });
+  });
+
+  if (total === 0) {
+    html = `<div class="dropdown-vacio">Sin resultados para "${query}"</div>`;
+  }
+
+  dl.innerHTML = html;
+  dl.classList.add('visible');
+}
+
+function seleccionarProducto(nombre, categoria) {
+  const punto = document.getElementById('punto').value;
+  const esUnidad = POR_UNIDAD[punto]?.has(nombre);
+  const unidad = esUnidad ? 'und' : 'kg';
+
+  productoSeleccionado = { nombre, categoria, unidad };
+
+  // Ocultar buscador, mostrar chip
+  document.getElementById('input-producto').style.display = 'none';
+  document.getElementById('btn-limpiar-prod').style.display = 'none';
+  document.getElementById('dropdown-lista').classList.remove('visible');
+
+  document.getElementById('chip-nombre').textContent = nombre;
+  document.getElementById('chip-cat').textContent = categoria;
+  document.getElementById('chip-producto').style.display = 'flex';
+
+  // Cantidad
+  const cantInput = document.getElementById('cantidad');
+  cantInput.disabled = false;
+  cantInput.value = '';
+  const hint = document.getElementById('cantidad-hint');
+  if (esUnidad) {
+    cantInput.placeholder = 'Ej: 3';
+    hint.textContent = 'Cantidad en unidades (ej: 3 unidades)';
+  } else {
+    cantInput.placeholder = 'Ej: 1.5';
+    hint.textContent = 'Peso en kilos (ej: 1.5 kg)';
+  }
+
+  validarAgregar();
+}
+
+function limpiarProducto() {
+  productoSeleccionado = null;
+  const input = document.getElementById('input-producto');
+  input.value = '';
+  input.style.display = 'block';
+  document.getElementById('btn-limpiar-prod').style.display = 'none';
+  document.getElementById('dropdown-lista').classList.remove('visible');
+  document.getElementById('chip-producto').style.display = 'none';
+  document.getElementById('cantidad').disabled = true;
+  document.getElementById('cantidad').value = '';
+  document.getElementById('cantidad-hint').textContent = '';
+  validarAgregar();
+}
+
+// Cerrar dropdown al tocar fuera
+document.addEventListener('click', e => {
+  const wrap = document.getElementById('buscador-wrap');
+  if (!wrap.contains(e.target)) {
+    document.getElementById('dropdown-lista').classList.remove('visible');
+  }
+});
+
+// ─── DESTINO / FOTOS ──────────────────────────────────────────────────────
+
+function seleccionarDestino(val) {
+  destinoActual = val;
+  document.getElementById('btn-bota').className = 'destino-btn' + (val === 'bota' ? ' activo-bota' : '');
+  document.getElementById('btn-pulpa').className = 'destino-btn' + (val === 'pulpa' ? ' activo-pulpa' : '');
+  validarAgregar();
+}
+
+function alSeleccionarFotos(e) {
+  fotosActuales = Array.from(e.target.files);
+  document.getElementById('foto-hint').textContent =
+    fotosActuales.length > 0 ? `📎 ${fotosActuales.length} foto(s) seleccionada(s)` : '';
+}
+
+// ─── VALIDACIÓN ───────────────────────────────────────────────────────────
+
+function validarAgregar() {
+  const ok = document.getElementById('punto').value &&
+             document.getElementById('persona').value &&
+             productoSeleccionado &&
+             document.getElementById('cantidad').value.trim() &&
+             destinoActual;
+  document.getElementById('btn-agregar').disabled = !ok;
+}
+
+document.getElementById('cantidad').addEventListener('input', validarAgregar);
+document.getElementById('persona').addEventListener('change', validarAgregar);
+
+// ─── AGREGAR / LISTA ──────────────────────────────────────────────────────
+
+function agregarProducto() {
+  const cantidad = document.getElementById('cantidad').value.trim();
+  const destino = destinoActual === 'bota' ? 'Se botó' : 'Va para pulpa';
+
+  registros.push({
+    producto: productoSeleccionado.nombre,
+    categoria: productoSeleccionado.categoria,
+    unidad: productoSeleccionado.unidad,
+    cantidad,
+    destino,
+    fotos: [...fotosActuales]
+  });
+
+  renderizarLista();
+
+  // Resetear campos (mantener punto)
+  limpiarProducto();
+  document.getElementById('cantidad').value = '';
+  document.getElementById('cantidad').disabled = true;
+  document.getElementById('cantidad-hint').textContent = '';
+  document.getElementById('fotos').value = '';
+  document.getElementById('foto-hint').textContent = '';
+  fotosActuales = [];
+  destinoActual = null;
+  document.getElementById('btn-bota').className = 'destino-btn';
+  document.getElementById('btn-pulpa').className = 'destino-btn';
+  document.getElementById('btn-agregar').disabled = true;
+  document.getElementById('btn-enviar').disabled = false;
+
+  // Re-habilitar buscador
+  const punto = document.getElementById('punto').value;
+  const input = document.getElementById('input-producto');
+  input.disabled = !punto;
+  input.value = '';
+}
+
+function renderizarLista() {
+  const cont = document.getElementById('registros-lista');
+  document.getElementById('contador').textContent = registros.length;
+
+  if (registros.length === 0) {
+    cont.innerHTML = '<p class="registros-vacio">Aún no has agregado productos</p>';
+    return;
+  }
+
+  cont.innerHTML = registros.map((r, i) => `
+    <div class="registro-item">
+      <span class="registro-icono">${r.destino === 'Se botó' ? '🗑️' : '🧃'}</span>
+      <div class="registro-info">
+        <div class="registro-nombre">${r.producto}</div>
+        <div class="registro-detalle">${r.cantidad} ${r.unidad} · ${r.destino} · ${r.categoria}</div>
+        ${r.fotos.length > 0 ? `<div class="registro-fotos">📎 ${r.fotos.length} foto(s)</div>` : ''}
+      </div>
+      <button class="registro-eliminar" onclick="eliminarRegistro(${i})">✕</button>
+    </div>
+  `).join('');
+}
+
+function eliminarRegistro(i) {
+  registros.splice(i, 1);
+  renderizarLista();
+  document.getElementById('btn-enviar').disabled = registros.length === 0;
+}
+
+// ─── ENVÍO ────────────────────────────────────────────────────────────────
+
+async function enviarFormulario() {
+  const puntoSel = document.getElementById('punto');
+  const puntoNombre = puntoSel.options[puntoSel.selectedIndex].text;
+  const estado = document.getElementById('estado');
+  const btn = document.getElementById('btn-enviar');
+
+  btn.disabled = true;
+  estado.className = 'estado cargando';
+  estado.textContent = '⏳ Enviando registros...';
+
+  const formData = new FormData();
+  formData.append('punto', puntoNombre);
+  formData.append('persona', document.getElementById('persona').value);
+  formData.append('totalRegistros', registros.length);
+
+  registros.forEach((r, i) => {
+    formData.append(`prod_${i}_producto`, r.producto);
+    formData.append(`prod_${i}_categoria`, r.categoria);
+    formData.append(`prod_${i}_cantidad`, r.cantidad);
+    formData.append(`prod_${i}_unidad`, r.unidad);
+    formData.append(`prod_${i}_destino`, r.destino);
+    r.fotos.forEach((f, j) => formData.append(`prod_${i}_foto_${j}`, f));
+  });
+
+  try {
+    const res = await fetch('https://script.google.com/macros/s/AKfycbwy8AKztFN-2LorAtjnowZmu0tR2p7tSEavhSs15APb0PITrnCvyjP2cMzUlRuS56dU/exec', { method: 'POST', body: formData });
+    const data = await res.json();
+
+    if (data.result === 'ok') {
+      estado.className = 'estado exito';
+      estado.textContent = `✅ ${registros.length} producto(s) registrado(s) correctamente`;
+      limpiarTodo();
+    } else {
+      throw new Error(data.error || 'Error desconocido');
+    }
+  } catch (err) {
+    estado.className = 'estado error';
+    estado.textContent = '❌ Error al enviar. Intenta de nuevo.';
+    btn.disabled = false;
+  }
+}
+
+function limpiarTodo() {
+  document.getElementById('punto').value = '';
+  const sp = document.getElementById('persona');
+  sp.innerHTML = '<option value="">— Primero selecciona el punto —</option>';
+  sp.disabled = true;
+  limpiarProducto();
+  document.getElementById('input-producto').disabled = true;
+  document.getElementById('cantidad').value = '';
+  document.getElementById('cantidad').disabled = true;
+  document.getElementById('cantidad-hint').textContent = '';
+  document.getElementById('fotos').value = '';
+  document.getElementById('foto-hint').textContent = '';
+  fotosActuales = [];
+  destinoActual = null;
+  document.getElementById('btn-bota').className = 'destino-btn';
+  document.getElementById('btn-pulpa').className = 'destino-btn';
+  document.getElementById('btn-agregar').disabled = true;
+  document.getElementById('btn-enviar').disabled = true;
+  registros = [];
+  renderizarLista();
+}
+</script>
+</body>
+</html>
