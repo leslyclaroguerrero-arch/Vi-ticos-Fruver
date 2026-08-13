@@ -207,14 +207,14 @@
       <div class="sec-label">🛒 Total compras</div>
       <div class="field-group">
         <div class="field">
-          <label for="totalCompras">Valor total compras <span class="req">*</span></label>
+          <label for="totalCompras">Valor total compras</label>
           <div class="prefix-wrap">
             <span class="prefix">$</span>
             <input type="text" id="totalCompras" placeholder="0" inputmode="numeric" autocomplete="off" />
           </div>
         </div>
         <div class="field">
-          <label>Fotos facturas de compras <span class="req">*</span></label>
+          <label>Fotos facturas de compras</label>
           <div class="foto-area" id="fotoAreaCompras">
             <div class="foto-trigger" id="fotoTriggerCompras">
               <input type="file" accept="image/*" multiple onchange="handleFiles('compras', this.files)" />
@@ -243,14 +243,14 @@
       <div class="sec-label">💸 Total gastos</div>
       <div class="field-group">
         <div class="field">
-          <label for="totalGastos">Valor total gastos <span class="req">*</span></label>
+          <label for="totalGastos">Valor total gastos</label>
           <div class="prefix-wrap">
             <span class="prefix">$</span>
             <input type="text" id="totalGastos" placeholder="0" inputmode="numeric" autocomplete="off" />
           </div>
         </div>
         <div class="field">
-          <label>Fotos facturas de gastos <span class="req">*</span></label>
+          <label>Fotos facturas de gastos</label>
           <div class="foto-area" id="fotoAreaGastos">
             <div class="foto-trigger" id="fotoTriggerGastos">
               <input type="file" accept="image/*" multiple onchange="handleFiles('gastos', this.files)" />
@@ -402,11 +402,25 @@ async function enviar() {
   const fotosCompras  = state.compras.archivos;
   const fotosGastos   = state.gastos.archivos;
 
-  if (!cajera)       return showError('Selecciona tu nombre antes de enviar.');
-  if (!totalCompras) return showError('Escribe el valor total de compras.');
-  if (!totalGastos)  return showError('Escribe el valor total de gastos.');
-  if (fotosCompras.length === 0) return showError('Adjunta al menos una foto de las facturas de compras.');
-  if (fotosGastos.length === 0)  return showError('Adjunta al menos una foto de las facturas de gastos.');
+  if (!cajera) return showError('Selecciona tu nombre antes de enviar.');
+
+  // Al menos una sección debe tener datos
+  const tieneCompras = totalCompras || fotosCompras.length > 0;
+  const tieneGastos  = totalGastos  || fotosGastos.length > 0;
+  if (!tieneCompras && !tieneGastos)
+    return showError('Ingresa al menos compras o gastos para continuar.');
+
+  // Si hay valor de compras, debe haber foto, y viceversa
+  if (totalCompras && fotosCompras.length === 0)
+    return showError('Adjuntaste un valor de compras pero falta la foto de la factura.');
+  if (fotosCompras.length > 0 && !totalCompras)
+    return showError('Adjuntaste fotos de compras pero falta el valor total.');
+
+  // Si hay valor de gastos, debe haber foto, y viceversa
+  if (totalGastos && fotosGastos.length === 0)
+    return showError('Adjuntaste un valor de gastos pero falta la foto de la factura.');
+  if (fotosGastos.length > 0 && !totalGastos)
+    return showError('Adjuntaste fotos de gastos pero falta el valor total.');
 
   const btn = document.getElementById('btnSubmit');
   btn.disabled = true;
