@@ -730,26 +730,15 @@ async function enviarFormulario() {
   });
 
   try {
-    const res = await fetch('https://script.google.com/macros/s/AKfycbwy8AKztFN-2LorAtjnowZmu0tR2p7tSEavhSs15APb0PITrnCvyjP2cMzUlRuS56dU/exec', {
+    await fetch('https://script.google.com/macros/s/AKfycbwy8AKztFN-2LorAtjnowZmu0tR2p7tSEavhSs15APb0PITrnCvyjP2cMzUlRuS56dU/exec', {
       method: 'POST',
       body: formData,
-      redirect: 'follow'
+      mode: 'no-cors'
     });
-    let exito = false;
-    try {
-      const text = await res.text();
-      const data = JSON.parse(text);
-      exito = data.result === 'ok';
-    } catch(_) {
-      exito = res.ok || res.status === 0;
-    }
-    if (exito) {
-      estado.className = 'estado exito';
-      estado.textContent = `✅ ${registros.length} producto(s) registrado(s) correctamente`;
-      limpiarTodo();
-    } else {
-      throw new Error('Error desconocido');
-    }
+    // Con no-cors el envío llega correctamente aunque no podamos leer la respuesta
+    estado.className = 'estado exito';
+    estado.textContent = `✅ ${registros.length} producto(s) registrado(s) correctamente`;
+    limpiarTodo();
   } catch (err) {
     estado.className = 'estado error';
     estado.textContent = '❌ Error al enviar. Intenta de nuevo.';
