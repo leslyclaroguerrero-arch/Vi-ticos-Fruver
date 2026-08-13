@@ -453,10 +453,16 @@ async function enviarRegistro() {
   formData.append('punto', lote.punto);
 
   try {
-    const res  = await fetch(APPS_SCRIPT_URL, { method: 'POST', body: formData });
-    const data = await res.json();
-
-    if (data.result === 'ok') {
+    const res = await fetch(APPS_SCRIPT_URL, { method: 'POST', body: formData, redirect: 'follow' });
+    let exito = false;
+    try {
+      const text = await res.text();
+      const data = JSON.parse(text);
+      exito = data.result === 'ok';
+    } catch(_) {
+      exito = res.ok || res.status === 0;
+    }
+    if (exito) {
       estado.className = 'estado exito';
       estado.textContent = `✅ Registradas ${cantidadPulpas} pulpas de ${lote.producto}`;
       // Recargar lotes
@@ -468,7 +474,7 @@ async function enviarRegistro() {
       loteSeleccionado = null;
       await cargarLotes();
     } else {
-      throw new Error(data.error || 'Error desconocido');
+      throw new Error('Error desconocido');
     }
   } catch (err) {
     estado.className = 'estado error';
