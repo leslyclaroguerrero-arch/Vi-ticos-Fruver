@@ -730,15 +730,25 @@ async function enviarFormulario() {
   });
 
   try {
-    const res = await fetch('https://script.google.com/macros/s/AKfycbwy8AKztFN-2LorAtjnowZmu0tR2p7tSEavhSs15APb0PITrnCvyjP2cMzUlRuS56dU/exec', { method: 'POST', body: formData });
-    const data = await res.json();
-
-    if (data.result === 'ok') {
+    const res = await fetch('https://script.google.com/macros/s/AKfycbwy8AKztFN-2LorAtjnowZmu0tR2p7tSEavhSs15APb0PITrnCvyjP2cMzUlRuS56dU/exec', {
+      method: 'POST',
+      body: formData,
+      redirect: 'follow'
+    });
+    let exito = false;
+    try {
+      const text = await res.text();
+      const data = JSON.parse(text);
+      exito = data.result === 'ok';
+    } catch(_) {
+      exito = res.ok || res.status === 0;
+    }
+    if (exito) {
       estado.className = 'estado exito';
       estado.textContent = `✅ ${registros.length} producto(s) registrado(s) correctamente`;
       limpiarTodo();
     } else {
-      throw new Error(data.error || 'Error desconocido');
+      throw new Error('Error desconocido');
     }
   } catch (err) {
     estado.className = 'estado error';
