@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Registro de Pulpas – Fruver</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+  :root {
+    --naranja: #E76F1E;
+    --naranja-suave: #FEF5EE;
+    --naranja-borde: #F4A96A;
+    --verde: #2D6A4F;
+    --verde-suave: #D8F3DC;
+    --verde-claro: #52B788;
+    --gris-fondo: #F7F4F1;
+    --gris-borde: #CBD5CB;
+    --texto: #1A2E1A;
+    --texto-suave: #5A705A;
+    --blanco: #FFFFFF;
+    --rojo: #C0392B;
+    --radio: 12px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--gris-fondo);
+    color: var(--texto);
+    min-height: 100vh;
+    padding: 0 0 40px 0;
+  }
+
+  header {
+    background: var(--naranja);
+    color: white;
+    padding: 20px 20px 16px;
+    text-align: center;
+  }
+  header h1 { font-size: 1.1rem; font-weight: 700; letter-spacing: 0.02em; }
+  header p { font-size: 0.78rem; opacity: 0.8; margin-top: 4px; }
+
+  .card {
+    background: var(--blanco);
+    border-radius: var(--radio);
+    margin: 16px 16px 0;
+    padding: 20px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+  }
+
+  label {
+    display: block;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--texto-suave);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 6px;
+  }
+
+  select, input[type="text"], input[type="number"] {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1.5px solid var(--gris-borde);
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-family: inherit;
+    color: var(--texto);
+    background: var(--blanco);
+  }
+  select {
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%235A705A' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding-right: 36px;
+  }
+  select:focus {
+    outline: none;
+    border-color: var(--naranja-borde);
+    box-shadow: 0 0 0 3px rgba(231,111,30,0.12);
+  }
+  select:disabled { background-color: #f0f0f0; color: #aaa; cursor: not-allowed; }
+  input:focus {
+    outline: none;
+    border-color: var(--naranja-borde);
+    box-shadow: 0 0 0 3px rgba(231,111,30,0.12);
+  }
+  input:disabled { background: #f0f0f0; color: #aaa; cursor: not-allowed; }
+
+  .field { margin-bottom: 16px; }
+  .field:last-child { margin-bottom: 0; }
+  .hint { font-size: 0.75rem; color: var(--texto-suave); margin-top: 5px; }
+
+  /* Estado de carga de lotes */
+  .cargando-lotes {
+    text-align: center;
+    padding: 24px 0;
+    color: var(--texto-suave);
+    font-size: 0.88rem;
+  }
+  .cargando-lotes .spinner {
+    font-size: 1.5rem;
+    display: block;
+    margin-bottom: 8px;
+    animation: spin 1s linear infinite;
+  }
+  @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+  /* Lista de lotes pendientes */
+  .lotes-lista { display: flex; flex-direction: column; gap: 10px; }
+
+  .lote-card {
+    border: 2px solid var(--gris-borde);
+    border-radius: 10px;
+    padding: 14px;
+    cursor: pointer;
+    transition: all 0.15s;
+    background: var(--blanco);
+  }
+  .lote-card:hover { border-color: var(--naranja-borde); background: var(--naranja-suave); }
+  .lote-card.seleccionado {
+    border-color: var(--naranja);
+    background: var(--naranja-suave);
+  }
+  .lote-card .lote-producto {
+    font-weight: 700;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .lote-card .lote-detalle {
+    font-size: 0.78rem;
+    color: var(--texto-suave);
+    margin-top: 4px;
+  }
+  .lote-card .lote-punto {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--naranja);
+    margin-top: 3px;
+  }
+  .lote-check {
+    margin-left: auto;
+    font-size: 1.2rem;
+    display: none;
+  }
+  .lote-card.seleccionado .lote-check { display: block; }
+
+  .sin-lotes {
+    text-align: center;
+    padding: 24px 16px;
+    color: var(--texto-suave);
+    font-size: 0.88rem;
+  }
+  .sin-lotes .icono { font-size: 2rem; display: block; margin-bottom: 8px; }
+
+  /* Resumen lote seleccionado */
+  .lote-seleccionado-resumen {
+    background: var(--naranja-suave);
+    border: 1.5px solid var(--naranja-borde);
+    border-radius: 10px;
+    padding: 14px;
+    margin-bottom: 16px;
+  }
+  .lote-seleccionado-resumen .titulo { font-size: 0.72rem; font-weight: 700; color: var(--naranja); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; }
+  .lote-seleccionado-resumen .nombre { font-weight: 700; font-size: 1rem; }
+  .lote-seleccionado-resumen .detalle { font-size: 0.78rem; color: var(--texto-suave); margin-top: 3px; }
+
+  /* Submit */
+  .btn-submit {
+    width: calc(100% - 32px);
+    margin: 20px 16px 0;
+    padding: 16px;
+    background: var(--naranja);
+    color: white;
+    border: none;
+    border-radius: var(--radio);
+    font-size: 1rem;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    letter-spacing: 0.03em;
+    transition: background 0.15s;
+  }
+  .btn-submit:hover { background: #C85A10; }
+  .btn-submit:disabled { background: var(--gris-borde); cursor: not-allowed; }
+
+  .estado {
+    margin: 14px 16px 0;
+    padding: 14px 16px;
+    border-radius: 10px;
+    font-size: 0.88rem;
+    font-weight: 500;
+    display: none;
+  }
+  .estado.exito { background: var(--verde-suave); color: var(--verde); display: block; }
+  .estado.error { background: #FDEAEA; color: var(--rojo); display: block; }
+  .estado.cargando { background: #EEF4FF; color: #2563EB; display: block; }
+
+  .btn-recargar {
+    display: block;
+    margin: 12px auto 0;
+    background: none;
+    border: none;
+    color: var(--naranja);
+    font-size: 0.85rem;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    text-decoration: underline;
+  }
+
+  .seccion-titulo {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--texto-suave);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 12px;
+  }
+  .badge {
+    display: inline-block;
+    background: var(--naranja);
+    color: white;
+    font-size: 0.72rem;
+    font-weight: 700;
+    border-radius: 20px;
+    padding: 2px 8px;
+    margin-left: 6px;
+    vertical-align: middle;
+  }
+
+  .timestamp-info {
+    font-size: 0.75rem;
+    color: var(--texto-suave);
+    text-align: center;
+    margin-top: 12px;
+    padding: 0 16px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🧃 Registro de Pulpas</h1>
+  <p>Fruver — Transformación de producto</p>
+</header>
+
+<!-- QUIEN REGISTRA -->
+<div class="card">
+  <div class="field">
+    <label>Punto de venta</label>
+    <select id="punto" onchange="alCambiarPunto()">
+      <option value="">— Selecciona el punto —</option>
+      <option value="Gran Frutiver San Francisco">Gran Frutiver San Francisco</option>
+      <option value="Todozuyo La 70">Todozuyo La 70</option>
+      <option value="Todozuyo El Concor">Todozuyo El Concor</option>
+    </select>
+  </div>
+  <div class="field">
+    <label>¿Quién registra?</label>
+    <select id="persona" disabled onchange="validarFormulario()">
+      <option value="">— Primero selecciona el punto —</option>
+    </select>
+  </div>
+</div>
+
+<!-- LOTES PENDIENTES -->
+<div class="card">
+  <p class="seccion-titulo">
+    Lotes pendientes de pulpa
+    <span class="badge" id="badge-lotes">0</span>
+  </p>
+  <div id="contenedor-lotes">
+    <div class="cargando-lotes">
+      <span class="spinner">⏳</span>
+      Cargando lotes pendientes...
+    </div>
+  </div>
+  <button class="btn-recargar" onclick="cargarLotes()">↺ Actualizar lista</button>
+</div>
+
+<!-- DETALLE DE PULPAS -->
+<div class="card" id="card-pulpas" style="display:none">
+  <div class="lote-seleccionado-resumen" id="resumen-lote"></div>
+  <div class="field">
+    <label>Pulpas producidas</label>
+    <input type="number" id="cantidad-pulpas" placeholder="Ej: 8" min="1" inputmode="numeric" oninput="validarFormulario()" />
+    <div class="hint">Cantidad de pulpas en unidades</div>
+  </div>
+</div>
+
+<button class="btn-submit" id="btn-enviar" onclick="enviarRegistro()" disabled>
+  Registrar pulpas
+</button>
+
+<div class="estado" id="estado"></div>
+<p class="timestamp-info">La fecha y hora se registran automáticamente ✓</p>
+
+<script>
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwy8AKztFN-2LorAtjnowZmu0tR2p7tSEavhSs15APb0PITrnCvyjP2cMzUlRuS56dU/exec";
+
+const PERSONAS_POR_PUNTO = {
+  "Gran Frutiver San Francisco": ["Silvia","Jesús","Maicol"],
+  "Todozuyo La 70":              ["Mathew","Antonio"],
+  "Todozuyo El Concor":          ["Alex","Alfonso","Yeiner"]
+};
+
+let todosLosLotes = [];
+let lotes = [];
+let loteSeleccionado = null;
+
+function alCambiarPunto() {
+  const punto = document.getElementById('punto').value;
+  const selPersona = document.getElementById('persona');
+
+  selPersona.innerHTML = '<option value="">— Selecciona quién registra —</option>';
+  loteSeleccionado = null;
+  document.getElementById('card-pulpas').style.display = 'none';
+
+  if (punto && PERSONAS_POR_PUNTO[punto]) {
+    PERSONAS_POR_PUNTO[punto].forEach(p => {
+      const o = document.createElement('option');
+      o.value = p; o.textContent = p;
+      selPersona.appendChild(o);
+    });
+    selPersona.disabled = false;
+  } else {
+    selPersona.disabled = true;
+  }
+
+  // Filtrar lotes por punto seleccionado
+  lotes = todosLosLotes.filter(l => l.punto === punto);
+  document.getElementById('badge-lotes').textContent = lotes.length;
+  renderizarLotes();
+  validarFormulario();
+}
+
+// ─── CARGAR LOTES PENDIENTES ──────────────────────────────────────────────
+
+async function cargarLotes() {
+  const cont = document.getElementById('contenedor-lotes');
+  document.getElementById('badge-lotes').textContent = '0';
+  loteSeleccionado = null;
+  document.getElementById('card-pulpas').style.display = 'none';
+  validarFormulario();
+
+  cont.innerHTML = `<div class="cargando-lotes"><span class="spinner">⏳</span>Cargando lotes pendientes...</div>`;
+
+  try {
+    const url = APPS_SCRIPT_URL + "?action=getLotesPendientes";
+    const res = await fetch(url);
+    const data = await res.json();
+
+    todosLosLotes = data.lotes || [];
+
+    // Filtrar por punto si ya hay uno seleccionado
+    const punto = document.getElementById('punto').value;
+    lotes = punto ? todosLosLotes.filter(l => l.punto === punto) : [];
+    document.getElementById('badge-lotes').textContent = lotes.length;
+    renderizarLotes();
+
+  } catch (err) {
+    cont.innerHTML = `<div class="sin-lotes"><span class="icono">❌</span>Error al cargar lotes. Toca "Actualizar lista".</div>`;
+  }
+}
+
+function renderizarLotes() {
+  const cont = document.getElementById('contenedor-lotes');
+  const punto = document.getElementById('punto').value;
+
+  if (!punto) {
+    cont.innerHTML = `<div class="sin-lotes"><span class="icono">📍</span>Selecciona el punto para ver los lotes pendientes</div>`;
+    return;
+  }
+
+  if (lotes.length === 0) {
+    cont.innerHTML = `<div class="sin-lotes"><span class="icono">✅</span>No hay lotes pendientes en este punto</div>`;
+    return;
+  }
+
+  cont.innerHTML = `<div class="lotes-lista">${lotes.map((l, i) => `
+    <div class="lote-card" id="lote-${i}" onclick="seleccionarLote(${i})">
+      <div class="lote-producto">
+        🧃 ${l.producto}
+        <span class="lote-check">✅</span>
+      </div>
+      <div class="lote-detalle">${l.cantidad} ${l.unidad} · ${l.fecha}</div>
+      <div class="lote-punto">📍 ${l.punto} · Reportado por ${l.persona}</div>
+    </div>
+  `).join('')}</div>`;
+}
+
+// ─── SELECCIONAR LOTE ─────────────────────────────────────────────────────
+
+function seleccionarLote(i) {
+  // Quitar selección anterior
+  if (loteSeleccionado !== null) {
+    document.getElementById(`lote-${loteSeleccionado}`)?.classList.remove('seleccionado');
+  }
+
+  loteSeleccionado = i;
+  document.getElementById(`lote-${i}`).classList.add('seleccionado');
+
+  const l = lotes[i];
+  document.getElementById('resumen-lote').innerHTML = `
+    <div class="titulo">Lote seleccionado</div>
+    <div class="nombre">🧃 ${l.producto}</div>
+    <div class="detalle">${l.cantidad} ${l.unidad} enviados a pulpa · ${l.fecha} · ${l.punto}</div>
+  `;
+
+  document.getElementById('card-pulpas').style.display = 'block';
+  document.getElementById('cantidad-pulpas').value = '';
+  document.getElementById('cantidad-pulpas').focus();
+  validarFormulario();
+}
+
+// ─── VALIDAR ──────────────────────────────────────────────────────────────
+
+function validarFormulario() {
+  const ok = document.getElementById('punto').value &&
+             document.getElementById('persona').value &&
+             loteSeleccionado !== null &&
+             document.getElementById('cantidad-pulpas').value > 0;
+  document.getElementById('btn-enviar').disabled = !ok;
+}
+
+// ─── ENVIAR ───────────────────────────────────────────────────────────────
+
+async function enviarRegistro() {
+  const persona       = document.getElementById('persona').value;
+  const punto         = document.getElementById('punto').value;
+  const cantidadPulpas = document.getElementById('cantidad-pulpas').value;
+  const lote          = lotes[loteSeleccionado];
+
+  const estado = document.getElementById('estado');
+  const btn    = document.getElementById('btn-enviar');
+  btn.disabled = true;
+  estado.className = 'estado cargando';
+  estado.textContent = '⏳ Registrando pulpas...';
+
+  const formData = new FormData();
+  formData.append('action', 'registrarPulpa');
+  formData.append('persona', persona);
+  formData.append('cantidadPulpas', cantidadPulpas);
+  formData.append('filaIndex', lote.filaIndex);
+  formData.append('producto', lote.producto);
+  formData.append('punto', lote.punto);
+
+  try {
+    const res  = await fetch(APPS_SCRIPT_URL, { method: 'POST', body: formData });
+    const data = await res.json();
+
+    if (data.result === 'ok') {
+      estado.className = 'estado exito';
+      estado.textContent = `✅ Registradas ${cantidadPulpas} pulpas de ${lote.producto}`;
+      // Recargar lotes
+      document.getElementById('punto').value = '';
+      document.getElementById('persona').innerHTML = '<option value="">— Primero selecciona el punto —</option>';
+      document.getElementById('persona').disabled = true;
+      document.getElementById('cantidad-pulpas').value = '';
+      document.getElementById('card-pulpas').style.display = 'none';
+      loteSeleccionado = null;
+      await cargarLotes();
+    } else {
+      throw new Error(data.error || 'Error desconocido');
+    }
+  } catch (err) {
+    estado.className = 'estado error';
+    estado.textContent = '❌ Error al registrar. Intenta de nuevo.';
+    btn.disabled = false;
+  }
+}
+
+// Cargar al iniciar
+cargarLotes();
+</script>
+</body>
+</html>
