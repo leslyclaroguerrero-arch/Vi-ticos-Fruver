@@ -60,7 +60,7 @@
     margin-bottom: 6px;
   }
 
-  select, input[type="text"], input[type="number"] {
+  select, input[type="number"] {
     width: 100%;
     padding: 12px 14px;
     border: 1.5px solid var(--gris-borde);
@@ -78,142 +78,16 @@
     background-position: right 14px center;
     padding-right: 36px;
   }
-  select:focus {
+  select:focus, input:focus {
     outline: none;
     border-color: var(--naranja-borde);
     box-shadow: 0 0 0 3px rgba(231,111,30,0.12);
   }
   select:disabled { background-color: #f0f0f0; color: #aaa; cursor: not-allowed; }
-  input:focus {
-    outline: none;
-    border-color: var(--naranja-borde);
-    box-shadow: 0 0 0 3px rgba(231,111,30,0.12);
-  }
-  input:disabled { background: #f0f0f0; color: #aaa; cursor: not-allowed; }
 
   .field { margin-bottom: 16px; }
   .field:last-child { margin-bottom: 0; }
   .hint { font-size: 0.75rem; color: var(--texto-suave); margin-top: 5px; }
-
-  /* Estado de carga de lotes */
-  .cargando-lotes {
-    text-align: center;
-    padding: 24px 0;
-    color: var(--texto-suave);
-    font-size: 0.88rem;
-  }
-  .cargando-lotes .spinner {
-    font-size: 1.5rem;
-    display: block;
-    margin-bottom: 8px;
-    animation: spin 1s linear infinite;
-  }
-  @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-
-  /* Lista de lotes pendientes */
-  .lotes-lista { display: flex; flex-direction: column; gap: 10px; }
-
-  .lote-card {
-    border: 2px solid var(--gris-borde);
-    border-radius: 10px;
-    padding: 14px;
-    cursor: pointer;
-    transition: all 0.15s;
-    background: var(--blanco);
-  }
-  .lote-card:hover { border-color: var(--naranja-borde); background: var(--naranja-suave); }
-  .lote-card.seleccionado {
-    border-color: var(--naranja);
-    background: var(--naranja-suave);
-  }
-  .lote-card .lote-producto {
-    font-weight: 700;
-    font-size: 0.95rem;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-  .lote-card .lote-detalle {
-    font-size: 0.78rem;
-    color: var(--texto-suave);
-    margin-top: 4px;
-  }
-  .lote-card .lote-punto {
-    font-size: 0.72rem;
-    font-weight: 600;
-    color: var(--naranja);
-    margin-top: 3px;
-  }
-  .lote-check {
-    margin-left: auto;
-    font-size: 1.2rem;
-    display: none;
-  }
-  .lote-card.seleccionado .lote-check { display: block; }
-
-  .sin-lotes {
-    text-align: center;
-    padding: 24px 16px;
-    color: var(--texto-suave);
-    font-size: 0.88rem;
-  }
-  .sin-lotes .icono { font-size: 2rem; display: block; margin-bottom: 8px; }
-
-  /* Resumen lote seleccionado */
-  .lote-seleccionado-resumen {
-    background: var(--naranja-suave);
-    border: 1.5px solid var(--naranja-borde);
-    border-radius: 10px;
-    padding: 14px;
-    margin-bottom: 16px;
-  }
-  .lote-seleccionado-resumen .titulo { font-size: 0.72rem; font-weight: 700; color: var(--naranja); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; }
-  .lote-seleccionado-resumen .nombre { font-weight: 700; font-size: 1rem; }
-  .lote-seleccionado-resumen .detalle { font-size: 0.78rem; color: var(--texto-suave); margin-top: 3px; }
-
-  /* Submit */
-  .btn-submit {
-    width: calc(100% - 32px);
-    margin: 20px 16px 0;
-    padding: 16px;
-    background: var(--naranja);
-    color: white;
-    border: none;
-    border-radius: var(--radio);
-    font-size: 1rem;
-    font-weight: 700;
-    font-family: inherit;
-    cursor: pointer;
-    letter-spacing: 0.03em;
-    transition: background 0.15s;
-  }
-  .btn-submit:hover { background: #C85A10; }
-  .btn-submit:disabled { background: var(--gris-borde); cursor: not-allowed; }
-
-  .estado {
-    margin: 14px 16px 0;
-    padding: 14px 16px;
-    border-radius: 10px;
-    font-size: 0.88rem;
-    font-weight: 500;
-    display: none;
-  }
-  .estado.exito { background: var(--verde-suave); color: var(--verde); display: block; }
-  .estado.error { background: #FDEAEA; color: var(--rojo); display: block; }
-  .estado.cargando { background: #EEF4FF; color: #2563EB; display: block; }
-
-  .btn-recargar {
-    display: block;
-    margin: 12px auto 0;
-    background: none;
-    border: none;
-    color: var(--naranja);
-    font-size: 0.85rem;
-    font-weight: 600;
-    font-family: inherit;
-    cursor: pointer;
-    text-decoration: underline;
-  }
 
   .seccion-titulo {
     font-size: 0.78rem;
@@ -234,14 +108,182 @@
     margin-left: 6px;
     vertical-align: middle;
   }
+  .badge-verde {
+    display: inline-block;
+    background: var(--verde);
+    color: white;
+    font-size: 0.72rem;
+    font-weight: 700;
+    border-radius: 20px;
+    padding: 2px 8px;
+    margin-left: 6px;
+    vertical-align: middle;
+  }
+
+  /* Lotes disponibles */
+  .cargando-lotes {
+    text-align: center;
+    padding: 24px 0;
+    color: var(--texto-suave);
+    font-size: 0.88rem;
+  }
+  .spinner { display: inline-block; animation: spin 1s linear infinite; }
+  @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+  .lotes-lista { display: flex; flex-direction: column; gap: 8px; }
+
+  .lote-card {
+    border: 2px solid var(--gris-borde);
+    border-radius: 10px;
+    padding: 12px 14px;
+    cursor: pointer;
+    transition: all 0.15s;
+    background: var(--blanco);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .lote-card:hover { border-color: var(--naranja-borde); background: var(--naranja-suave); }
+  .lote-card.seleccionado { border-color: var(--naranja); background: var(--naranja-suave); }
+  .lote-card.ya-agregado { border-color: var(--verde-claro); background: #F0FAF4; opacity: 0.6; cursor: not-allowed; }
+
+  .lote-check {
+    width: 22px; height: 22px;
+    border: 2px solid var(--gris-borde);
+    border-radius: 50%;
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.75rem;
+    transition: all 0.15s;
+  }
+  .lote-card.seleccionado .lote-check { background: var(--naranja); border-color: var(--naranja); color: white; }
+  .lote-card.ya-agregado .lote-check { background: var(--verde-claro); border-color: var(--verde-claro); color: white; }
+
+  .lote-info { flex: 1; }
+  .lote-producto { font-weight: 700; font-size: 0.9rem; }
+  .lote-detalle { font-size: 0.76rem; color: var(--texto-suave); margin-top: 2px; }
+  .lote-punto { font-size: 0.72rem; font-weight: 600; color: var(--naranja); margin-top: 2px; }
+
+  .sin-lotes {
+    text-align: center;
+    padding: 20px 16px;
+    color: var(--texto-suave);
+    font-size: 0.85rem;
+  }
+  .sin-lotes .icono { font-size: 1.8rem; display: block; margin-bottom: 6px; }
+
+  /* Formulario cantidad por lote seleccionado */
+  .lote-cantidad-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--naranja-suave);
+    border: 1.5px solid var(--naranja-borde);
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-bottom: 8px;
+  }
+  .lote-cantidad-row .lcr-info { flex: 1; }
+  .lote-cantidad-row .lcr-nombre { font-weight: 700; font-size: 0.88rem; }
+  .lote-cantidad-row .lcr-detalle { font-size: 0.74rem; color: var(--texto-suave); margin-top: 2px; }
+  .lote-cantidad-row input[type="number"] {
+    width: 90px;
+    padding: 8px 10px;
+    font-size: 0.9rem;
+    flex-shrink: 0;
+  }
+  .lote-cantidad-row .lcr-quitar {
+    background: none; border: none;
+    color: var(--rojo); font-size: 1.1rem;
+    cursor: pointer; padding: 4px; flex-shrink: 0;
+  }
+
+  /* Lista de registros agregados */
+  .registro-item {
+    background: var(--gris-fondo);
+    border: 1.5px solid var(--gris-borde);
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .registro-icono { font-size: 1.3rem; flex-shrink: 0; }
+  .registro-info { flex: 1; }
+  .registro-nombre { font-weight: 700; font-size: 0.88rem; }
+  .registro-detalle { font-size: 0.76rem; color: var(--texto-suave); margin-top: 2px; }
+  .registro-eliminar { background: none; border: none; color: var(--rojo); font-size: 1rem; cursor: pointer; padding: 4px; flex-shrink: 0; }
+
+  .registros-vacio { text-align: center; color: var(--gris-borde); font-size: 0.85rem; padding: 12px 0; }
+
+  .btn-agregar {
+    width: 100%;
+    padding: 13px;
+    background: transparent;
+    color: var(--naranja);
+    border: 2px solid var(--naranja);
+    border-radius: var(--radio);
+    font-size: 0.95rem;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.15s;
+    margin-top: 4px;
+  }
+  .btn-agregar:hover { background: var(--naranja-suave); }
+  .btn-agregar:disabled { border-color: var(--gris-borde); color: var(--gris-borde); cursor: not-allowed; background: transparent; }
+
+  .btn-recargar {
+    display: block;
+    margin: 10px auto 0;
+    background: none;
+    border: none;
+    color: var(--naranja);
+    font-size: 0.82rem;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    text-decoration: underline;
+  }
+
+  .btn-submit {
+    width: calc(100% - 32px);
+    margin: 20px 16px 0;
+    padding: 16px;
+    background: var(--naranja);
+    color: white;
+    border: none;
+    border-radius: var(--radio);
+    font-size: 1rem;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .btn-submit:hover { background: #C85A10; }
+  .btn-submit:disabled { background: var(--gris-borde); cursor: not-allowed; }
+
+  .estado {
+    margin: 14px 16px 0;
+    padding: 14px 16px;
+    border-radius: 10px;
+    font-size: 0.88rem;
+    font-weight: 500;
+    display: none;
+  }
+  .estado.exito { background: var(--verde-suave); color: var(--verde); display: block; }
+  .estado.error { background: #FDEAEA; color: var(--rojo); display: block; }
+  .estado.cargando { background: #EEF4FF; color: #2563EB; display: block; }
 
   .timestamp-info {
     font-size: 0.75rem;
     color: var(--texto-suave);
     text-align: center;
     margin-top: 12px;
-    padding: 0 16px;
   }
+
+  .divider { height: 1px; background: var(--gris-fondo); margin: 14px 0; }
 </style>
 </head>
 <body>
@@ -251,7 +293,7 @@
   <p>Fruver — Transformación de producto</p>
 </header>
 
-<!-- QUIEN REGISTRA -->
+<!-- PUNTO Y PERSONA -->
 <div class="card">
   <div class="field">
     <label>Punto de venta</label>
@@ -264,39 +306,52 @@
   </div>
   <div class="field">
     <label>¿Quién registra?</label>
-    <select id="persona" disabled onchange="validarFormulario()">
+    <select id="persona" disabled onchange="validarEnviar()">
       <option value="">— Primero selecciona el punto —</option>
     </select>
   </div>
 </div>
 
-<!-- LOTES PENDIENTES -->
+<!-- LOTES DISPONIBLES -->
 <div class="card">
   <p class="seccion-titulo">
-    Lotes pendientes de pulpa
+    Lotes pendientes
     <span class="badge" id="badge-lotes">0</span>
   </p>
+  <div class="buscador-lotes-wrap" id="buscador-lotes-wrap" style="display:none; margin-bottom:12px; position:relative;">
+    <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:0.9rem;pointer-events:none;">🔍</span>
+    <input type="text" id="buscar-lote" placeholder="Buscar por producto..."
+      oninput="filtrarLotesPorBusqueda()"
+      style="width:100%;padding:10px 12px 10px 34px;border:1.5px solid var(--gris-borde);border-radius:8px;font-size:0.88rem;font-family:inherit;" />
+  </div>
   <div id="contenedor-lotes">
-    <div class="cargando-lotes">
-      <span class="spinner">⏳</span>
-      Cargando lotes pendientes...
-    </div>
+    <div class="sin-lotes"><span class="icono">📍</span>Selecciona el punto para ver los lotes</div>
   </div>
   <button class="btn-recargar" onclick="cargarLotes()">↺ Actualizar lista</button>
 </div>
 
-<!-- DETALLE DE PULPAS -->
-<div class="card" id="card-pulpas" style="display:none">
-  <div class="lote-seleccionado-resumen" id="resumen-lote"></div>
-  <div class="field">
-    <label>Pulpas producidas</label>
-    <input type="number" id="cantidad-pulpas" placeholder="Ej: 8" min="1" inputmode="numeric" oninput="validarFormulario()" />
-    <div class="hint">Cantidad de pulpas en unidades</div>
+<!-- LOTES SELECCIONADOS CON CANTIDAD -->
+<div class="card" id="card-seleccionados" style="display:none">
+  <p class="seccion-titulo">Ingresar pulpas por lote</p>
+  <div id="lotes-cantidad"></div>
+  <button class="btn-agregar" id="btn-agregar" onclick="agregarALista()" disabled>
+    + Agregar a la lista
+  </button>
+</div>
+
+<!-- LISTA FINAL -->
+<div class="card">
+  <p class="seccion-titulo">
+    Lotes a registrar
+    <span class="badge-verde" id="badge-registros">0</span>
+  </p>
+  <div id="registros-lista">
+    <p class="registros-vacio">Aún no has agregado lotes</p>
   </div>
 </div>
 
 <button class="btn-submit" id="btn-enviar" onclick="enviarRegistro()" disabled>
-  Registrar pulpas
+  Enviar registro de pulpas
 </button>
 
 <div class="estado" id="estado"></div>
@@ -311,17 +366,21 @@ const PERSONAS_POR_PUNTO = {
   "Todozuyo El Concor":          ["Alex","Alfonso","Yeiner"]
 };
 
-let todosLosLotes = [];
-let lotes = [];
-let loteSeleccionado = null;
+let todosLosLotes  = [];
+let lotesVisibles  = [];  // lotes del punto seleccionado
+let lotesSeleccionados = new Set(); // índices seleccionados en lotesVisibles
+let registros      = []; // lotes ya agregados a la lista final
+
+// ─── PUNTO / PERSONA ──────────────────────────────────────────────────────
 
 function alCambiarPunto() {
   const punto = document.getElementById('punto').value;
   const selPersona = document.getElementById('persona');
 
   selPersona.innerHTML = '<option value="">— Selecciona quién registra —</option>';
-  loteSeleccionado = null;
-  document.getElementById('card-pulpas').style.display = 'none';
+  lotesSeleccionados.clear();
+  registros = [];
+  renderizarLista();
 
   if (punto && PERSONAS_POR_PUNTO[punto]) {
     PERSONAS_POR_PUNTO[punto].forEach(p => {
@@ -334,112 +393,264 @@ function alCambiarPunto() {
     selPersona.disabled = true;
   }
 
-  // Filtrar lotes por punto seleccionado
-  lotes = todosLosLotes.filter(l => l.punto === punto);
-  document.getElementById('badge-lotes').textContent = lotes.length;
-  renderizarLotes();
-  validarFormulario();
+  filtrarYMostrarLotes(punto);
+  validarEnviar();
 }
 
-// ─── CARGAR LOTES PENDIENTES ──────────────────────────────────────────────
+// ─── CARGAR Y FILTRAR LOTES ───────────────────────────────────────────────
 
 async function cargarLotes() {
   const cont = document.getElementById('contenedor-lotes');
+  cont.innerHTML = `<div class="cargando-lotes"><span class="spinner">⏳</span> Cargando...</div>`;
   document.getElementById('badge-lotes').textContent = '0';
-  loteSeleccionado = null;
-  document.getElementById('card-pulpas').style.display = 'none';
-  validarFormulario();
-
-  cont.innerHTML = `<div class="cargando-lotes"><span class="spinner">⏳</span>Cargando lotes pendientes...</div>`;
 
   try {
-    const url = APPS_SCRIPT_URL + "?action=getLotesPendientes";
-    const res = await fetch(url);
+    const res  = await fetch(APPS_SCRIPT_URL + "?action=getLotesPendientes");
     const data = await res.json();
-
     todosLosLotes = data.lotes || [];
-
-    // Filtrar por punto si ya hay uno seleccionado
     const punto = document.getElementById('punto').value;
-    lotes = punto ? todosLosLotes.filter(l => l.punto === punto) : [];
-    document.getElementById('badge-lotes').textContent = lotes.length;
-    renderizarLotes();
-
-  } catch (err) {
-    cont.innerHTML = `<div class="sin-lotes"><span class="icono">❌</span>Error al cargar lotes. Toca "Actualizar lista".</div>`;
+    filtrarYMostrarLotes(punto);
+  } catch(err) {
+    cont.innerHTML = `<div class="sin-lotes"><span class="icono">❌</span>Error al cargar. Toca "Actualizar lista".</div>`;
   }
 }
 
-function renderizarLotes() {
+function filtrarYMostrarLotes(punto) {
   const cont = document.getElementById('contenedor-lotes');
-  const punto = document.getElementById('punto').value;
 
   if (!punto) {
-    cont.innerHTML = `<div class="sin-lotes"><span class="icono">📍</span>Selecciona el punto para ver los lotes pendientes</div>`;
+    lotesVisibles = [];
+    cont.innerHTML = `<div class="sin-lotes"><span class="icono">📍</span>Selecciona el punto para ver los lotes</div>`;
+    document.getElementById('badge-lotes').textContent = '0';
+    document.getElementById('card-seleccionados').style.display = 'none';
+    mostrarBuscador(false);
     return;
   }
 
-  if (lotes.length === 0) {
+  // IDs de lotes ya agregados a la lista
+  const yaAgregados = new Set(registros.map(r => r.filaIndex));
+
+  lotesVisibles = todosLosLotes.filter(l => l.punto === punto);
+  // Quitar los ya agregados de la selección activa
+  lotesSeleccionados = new Set([...lotesSeleccionados].filter(i => !yaAgregados.has(lotesVisibles[i]?.filaIndex)));
+
+  document.getElementById('badge-lotes').textContent = lotesVisibles.filter(l => !yaAgregados.has(l.filaIndex)).length;
+
+  if (lotesVisibles.length === 0) {
     cont.innerHTML = `<div class="sin-lotes"><span class="icono">✅</span>No hay lotes pendientes en este punto</div>`;
+    document.getElementById('card-seleccionados').style.display = 'none';
+    mostrarBuscador(false);
+    return;
+  }
+  mostrarBuscador(true);
+
+  cont.innerHTML = `<div class="lotes-lista">${lotesVisibles.map((l, i) => {
+    const agregado = yaAgregados.has(l.filaIndex);
+    const seleccionado = lotesSeleccionados.has(i);
+    const clase = agregado ? 'ya-agregado' : seleccionado ? 'seleccionado' : '';
+    const checkContent = agregado ? '✓' : seleccionado ? '✓' : '';
+    return `
+      <div class="lote-card ${clase}" id="lote-card-${i}" onclick="toggleLote(${i})">
+        <div class="lote-check" id="lote-check-${i}">${checkContent}</div>
+        <div class="lote-info">
+          <div class="lote-producto">🧃 ${l.producto}</div>
+          <div class="lote-detalle">${l.cantidad} ${l.unidad} · ${l.fecha}</div>
+          <div class="lote-punto">Reportado por ${l.persona}</div>
+        </div>
+      </div>`;
+  }).join('')}</div>`;
+
+  actualizarPanelCantidades();
+}
+
+function toggleLote(i) {
+  const yaAgregados = new Set(registros.map(r => r.filaIndex));
+  const lote = lotesVisibles[i];
+  if (yaAgregados.has(lote.filaIndex)) return; // ya está en la lista, ignorar
+
+  if (lotesSeleccionados.has(i)) {
+    lotesSeleccionados.delete(i);
+  } else {
+    lotesSeleccionados.add(i);
+  }
+
+  // Actualizar visual del card
+  const card  = document.getElementById(`lote-card-${i}`);
+  const check = document.getElementById(`lote-check-${i}`);
+  if (lotesSeleccionados.has(i)) {
+    card.classList.add('seleccionado');
+    check.textContent = '✓';
+  } else {
+    card.classList.remove('seleccionado');
+    check.textContent = '';
+  }
+
+  actualizarPanelCantidades();
+}
+
+// ─── PANEL DE CANTIDADES (agrupado por producto) ─────────────────────────
+
+function actualizarPanelCantidades() {
+  const panel = document.getElementById('card-seleccionados');
+  const cont  = document.getElementById('lotes-cantidad');
+
+  if (lotesSeleccionados.size === 0) {
+    panel.style.display = 'none';
+    document.getElementById('btn-agregar').disabled = true;
     return;
   }
 
-  cont.innerHTML = `<div class="lotes-lista">${lotes.map((l, i) => `
-    <div class="lote-card" id="lote-${i}" onclick="seleccionarLote(${i})">
-      <div class="lote-producto">
-        🧃 ${l.producto}
-        <span class="lote-check">✅</span>
-      </div>
-      <div class="lote-detalle">${l.cantidad} ${l.unidad} · ${l.fecha}</div>
-      <div class="lote-punto">📍 ${l.punto} · Reportado por ${l.persona}</div>
-    </div>
-  `).join('')}</div>`;
+  panel.style.display = 'block';
+
+  // Agrupar índices seleccionados por producto
+  const grupos = {}; // { producto: [i, i, ...] }
+  [...lotesSeleccionados].forEach(i => {
+    const prod = lotesVisibles[i].producto;
+    if (!grupos[prod]) grupos[prod] = [];
+    grupos[prod].push(i);
+  });
+
+  cont.innerHTML = Object.entries(grupos).map(([prod, indices]) => {
+    const totalKg = indices.reduce((s, i) => s + parseFloat(lotesVisibles[i].cantidad), 0);
+    const unidad  = lotesVisibles[indices[0]].unidad;
+    const lotes   = indices.map(i => `${lotesVisibles[i].cantidad} ${unidad} (${lotesVisibles[i].fecha})`).join(' + ');
+    const grupoId = prod.replace(/\s+/g,'_');
+    return `
+      <div class="lote-cantidad-row" id="lcr-${grupoId}">
+        <div class="lcr-info">
+          <div class="lcr-nombre">🧃 ${prod}</div>
+          <div class="lcr-detalle">${lotes} = ${totalKg} ${unidad} total</div>
+          ${indices.length > 1 ? '<div class="lcr-detalle" style="color:var(--naranja);margin-top:3px;">⚖️ Se distribuirá proporcionalmente</div>' : ''}
+        </div>
+        <input type="number" id="pulpas-grupo-${grupoId}" min="1" placeholder="Ej: 8"
+          inputmode="numeric" oninput="validarAgregar()"
+          data-indices="${indices.join(',')}"
+          data-total="${totalKg}" />
+        <button class="lcr-quitar" onclick="quitarGrupo('${prod}')">✕</button>
+      </div>`;
+  }).join('');
+
+  validarAgregar();
 }
 
-// ─── SELECCIONAR LOTE ─────────────────────────────────────────────────────
+function quitarGrupo(producto) {
+  // Deseleccionar todos los lotes de ese producto
+  [...lotesSeleccionados].forEach(i => {
+    if (lotesVisibles[i].producto === producto) {
+      lotesSeleccionados.delete(i);
+      const card  = document.getElementById(`lote-card-${i}`);
+      const check = document.getElementById(`lote-check-${i}`);
+      if (card)  card.classList.remove('seleccionado');
+      if (check) check.textContent = '';
+    }
+  });
+  actualizarPanelCantidades();
+}
 
-function seleccionarLote(i) {
-  // Quitar selección anterior
-  if (loteSeleccionado !== null) {
-    document.getElementById(`lote-${loteSeleccionado}`)?.classList.remove('seleccionado');
+function validarAgregar() {
+  const inputs = document.querySelectorAll('[id^="pulpas-grupo-"]');
+  const todosConCantidad = inputs.length > 0 && [...inputs].every(inp => parseInt(inp.value) > 0);
+  document.getElementById('btn-agregar').disabled = !todosConCantidad || lotesSeleccionados.size === 0;
+}
+
+// Distribuye pulpas proporcionalmente entre lotes del mismo producto
+function distribuirProporcional(totalPulpas, cantidades) {
+  const total = cantidades.reduce((a, b) => a + b, 0);
+  let distribuidas = cantidades.map(c => Math.round(totalPulpas * c / total));
+  // Ajustar diferencia de redondeo al lote más grande
+  const diff = totalPulpas - distribuidas.reduce((a, b) => a + b, 0);
+  if (diff !== 0) {
+    const maxIdx = cantidades.indexOf(Math.max(...cantidades));
+    distribuidas[maxIdx] += diff;
+  }
+  return distribuidas;
+}
+
+// ─── AGREGAR A LA LISTA ───────────────────────────────────────────────────
+
+function agregarALista() {
+  // Agrupar por producto
+  const grupos = {};
+  [...lotesSeleccionados].forEach(i => {
+    const prod = lotesVisibles[i].producto;
+    if (!grupos[prod]) grupos[prod] = [];
+    grupos[prod].push(i);
+  });
+
+  Object.entries(grupos).forEach(([prod, indices]) => {
+    const grupoId    = prod.replace(/\s+/g,'_');
+    const input      = document.getElementById(`pulpas-grupo-${grupoId}`);
+    const totalPulpas = parseInt(input.value);
+    const cantidades = indices.map(i => parseFloat(lotesVisibles[i].cantidad));
+    const distribuidas = distribuirProporcional(totalPulpas, cantidades);
+
+    indices.forEach((idx, j) => {
+      const lote = lotesVisibles[idx];
+      registros.push({
+        filaIndex: lote.filaIndex,
+        producto:  lote.producto,
+        cantidad:  lote.cantidad,
+        unidad:    lote.unidad,
+        fecha:     lote.fecha,
+        pulpas:    distribuidas[j],
+        totalPulpas: indices.length > 1 ? `${distribuidas[j]} de ${totalPulpas} total` : totalPulpas
+      });
+    });
+  });
+
+  lotesSeleccionados.clear();
+  renderizarLista();
+  const punto = document.getElementById('punto').value;
+  filtrarYMostrarLotes(punto);
+  validarEnviar();
+}
+
+function renderizarLista() {
+  const cont = document.getElementById('registros-lista');
+  document.getElementById('badge-registros').textContent = registros.length;
+
+  if (registros.length === 0) {
+    cont.innerHTML = '<p class="registros-vacio">Aún no has agregado lotes</p>';
+    return;
   }
 
-  loteSeleccionado = i;
-  document.getElementById(`lote-${i}`).classList.add('seleccionado');
-
-  const l = lotes[i];
-  document.getElementById('resumen-lote').innerHTML = `
-    <div class="titulo">Lote seleccionado</div>
-    <div class="nombre">🧃 ${l.producto}</div>
-    <div class="detalle">${l.cantidad} ${l.unidad} enviados a pulpa · ${l.fecha} · ${l.punto}</div>
-  `;
-
-  document.getElementById('card-pulpas').style.display = 'block';
-  document.getElementById('cantidad-pulpas').value = '';
-  document.getElementById('cantidad-pulpas').focus();
-  validarFormulario();
+  cont.innerHTML = registros.map((r, i) => `
+    <div class="registro-item">
+      <span class="registro-icono">🧃</span>
+      <div class="registro-info">
+        <div class="registro-nombre">${r.producto}</div>
+        <div class="registro-detalle">${r.totalPulpas || r.pulpas} pulpas · de ${r.cantidad} ${r.unidad} enviados · ${r.fecha}</div>
+      </div>
+      <button class="registro-eliminar" onclick="eliminarRegistro(${i})">✕</button>
+    </div>
+  `).join('');
 }
 
-// ─── VALIDAR ──────────────────────────────────────────────────────────────
+function eliminarRegistro(i) {
+  registros.splice(i, 1);
+  renderizarLista();
+  const punto = document.getElementById('punto').value;
+  filtrarYMostrarLotes(punto);
+  validarEnviar();
+}
 
-function validarFormulario() {
+// ─── VALIDAR ENVÍO ────────────────────────────────────────────────────────
+
+function validarEnviar() {
   const ok = document.getElementById('punto').value &&
              document.getElementById('persona').value &&
-             loteSeleccionado !== null &&
-             document.getElementById('cantidad-pulpas').value > 0;
+             registros.length > 0;
   document.getElementById('btn-enviar').disabled = !ok;
 }
 
 // ─── ENVIAR ───────────────────────────────────────────────────────────────
 
 async function enviarRegistro() {
-  const persona       = document.getElementById('persona').value;
-  const punto         = document.getElementById('punto').value;
-  const cantidadPulpas = document.getElementById('cantidad-pulpas').value;
-  const lote          = lotes[loteSeleccionado];
+  const persona = document.getElementById('persona').value;
+  const punto   = document.getElementById('punto').value;
+  const estado  = document.getElementById('estado');
+  const btn     = document.getElementById('btn-enviar');
 
-  const estado = document.getElementById('estado');
-  const btn    = document.getElementById('btn-enviar');
   btn.disabled = true;
   estado.className = 'estado cargando';
   estado.textContent = '⏳ Registrando pulpas...';
@@ -447,34 +658,54 @@ async function enviarRegistro() {
   const formData = new FormData();
   formData.append('action', 'registrarPulpa');
   formData.append('persona', persona);
-  formData.append('cantidadPulpas', cantidadPulpas);
-  formData.append('filaIndex', lote.filaIndex);
-  formData.append('producto', lote.producto);
-  formData.append('punto', lote.punto);
+  formData.append('punto', punto);
+  formData.append('totalLotes', registros.length);
+
+  registros.forEach((r, i) => {
+    formData.append(`lote_${i}_filaIndex`, r.filaIndex);
+    formData.append(`lote_${i}_producto`, r.producto);
+    formData.append(`lote_${i}_pulpas`, r.pulpas);
+  });
 
   try {
     await fetch(APPS_SCRIPT_URL, { method: 'POST', body: formData, mode: 'no-cors' });
-    // Con no-cors el envío llega aunque no podamos leer la respuesta
-    if (true) {
-      estado.className = 'estado exito';
-      estado.textContent = `✅ Registradas ${cantidadPulpas} pulpas de ${lote.producto}`;
-      // Recargar lotes
-      document.getElementById('punto').value = '';
-      document.getElementById('persona').innerHTML = '<option value="">— Primero selecciona el punto —</option>';
-      document.getElementById('persona').disabled = true;
-      document.getElementById('cantidad-pulpas').value = '';
-      document.getElementById('card-pulpas').style.display = 'none';
-      loteSeleccionado = null;
-      await cargarLotes();
-    }
-  } catch (err) {
+    estado.className = 'estado exito';
+    estado.textContent = `✅ ${registros.length} lote(s) registrado(s) correctamente`;
+    // Limpiar todo
+    document.getElementById('punto').value = '';
+    document.getElementById('persona').innerHTML = '<option value="">— Primero selecciona el punto —</option>';
+    document.getElementById('persona').disabled = true;
+    registros = [];
+    lotesSeleccionados.clear();
+    renderizarLista();
+    filtrarYMostrarLotes('');
+  } catch(err) {
     estado.className = 'estado error';
-    estado.textContent = '❌ Error al registrar. Intenta de nuevo.';
+    estado.textContent = '❌ Error al enviar. Intenta de nuevo.';
     btn.disabled = false;
   }
 }
 
-// Cargar al iniciar
+function filtrarLotesPorBusqueda() {
+  const query = document.getElementById('buscar-lote').value.trim().toLowerCase();
+  const yaAgregados = new Set(registros.map(r => r.filaIndex));
+  const cards = document.querySelectorAll('[id^="lote-card-"]');
+
+  cards.forEach((card, idx) => {
+    const lote = lotesVisibles[idx];
+    if (!lote) return;
+    const match = !query || lote.producto.toLowerCase().includes(query);
+    card.style.display = match ? '' : 'none';
+  });
+}
+
+// Mostrar buscador cuando hay lotes
+function mostrarBuscador(show) {
+  document.getElementById('buscador-lotes-wrap').style.display = show ? 'block' : 'none';
+  if (!show) document.getElementById('buscar-lote').value = '';
+}
+
+// Cargar lotes al iniciar
 cargarLotes();
 </script>
 </body>
