@@ -578,22 +578,24 @@ function agregarALista() {
   });
 
   Object.entries(grupos).forEach(([prod, indices]) => {
-    const grupoId    = prod.replace(/\s+/g,'_');
-    const input      = document.getElementById(`pulpas-grupo-${grupoId}`);
-    const totalPulpas = parseInt(input.value);
-    const cantidades = indices.map(i => parseFloat(lotesVisibles[i].cantidad));
+    const grupoIdInput = prod.replace(/\s+/g,'_');
+    const input        = document.getElementById(`pulpas-grupo-${grupoIdInput}`);
+    const totalPulpas  = parseInt(input.value);
+    const cantidades   = indices.map(i => parseFloat(lotesVisibles[i].cantidad));
     const distribuidas = distribuirProporcional(totalPulpas, cantidades);
 
+    const grupoId = prod + '_' + Date.now();
     indices.forEach((idx, j) => {
       const lote = lotesVisibles[idx];
       registros.push({
-        filaIndex: lote.filaIndex,
-        producto:  lote.producto,
-        cantidad:  lote.cantidad,
-        unidad:    lote.unidad,
-        fecha:     lote.fecha,
-        pulpas:    distribuidas[j],
-        totalPulpas: indices.length > 1 ? `${distribuidas[j]} de ${totalPulpas} total` : totalPulpas
+        filaIndex:       lote.filaIndex,
+        producto:        lote.producto,
+        cantidad:        lote.cantidad,
+        unidad:          lote.unidad,
+        fecha:           lote.fecha,
+        pulpas:          distribuidas[j],  // valor real para el Sheet
+        grupoId:         grupoId,
+        pulpasGrupoTotal: totalPulpas      // lo que el empleado ingresó
       });
     });
   });
@@ -614,20 +616,37 @@ function renderizarLista() {
     return;
   }
 
-  cont.innerHTML = registros.map((r, i) => `
+  // Agrupar registros por producto para mostrar el total que el empleado ingresó
+  const grupos = {};
+  registros.forEach((r, i) => {
+    const key = r.producto + '_' + r.grupoId;
+    if (!grupos[key]) grupos[key] = { producto: r.producto, pulpasTotal: r.pulpasGrupoTotal, indices: [] };
+    grupos[key].indices.push(i);
+  });
+
+  cont.innerHTML = Object.values(grupos).map(g => `
     <div class="registro-item">
       <span class="registro-icono">🧃</span>
       <div class="registro-info">
-        <div class="registro-nombre">${r.producto}</div>
-        <div class="registro-detalle">${r.totalPulpas || r.pulpas} pulpas · de ${r.cantidad} ${r.unidad} enviados · ${r.fecha}</div>
+        <div class="registro-nombre">${g.producto}</div>
+        <div class="registro-detalle">${g.pulpasTotal} pulpa(s) producida(s)</div>
       </div>
-      <button class="registro-eliminar" onclick="eliminarRegistro(${i})">✕</button>
+      <button class="registro-eliminar" onclick="eliminarGrupoRegistro(${JSON.stringify(g.indices)})">✕</button>
     </div>
   `).join('');
 }
 
 function eliminarRegistro(i) {
   registros.splice(i, 1);
+  renderizarLista();
+  const punto = document.getElementById('punto').value;
+  filtrarYMostrarLotes(punto);
+  validarEnviar();
+}
+
+function eliminarGrupoRegistro(indices) {
+  // Eliminar de mayor a menor para no alterar índices
+  indices.sort((a,b) => b - a).forEach(i => registros.splice(i, 1));
   renderizarLista();
   const punto = document.getElementById('punto').value;
   filtrarYMostrarLotes(punto);
