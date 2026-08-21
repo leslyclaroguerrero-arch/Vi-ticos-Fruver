@@ -462,15 +462,56 @@ function mRenderLista() {
 
 function mElim(i){ mReg.splice(i,1); mRenderLista(); document.getElementById('m-send').disabled=mReg.length===0; }
 
+async function fileToBase64(file) {
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = () => res(r.result.split(',')[1]);
+    r.onerror = rej;
+    r.readAsDataURL(file);
+  });
+}
+
+async function fileToBase64(file) {
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = () => res(r.result.split(',')[1]);
+    r.onerror = rej;
+    r.readAsDataURL(file);
+  });
+}
+
 async function mEnviar() {
   const ps=document.getElementById('m-pto'); const pnm=ps.options[ps.selectedIndex].text;
   const est=document.getElementById('m-est'); const btn=document.getElementById('m-send');
   btn.disabled=true; est.className='estado ca'; est.textContent='⏳ Enviando registros...';
-  const fd=new FormData();
-  fd.append('punto',pnm); fd.append('persona',document.getElementById('m-per').value); fd.append('totalRegistros',mReg.length);
-  mReg.forEach((r,i)=>{ fd.append(`prod_${i}_producto`,r.nm); fd.append(`prod_${i}_categoria`,r.cat); fd.append(`prod_${i}_cantidad`,r.cant); fd.append(`prod_${i}_unidad`,r.u); fd.append(`prod_${i}_destino`,r.dst); r.fts.forEach((f,j)=>fd.append(`prod_${i}_foto_${j}`,f)); });
+
+  // Convertir todas las fotos a base64
+  const regsConB64 = await Promise.all(mReg.map(async (r,i) => {
+    const fotosB64 = await Promise.all(r.fts.map(async f => ({
+      b64: await fileToBase64(f),
+      mime: f.type || 'image/jpeg',
+      nombre: f.name || 'foto.jpg'
+    })));
+    return {...r, fotosB64};
+  }));
+
+  const payload = {
+    punto: pnm,
+    persona: document.getElementById('m-per').value,
+    totalRegistros: mReg.length,
+    registros: regsConB64.map(r => ({
+      producto: r.nm, categoria: r.cat, cantidad: r.cant,
+      unidad: r.u, destino: r.dst, fotos: r.fotosB64
+    }))
+  };
+
   try {
-    await fetch(URL_AS,{method:'POST',body:fd,mode:'no-cors'});
+    await fetch(URL_AS, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: {'Content-Type': 'text/plain'},
+      body: JSON.stringify(payload)
+    });
     est.className='estado ex'; est.textContent=`✅ ${mReg.length} producto(s) registrado(s) correctamente`;
     mLimpTodo();
   } catch(e){ est.className='estado er'; est.textContent='❌ Error al enviar. Intenta de nuevo.'; btn.disabled=false; }
@@ -646,14 +687,21 @@ function pValEnv() {
 async function pEnviar() {
   const est=document.getElementById('p-est'), btn=document.getElementById('p-send');
   btn.disabled=true; est.className='estado ca'; est.textContent='⏳ Registrando pulpas...';
-  const fd=new FormData();
-  fd.append('action','registrarPulpa');
-  fd.append('persona',document.getElementById('p-per').value);
-  fd.append('punto',document.getElementById('p-pto').value);
-  fd.append('totalLotes',pReg.length);
-  pReg.forEach((r,i)=>{ fd.append(`lote_${i}_filaIndex`,r.fi); fd.append(`lote_${i}_producto`,r.nm); fd.append(`lote_${i}_pulpas`,r.pulpas); });
+
+  const payload = {
+    action: 'registrarPulpa',
+    persona: document.getElementById('p-per').value,
+    punto: document.getElementById('p-pto').value,
+    lotes: pReg.map(r => ({ filaIndex: r.fi, producto: r.nm, pulpas: r.pulpas }))
+  };
+
   try {
-    await fetch(URL_AS,{method:'POST',body:fd,mode:'no-cors'});
+    await fetch(URL_AS, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: {'Content-Type': 'text/plain'},
+      body: JSON.stringify(payload)
+    });
     const ng=new Set(pReg.map(r=>r.gKey)).size;
     est.className='estado ex'; est.textContent=`✅ ${ng} lote(s) registrado(s) correctamente`;
     document.getElementById('p-pto').value='';
