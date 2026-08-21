@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Control de Merma – Fruver</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+  :root {
+    --verde:#2D6A4F;--verde-claro:#52B788;--verde-suave:#D8F3DC;
+    --naranja:#E76F1E;--naranja-suave:#FEF5EE;--naranja-borde:#F4A96A;
+    --rojo:#C0392B;--gris-fondo:#F4F7F4;--gris-borde:#CBD5CB;
+    --texto:#1A2E1A;--texto-suave:#5A705A;--blanco:#FFFFFF;--radio:12px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Inter',sans-serif;background:var(--gris-fondo);color:var(--texto);min-height:100vh;}
+  .vista{display:none;padding-bottom:40px;}
+  .vista.activa{display:block;}
+
+  /* TOPBAR */
+  .topbar{color:white;padding:16px 16px 0;display:none;}
+  .topbar.tv{background:var(--verde);}
+  .topbar.tn{background:var(--naranja);}
+  .topbar-titulo{font-size:1rem;font-weight:700;text-align:center;padding-bottom:12px;}
+  .tabs{display:flex;}
+  .tab{flex:1;text-align:center;padding:10px 4px;font-size:0.78rem;font-weight:600;color:rgba(255,255,255,0.6);cursor:pointer;border-bottom:3px solid transparent;transition:all 0.15s;}
+  .tab.activo{color:white;border-bottom-color:white;}
+
+  /* INICIO */
+  .inicio-header{background:var(--verde);color:white;padding:44px 20px 36px;text-align:center;}
+  .inicio-header .logo{font-size:2.8rem;margin-bottom:12px;}
+  .inicio-header h1{font-size:1.3rem;font-weight:700;}
+  .inicio-header p{font-size:0.82rem;opacity:0.75;margin-top:6px;}
+  .inicio-cards{padding:24px 16px;display:flex;flex-direction:column;gap:14px;}
+  .ic{background:var(--blanco);border-radius:16px;padding:24px 20px;display:flex;align-items:center;gap:16px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.07);border:2px solid transparent;transition:all 0.15s;}
+  .ic:active{transform:scale(0.98);}
+  .ic.iv{border-color:var(--verde-claro);}
+  .ic.in{border-color:var(--naranja-borde);}
+  .ic .icono{font-size:2.4rem;flex-shrink:0;}
+  .ic .info{flex:1;}
+  .ic .titulo{font-size:1rem;font-weight:700;}
+  .ic .desc{font-size:0.78rem;color:var(--texto-suave);margin-top:4px;line-height:1.4;}
+  .ic .arrow{font-size:1.4rem;color:var(--gris-borde);}
+  .ic.iv .titulo{color:var(--verde);}
+  .ic.in .titulo{color:var(--naranja);}
+
+  /* CARD */
+  .card{background:var(--blanco);border-radius:var(--radio);margin:16px 16px 0;padding:20px;box-shadow:0 1px 4px rgba(0,0,0,0.07);}
+  label{display:block;font-size:0.78rem;font-weight:600;color:var(--texto-suave);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;}
+  select,input[type="text"],input[type="number"]{width:100%;padding:12px 14px;border:1.5px solid var(--gris-borde);border-radius:8px;font-size:0.95rem;font-family:inherit;color:var(--texto);background:var(--blanco);}
+  select{appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%235A705A' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:36px;}
+  select:focus,input:focus{outline:none;border-color:var(--verde-claro);box-shadow:0 0 0 3px rgba(82,183,136,0.15);}
+  .nf select:focus,.nf input:focus{border-color:var(--naranja-borde);box-shadow:0 0 0 3px rgba(231,111,30,0.12);}
+  select:disabled,input:disabled{background:#f0f0f0;color:#aaa;cursor:not-allowed;}
+  .field{margin-bottom:16px;}.field:last-child{margin-bottom:0;}
+  .hint{font-size:0.75rem;color:var(--texto-suave);margin-top:5px;}
+
+  /* BUSCADOR */
+  .bw{position:relative;}
+  .bw .ib{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:0.95rem;pointer-events:none;color:var(--texto-suave);}
+  .bw .ic2{position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:1rem;cursor:pointer;color:var(--gris-borde);background:none;border:none;padding:4px;display:none;}
+  .bw input{padding-left:34px;padding-right:34px;}
+  .ddl{position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--blanco);border:1.5px solid var(--verde-claro);border-radius:10px;box-shadow:0 4px 16px rgba(0,0,0,0.12);z-index:100;max-height:240px;overflow-y:auto;display:none;}
+  .ddl.visible{display:block;}
+  .ddg{padding:6px 12px 2px;font-size:0.68rem;font-weight:700;color:var(--verde);text-transform:uppercase;letter-spacing:0.08em;border-top:1px solid var(--gris-fondo);}
+  .ddg:first-child{border-top:none;}
+  .ddi{padding:10px 14px;font-size:0.9rem;cursor:pointer;color:var(--texto);}
+  .ddi:hover{background:var(--verde-suave);color:var(--verde);font-weight:600;}
+  .ddi mark{background:transparent;color:var(--verde);font-weight:700;}
+  .ddv{padding:14px;font-size:0.85rem;color:var(--texto-suave);text-align:center;}
+  .chip{display:flex;align-items:center;gap:8px;background:var(--verde-suave);border:1.5px solid var(--verde-claro);border-radius:8px;padding:10px 12px;margin-top:6px;}
+  .chip span{font-size:0.9rem;font-weight:600;color:var(--verde);flex:1;}
+  .chip small{font-size:0.75rem;color:var(--texto-suave);}
+  .chip-x{background:none;border:none;cursor:pointer;color:var(--texto-suave);font-size:1rem;padding:2px 4px;}
+
+  /* DESTINO */
+  .dg{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .db{border:2px solid var(--gris-borde);border-radius:10px;padding:14px 10px;text-align:center;cursor:pointer;background:var(--blanco);transition:all 0.15s;user-select:none;}
+  .db .di{font-size:1.6rem;display:block;margin-bottom:4px;}
+  .db .de{font-size:0.82rem;font-weight:600;color:var(--texto-suave);}
+  .db.ab{border-color:var(--rojo);background:#FEF0EF;}.db.ab .de{color:var(--rojo);}
+  .db.ap{border-color:var(--naranja);background:var(--naranja-suave);}.db.ap .de{color:var(--naranja);}
+
+  /* FOTO */
+  .fa{border:2px dashed var(--gris-borde);border-radius:10px;padding:20px 16px;text-align:center;cursor:pointer;position:relative;}
+  .fa input[type="file"]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+  .fa .fi{font-size:1.8rem;display:block;margin-bottom:4px;}
+  .fa p{font-size:0.82rem;color:var(--texto-suave);}
+  .fa p strong{color:var(--verde);}
+
+  /* BOTONES */
+  .btn-add{width:100%;padding:13px;background:transparent;border-radius:var(--radio);font-size:0.95rem;font-weight:700;font-family:inherit;cursor:pointer;transition:all 0.15s;margin-top:4px;}
+  .btn-add.v{color:var(--verde);border:2px solid var(--verde);}.btn-add.v:hover{background:var(--verde-suave);}
+  .btn-add.n{color:var(--naranja);border:2px solid var(--naranja);}.btn-add.n:hover{background:var(--naranja-suave);}
+  .btn-add:disabled{border-color:var(--gris-borde)!important;color:var(--gris-borde)!important;cursor:not-allowed;background:transparent!important;}
+  .btn-sub{width:calc(100% - 32px);margin:20px 16px 0;padding:16px;color:white;border:none;border-radius:var(--radio);font-size:1rem;font-weight:700;font-family:inherit;cursor:pointer;transition:background 0.15s;}
+  .btn-sub.v{background:var(--verde);}.btn-sub.v:hover{background:#235C40;}
+  .btn-sub.n{background:var(--naranja);}.btn-sub.n:hover{background:#C85A10;}
+  .btn-sub:disabled{background:var(--gris-borde)!important;cursor:not-allowed;}
+  .btn-rel{display:block;margin:10px auto 0;background:none;border:none;color:var(--naranja);font-size:0.82rem;font-weight:600;font-family:inherit;cursor:pointer;text-decoration:underline;}
+
+  /* LISTAS */
+  .st{font-size:0.78rem;font-weight:700;color:var(--texto-suave);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:12px;}
+  .badge{display:inline-block;color:white;font-size:0.72rem;font-weight:700;border-radius:20px;padding:2px 8px;margin-left:6px;vertical-align:middle;}
+  .badge.v{background:var(--verde);}.badge.n{background:var(--naranja);}
+  .rv{text-align:center;color:var(--gris-borde);font-size:0.85rem;padding:12px 0;}
+  .ri{background:var(--gris-fondo);border:1.5px solid var(--gris-borde);border-radius:10px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:flex-start;gap:10px;}
+  .ri-ic{font-size:1.3rem;flex-shrink:0;}
+  .ri-info{flex:1;}
+  .ri-nm{font-weight:700;font-size:0.9rem;}
+  .ri-dt{font-size:0.78rem;color:var(--texto-suave);margin-top:2px;}
+  .ri-ft{font-size:0.75rem;color:var(--verde);margin-top:2px;}
+  .ri-x{background:none;border:none;color:var(--rojo);font-size:1rem;cursor:pointer;padding:4px;flex-shrink:0;}
+
+  /* LOTES PULPAS */
+  .lc{border:2px solid var(--gris-borde);border-radius:10px;padding:12px 14px;cursor:pointer;transition:all 0.15s;background:var(--blanco);display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+  .lc:hover{border-color:var(--naranja-borde);background:var(--naranja-suave);}
+  .lc.ls{border-color:var(--naranja);background:var(--naranja-suave);}
+  .lc.la{border-color:var(--verde-claro);background:#F0FAF4;opacity:0.6;cursor:not-allowed;}
+  .lck{width:22px;height:22px;border:2px solid var(--gris-borde);border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:0.75rem;}
+  .lc.ls .lck{background:var(--naranja);border-color:var(--naranja);color:white;}
+  .lc.la .lck{background:var(--verde-claro);border-color:var(--verde-claro);color:white;}
+  .lci{flex:1;}
+  .lcp{font-weight:700;font-size:0.9rem;}
+  .lcd{font-size:0.76rem;color:var(--texto-suave);margin-top:2px;}
+  .lcu{font-size:0.72rem;font-weight:600;color:var(--naranja);margin-top:2px;}
+  .sl{text-align:center;padding:20px 16px;color:var(--texto-suave);font-size:0.85rem;}
+  .sl .si{font-size:1.8rem;display:block;margin-bottom:6px;}
+  .cl{text-align:center;padding:24px 0;color:var(--texto-suave);font-size:0.88rem;}
+  .sp{display:inline-block;animation:spin 1s linear infinite;}
+  @keyframes spin{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
+  .lcr{display:flex;align-items:center;gap:10px;background:var(--naranja-suave);border:1.5px solid var(--naranja-borde);border-radius:10px;padding:12px 14px;margin-bottom:8px;}
+  .lcr .li{flex:1;}
+  .lcr .ln{font-weight:700;font-size:0.88rem;}
+  .lcr .ld{font-size:0.74rem;color:var(--texto-suave);margin-top:2px;}
+  .lcr input[type="number"]{width:90px;padding:8px 10px;font-size:0.9rem;flex-shrink:0;}
+  .lcr .lx{background:none;border:none;color:var(--rojo);font-size:1.1rem;cursor:pointer;padding:4px;flex-shrink:0;}
+
+  /* ESTADO */
+  .estado{margin:14px 16px 0;padding:14px 16px;border-radius:10px;font-size:0.88rem;font-weight:500;display:none;}
+  .estado.ex{background:var(--verde-suave);color:var(--verde);display:block;}
+  .estado.er{background:#FDEAEA;color:var(--rojo);display:block;}
+  .estado.ca{background:#EEF4FF;color:#2563EB;display:block;}
+  .ts{font-size:0.75rem;color:var(--texto-suave);text-align:center;margin-top:12px;padding:0 16px;}
+</style>
+</head>
+<body>
+
+<!-- VISTA INICIO -->
+<div class="vista activa" id="vi">
+  <div class="inicio-header">
+    <div class="logo">🥬</div>
+    <h1>Control de Merma</h1>
+    <p>Fruver — Selecciona el tipo de registro</p>
+  </div>
+  <div class="inicio-cards">
+    <div class="ic iv" onclick="irA('m')">
+      <div class="icono">🗑️</div>
+      <div class="info">
+        <div class="titulo">Registro de Merma</div>
+        <div class="desc">Registra productos dañados o que van para transformación en pulpa</div>
+      </div>
+      <div class="arrow">›</div>
+    </div>
+    <div class="ic in" onclick="irA('p')">
+      <div class="icono">🧃</div>
+      <div class="info">
+        <div class="titulo">Registro de Pulpas</div>
+        <div class="desc">Registra las pulpas producidas a partir de los lotes enviados</div>
+      </div>
+      <div class="arrow">›</div>
+    </div>
+  </div>
+</div>
+
+<!-- TOPBAR -->
+<div class="topbar" id="topbar">
+  <div class="topbar-titulo" id="tb-titulo"></div>
+  <div class="tabs">
+    <div class="tab" id="tab-i" onclick="irA('i')">🏠 Inicio</div>
+    <div class="tab" id="tab-m" onclick="irA('m')">🗑️ Merma</div>
+    <div class="tab" id="tab-p" onclick="irA('p')">🧃 Pulpas</div>
+  </div>
+</div>
+
+<!-- VISTA MERMA -->
+<div class="vista" id="vm">
+  <div class="card">
+    <div class="field">
+      <label>Punto de venta</label>
+      <select id="m-pto" onchange="mPunto()">
+        <option value="">— Selecciona el punto —</option>
+        <option value="GF">Gran Frutiver San Francisco</option>
+        <option value="TZ70">Todozuyo La 70</option>
+        <option value="TZCO">Todozuyo El Concor</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>¿Quién registra?</label>
+      <select id="m-per" disabled onchange="mVal()">
+        <option value="">— Primero selecciona el punto —</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="card">
+    <p class="st">Agregar producto a la lista</p>
+    <div class="field">
+      <label>Producto</label>
+      <div class="bw" id="m-bw">
+        <span class="ib">🔍</span>
+        <input type="text" id="m-inp" placeholder="Escribe para buscar…" autocomplete="off" disabled oninput="mFilt()" onfocus="mFilt()" />
+        <button class="ic2" id="m-clr" onclick="mLimpProd()">✕</button>
+        <div class="ddl" id="m-ddl"></div>
+      </div>
+      <div class="chip" id="m-chip" style="display:none">
+        <span id="m-cnm"></span><small id="m-ccat"></small>
+        <button class="chip-x" onclick="mLimpProd()">✕</button>
+      </div>
+    </div>
+    <div class="field">
+      <label>Cantidad</label>
+      <input type="text" id="m-cant" placeholder="—" inputmode="decimal" disabled />
+      <div class="hint" id="m-hnt"></div>
+    </div>
+    <div class="field">
+      <label>¿Qué pasa con este producto?</label>
+      <div class="dg">
+        <div class="db" id="m-dbb" onclick="mDest('b')"><span class="di">🗑️</span><span class="de">Se botó</span></div>
+        <div class="db" id="m-dbp" onclick="mDest('p')"><span class="di">🧃</span><span class="de">Va para pulpa</span></div>
+      </div>
+    </div>
+    <div class="field">
+      <label>Evidencia (opcional)</label>
+      <div class="fa">
+        <input type="file" id="m-fts" accept="image/*" multiple onchange="mFoto(event)" />
+        <span class="fi">📷</span><p><strong>Toca para foto</strong> o galería</p>
+      </div>
+      <div class="hint" id="m-fhnt"></div>
+    </div>
+    <button class="btn-add v" id="m-badd" onclick="mAgregar()" disabled>+ Agregar a la lista</button>
+  </div>
+
+  <div class="card">
+    <p class="st">Productos registrados <span class="badge v" id="m-cnt">0</span></p>
+    <div id="m-lista"><p class="rv">Aún no has agregado productos</p></div>
+  </div>
+
+  <button class="btn-sub v" id="m-send" onclick="mEnviar()" disabled>Enviar registro</button>
+  <div class="estado" id="m-est"></div>
+  <p class="ts">La fecha y hora se registran automáticamente ✓</p>
+</div>
+
+<!-- VISTA PULPAS -->
+<div class="vista nf" id="vp">
+  <div class="card">
+    <div class="field">
+      <label>Punto de venta</label>
+      <select id="p-pto" onchange="pPunto()">
+        <option value="">— Selecciona el punto —</option>
+        <option value="Gran Frutiver San Francisco">Gran Frutiver San Francisco</option>
+        <option value="Todozuyo La 70">Todozuyo La 70</option>
+        <option value="Todozuyo El Concor">Todozuyo El Concor</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>¿Quién registra?</label>
+      <select id="p-per" disabled onchange="pValEnv()">
+        <option value="">— Primero selecciona el punto —</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="card">
+    <p class="st">Lotes pendientes <span class="badge n" id="p-blotes">0</span></p>
+    <div id="p-bsl" style="display:none;margin-bottom:12px;position:relative;">
+      <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);pointer-events:none;">🔍</span>
+      <input type="text" id="p-bq" placeholder="Buscar por producto…" oninput="pBuscar()"
+        style="width:100%;padding:10px 12px 10px 34px;border:1.5px solid var(--gris-borde);border-radius:8px;font-size:0.88rem;font-family:inherit;" />
+    </div>
+    <div id="p-lotes"><div class="sl"><span class="si">📍</span>Selecciona el punto para ver los lotes</div></div>
+    <button class="btn-rel" onclick="pCargar()">↺ Actualizar lista</button>
+  </div>
+
+  <div class="card" id="p-csel" style="display:none">
+    <p class="st">Ingresar pulpas por lote</p>
+    <div id="p-lcant"></div>
+    <button class="btn-add n" id="p-badd" onclick="pAgregar()" disabled>+ Agregar a la lista</button>
+  </div>
+
+  <div class="card">
+    <p class="st">Lotes a registrar <span class="badge v" id="p-breg">0</span></p>
+    <div id="p-lista"><p class="rv">Aún no has agregado lotes</p></div>
+  </div>
+
+  <button class="btn-sub n" id="p-send" onclick="pEnviar()" disabled>Enviar registro de pulpas</button>
+  <div class="estado" id="p-est"></div>
+  <p class="ts">La fecha y hora se registran automáticamente ✓</p>
+</div>
+<script>
+const URL_AS = "https://script.google.com/macros/s/AKfycbwy8AKztFN-2LorAtjnowZmu0tR2p7tSEavhSs15APb0PITrnCvyjP2cMzUlRuS56dU/exec";
+
+// ── NAVEGACIÓN ────────────────────────────────────────────────────────────
+function irA(v) {
+  document.querySelectorAll('.vista').forEach(x => x.classList.remove('activa'));
+  const tb = document.getElementById('topbar');
+  ['i','m','p'].forEach(t => document.getElementById('tab-'+t).classList.remove('activo'));
+  if (v === 'i') { document.getElementById('vi').classList.add('activa'); tb.style.display='none'; return; }
+  tb.style.display = 'block';
+  if (v === 'm') {
+    tb.className='topbar tv'; document.getElementById('tb-titulo').textContent='🗑️ Registro de Merma';
+    document.getElementById('tab-m').classList.add('activo');
+    document.getElementById('vm').classList.add('activa');
+  } else {
+    tb.className='topbar tn'; document.getElementById('tb-titulo').textContent='🧃 Registro de Pulpas';
+    document.getElementById('tab-p').classList.add('activo');
+    document.getElementById('vp').classList.add('activa');
+    pCargar();
+  }
+  window.scrollTo(0,0);
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// MERMA
+// ══════════════════════════════════════════════════════════════════════════
+const MP = {
+  GF:{
+    "HORTALIZAS":["ACELGA","BERENJENA","BROCOLI","CALABACIN","CHAMPIÑONES","CILANTRO","COLIFLOR","ESPINACA","GUASCA","LECHUGA BATAVIA","LECHUGA CRESPA","P. GUINEO","PEREJIL","PUERROS","RABANO","RAICES CHINAS","RAMA DE APIO","SABILA","YOTA","ZUKINI"],
+    "VERDURAS":["AHUYAMA","AHUYAMIN","AJO CHILENO","ARVEJA","ARRACACHA","CEBOLLA BLANCA","CEBOLLA LARGA","CEBOLLA ROJA","FRIJOL","HABICHUELA","MAZORCA","PAPA CRIOLLA","PAPA PASTUSA","PAPA LAVADA","PEPINO COHOMBRO","PIMENTON","PLATANO MADURO","PLATANO VERDE","REMOLACHA","REPOLLO BLANCO","REPOLLO MORADO","TOMATE CHONTO","YUCA","ZANAHORIA"],
+    "FRUTAS":["AGUACATE HASS","AGUACATE PAPELILLO","BANANO BOCADILLO","BANANO CRIOLLO","BANANO URABA","BOROJO","CIRUELA BANDEJA","COCO","CURUBA","DURAZNO","FRESA BANDEJA","GUANABANA","GUAYABA","KIWI","LIMON CRIOLLO","LIMON MANDARINO","LIMON TAHITI","LULO","MANDARINA","MANGO AZUCAR","MANGO TOMMY","MARACUYA","MELON","MORA","NARANJA TANGELO","NARANJA VALENCIANA","PAPAYA","PATILLA","PATILLA BABY","PERA NACIONAL","PIÑA COMUN","PIÑA ORO MIEL","TAMARINDO PEPA","TAMARINDO PULPA","TOMATE DE ARBOL","UCHUVA","ZAPOTE"],
+    "IMPORTADOS":["AGRAZ","ARANDANOS","BANDEJA FREIJOA","BANDEJA MANZ G","BANDEJA MANZ V","GRANADILLA","JENGIBRE","MANZANA GALA","MANZANA ROJA","MANZANA VERDE","MIEL PEQUE","PERA CHILENA","PITALLA","UVA CHILENA","UVA ISABELLA","UVA REGLO","UVA VERDE"]
+  },
+  TZ70:{
+    "VERDURAS":["AHUYAMA","AHUYAMIN","AJI TOPITO","AJO CAJA","APIO EN RAMA","ARRACACHA","BATATA","BERENJENA","BROCOLI","CALABAZA","CEBOLLA BLANCA","CEBOLLA LARGA","CEBOLLA ROJA","CILANTRO","COLIFLOR","COROZO","ESPINACA","GUINEO MADURO","GUINEO VERDE","HABICHUELA CORTA","HABICHUELA LARGA","LECHUGA BATAVIA","LECHUGA RISADA","LECHUGA ROMANA","MAZORCA","ÑAME","PAPA CRIOLLA","PAPA LAVADA","PAPA SUCIA","PAPAYA","PEPINO","PEREJIL CHURCO","PIM. AMARILLO","PIM. ROJO","PIM. VERDE","PLAT. AMARILLO","PLAT. VERDE","PLATANO MALLA","PUERRO","RABANO","REMOLACHA","REPOLLO MORADO","REPOLLO VERDE","TOMATE CHERRY","TOMATE COCINA","YUCA","ZANAHORIA","ZUKINI AMARILLO","ZUKINI VERDE"],
+    "FRUTAS":["AGRAS","AGUACATE PAPELILLO","ARANDANOS","BANANO CRIOLLO","BANANO URABA","BOROJO","CAÑANDONGA","CIRUELA","COCO","CURUBA","DURAZNO","FRESA ESPECIAL","FRESA MEDIANA","FRESA PEQUEÑA","GRANADILLA","GUAYABA","KIWI","LIMON CRIOLLO","LIMON MANDARINO","LIMON TAHITI","LULO","MAN. ROJA","MAN. VERDE","MANDARINA","MANGO AZUCAR","MANGO TOMMY","MARACUYA","MELON","MORA","NARANJA TANGELO","NARANJA VALENCIANA","NISPERO","PAPAYA","PATILLA","PATILLA BABY","PERA","PIÑA COMUN","PIÑA ORO MIEL","PITAYA","PITAYA ROSADA","POMELO","SABILA","TAMARINDO PEPA","TAMARINDO PULPA","TOMATE DE ARBOL","UCHUVAS","UVA ISABELLA","UVA ROJA","UVA VERDE","ZAPOTE"]
+  }
+};
+MP.TZCO = MP.TZ70;
+const MU = {
+  GF: new Set(["CHAMPIÑONES","RAICES CHINAS","FRESA BANDEJA","UVA ISABELLA","MANZANA GALA","MANZANA ROJA","MANZANA VERDE","BANDEJA MANZ G","BANDEJA MANZ V","PERA CHILENA","GRANADILLA","JENGIBRE","ARANDANOS","UCHUVA","BANDEJA FREIJOA","CIRUELA BANDEJA"]),
+  TZ70: new Set(["PLAT. AMARILLO","PLAT. VERDE","PLATANO MALLA"]),
+  TZCO: new Set(["PLAT. AMARILLO","PLAT. VERDE","PLATANO MALLA"])
+};
+const MPER = { GF:["Silvia","Jesús","Maicol"], TZ70:["Mathew","Antonio"], TZCO:["Alex","Alfonso","Yeiner"] };
+
+let mPS=null, mDst=null, mFts=[], mReg=[];
+
+function mPunto() {
+  mLimpProd();
+  const c=document.getElementById('m-cant'); c.value=''; c.disabled=true;
+  document.getElementById('m-hnt').textContent='';
+  document.getElementById('m-fts').value=''; document.getElementById('m-fhnt').textContent='';
+  mFts=[]; mDst=null;
+  document.getElementById('m-dbb').className='db'; document.getElementById('m-dbp').className='db';
+  const pto=document.getElementById('m-pto').value;
+  const sp=document.getElementById('m-per');
+  sp.innerHTML='<option value="">— Selecciona quién registra —</option>';
+  if(pto && MPER[pto]){ MPER[pto].forEach(p=>{const o=document.createElement('option');o.value=p;o.textContent=p;sp.appendChild(o);}); sp.disabled=false; }
+  else sp.disabled=true;
+  document.getElementById('m-inp').disabled=!pto;
+  mVal();
+}
+
+function mFilt() {
+  const pto=document.getElementById('m-pto').value; if(!pto||mPS) return;
+  const q=document.getElementById('m-inp').value.trim().toLowerCase();
+  const dl=document.getElementById('m-ddl');
+  document.getElementById('m-clr').style.display=q?'block':'none';
+  const cats=MP[pto]; let html='',tot=0;
+  Object.entries(cats).forEach(([cat,prods])=>{
+    const f=q?prods.filter(p=>p.toLowerCase().includes(q)):prods;
+    if(!f.length) return; tot+=f.length;
+    html+=`<div class="ddg">${cat}</div>`;
+    f.forEach(p=>{
+      const r=q?p.replace(new RegExp(`(${q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')})`, 'gi'),'<mark>$1</mark>'):p;
+      html+=`<div class="ddi" onclick="mSelProd('${p}','${cat}')">${r}</div>`;
+    });
+  });
+  dl.innerHTML=tot?html:`<div class="ddv">Sin resultados para "${q}"</div>`;
+  dl.classList.add('visible');
+}
+
+function mSelProd(nm,cat) {
+  const pto=document.getElementById('m-pto').value;
+  const eu=MU[pto]?.has(nm);
+  mPS={nm,cat,u:eu?'und':'kg'};
+  document.getElementById('m-inp').style.display='none';
+  document.getElementById('m-clr').style.display='none';
+  document.getElementById('m-ddl').classList.remove('visible');
+  document.getElementById('m-cnm').textContent=nm;
+  document.getElementById('m-ccat').textContent=cat;
+  document.getElementById('m-chip').style.display='flex';
+  const c=document.getElementById('m-cant'); c.disabled=false; c.value='';
+  c.placeholder=eu?'Ej: 3':'Ej: 1.5';
+  document.getElementById('m-hnt').textContent=eu?'Cantidad en unidades (ej: 3 unidades)':'Peso en kilos (ej: 1.5 kg)';
+  mVal();
+}
+
+function mLimpProd() {
+  mPS=null;
+  const i=document.getElementById('m-inp'); i.value=''; i.style.display='block';
+  document.getElementById('m-clr').style.display='none';
+  document.getElementById('m-ddl').classList.remove('visible');
+  document.getElementById('m-chip').style.display='none';
+  const c=document.getElementById('m-cant'); c.disabled=true; c.value='';
+  document.getElementById('m-hnt').textContent='';
+  mVal();
+}
+
+document.addEventListener('click',e=>{ if(!document.getElementById('m-bw').contains(e.target)) document.getElementById('m-ddl').classList.remove('visible'); });
+
+function mDest(v) {
+  mDst=v;
+  document.getElementById('m-dbb').className='db'+(v==='b'?' ab':'');
+  document.getElementById('m-dbp').className='db'+(v==='p'?' ap':'');
+  mVal();
+}
+
+function mFoto(e) {
+  mFts=Array.from(e.target.files);
+  document.getElementById('m-fhnt').textContent=mFts.length?`📎 ${mFts.length} foto(s) seleccionada(s)`:'';
+}
+
+function mVal() {
+  const ok=document.getElementById('m-pto').value && document.getElementById('m-per').value && mPS && document.getElementById('m-cant').value.trim() && mDst;
+  document.getElementById('m-badd').disabled=!ok;
+}
+document.getElementById('m-cant').addEventListener('input',mVal);
+document.getElementById('m-per').addEventListener('change',mVal);
+
+function mAgregar() {
+  const cant=document.getElementById('m-cant').value.trim();
+  mReg.push({nm:mPS.nm,cat:mPS.cat,u:mPS.u,cant,dst:mDst==='b'?'Se botó':'Va para pulpa',fts:[...mFts]});
+  mRenderLista();
+  mLimpProd();
+  const c=document.getElementById('m-cant'); c.value=''; c.disabled=true;
+  document.getElementById('m-hnt').textContent='';
+  document.getElementById('m-fts').value=''; document.getElementById('m-fhnt').textContent='';
+  mFts=[]; mDst=null;
+  document.getElementById('m-dbb').className='db'; document.getElementById('m-dbp').className='db';
+  document.getElementById('m-badd').disabled=true;
+  document.getElementById('m-send').disabled=false;
+  const pto=document.getElementById('m-pto').value;
+  document.getElementById('m-inp').disabled=!pto;
+}
+
+function mRenderLista() {
+  const c=document.getElementById('m-lista');
+  document.getElementById('m-cnt').textContent=mReg.length;
+  if(!mReg.length){c.innerHTML='<p class="rv">Aún no has agregado productos</p>';return;}
+  c.innerHTML=mReg.map((r,i)=>`
+    <div class="ri">
+      <span class="ri-ic">${r.dst==='Se botó'?'🗑️':'🧃'}</span>
+      <div class="ri-info">
+        <div class="ri-nm">${r.nm}</div>
+        <div class="ri-dt">${r.cant} ${r.u} · ${r.dst} · ${r.cat}</div>
+        ${r.fts.length?`<div class="ri-ft">📎 ${r.fts.length} foto(s)</div>`:''}
+      </div>
+      <button class="ri-x" onclick="mElim(${i})">✕</button>
+    </div>`).join('');
+}
+
+function mElim(i){ mReg.splice(i,1); mRenderLista(); document.getElementById('m-send').disabled=mReg.length===0; }
+
+async function mEnviar() {
+  const ps=document.getElementById('m-pto'); const pnm=ps.options[ps.selectedIndex].text;
+  const est=document.getElementById('m-est'); const btn=document.getElementById('m-send');
+  btn.disabled=true; est.className='estado ca'; est.textContent='⏳ Enviando registros...';
+  const fd=new FormData();
+  fd.append('punto',pnm); fd.append('persona',document.getElementById('m-per').value); fd.append('totalRegistros',mReg.length);
+  mReg.forEach((r,i)=>{ fd.append(`prod_${i}_producto`,r.nm); fd.append(`prod_${i}_categoria`,r.cat); fd.append(`prod_${i}_cantidad`,r.cant); fd.append(`prod_${i}_unidad`,r.u); fd.append(`prod_${i}_destino`,r.dst); r.fts.forEach((f,j)=>fd.append(`prod_${i}_foto_${j}`,f)); });
+  try {
+    await fetch(URL_AS,{method:'POST',body:fd,mode:'no-cors'});
+    est.className='estado ex'; est.textContent=`✅ ${mReg.length} producto(s) registrado(s) correctamente`;
+    mLimpTodo();
+  } catch(e){ est.className='estado er'; est.textContent='❌ Error al enviar. Intenta de nuevo.'; btn.disabled=false; }
+}
+
+function mLimpTodo() {
+  document.getElementById('m-pto').value='';
+  const sp=document.getElementById('m-per'); sp.innerHTML='<option value="">— Primero selecciona el punto —</option>'; sp.disabled=true;
+  mLimpProd(); document.getElementById('m-inp').disabled=true;
+  const c=document.getElementById('m-cant'); c.value=''; c.disabled=true;
+  document.getElementById('m-hnt').textContent=''; document.getElementById('m-fts').value=''; document.getElementById('m-fhnt').textContent='';
+  mFts=[]; mDst=null;
+  document.getElementById('m-dbb').className='db'; document.getElementById('m-dbp').className='db';
+  document.getElementById('m-badd').disabled=true; document.getElementById('m-send').disabled=true;
+  mReg=[]; mRenderLista();
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// PULPAS
+// ══════════════════════════════════════════════════════════════════════════
+const PPER = {
+  "Gran Frutiver San Francisco":["Silvia","Jesús","Maicol"],
+  "Todozuyo La 70":["Mathew","Antonio"],
+  "Todozuyo El Concor":["Alex","Alfonso","Yeiner"]
+};
+
+let pTL=[], pLV=[], pLS=new Set(), pReg=[];
+
+function pPunto() {
+  const pto=document.getElementById('p-pto').value;
+  const sp=document.getElementById('p-per');
+  sp.innerHTML='<option value="">— Selecciona quién registra —</option>';
+  pLS.clear(); pReg=[]; pRenderLista();
+  if(pto && PPER[pto]){ PPER[pto].forEach(p=>{const o=document.createElement('option');o.value=p;o.textContent=p;sp.appendChild(o);}); sp.disabled=false; }
+  else sp.disabled=true;
+  pFiltrar(pto); pValEnv();
+}
+
+async function pCargar() {
+  const c=document.getElementById('p-lotes');
+  document.getElementById('p-blotes').textContent='0';
+  c.innerHTML=`<div class="cl"><span class="sp">⏳</span> Cargando...</div>`;
+  try {
+    const r=await fetch(URL_AS+"?action=getLotesPendientes");
+    const d=await r.json();
+    pTL=d.lotes||[];
+    pFiltrar(document.getElementById('p-pto').value);
+  } catch(e){ c.innerHTML=`<div class="sl"><span class="si">❌</span>Error al cargar. Toca "Actualizar lista".</div>`; }
+}
+
+function pFiltrar(pto) {
+  const c=document.getElementById('p-lotes'), bsl=document.getElementById('p-bsl');
+  if(!pto){ pLV=[]; c.innerHTML=`<div class="sl"><span class="si">📍</span>Selecciona el punto para ver los lotes</div>`; document.getElementById('p-blotes').textContent='0'; document.getElementById('p-csel').style.display='none'; bsl.style.display='none'; return; }
+  const ya=new Set(pReg.map(r=>r.fi));
+  pLV=pTL.filter(l=>l.punto===pto);
+  pLS=new Set([...pLS].filter(i=>!ya.has(pLV[i]?.filaIndex)));
+  document.getElementById('p-blotes').textContent=pLV.filter(l=>!ya.has(l.filaIndex)).length;
+  if(!pLV.length){ c.innerHTML=`<div class="sl"><span class="si">✅</span>No hay lotes pendientes en este punto</div>`; document.getElementById('p-csel').style.display='none'; bsl.style.display='none'; return; }
+  bsl.style.display='block'; document.getElementById('p-bq').value='';
+  pRenderLotes(); pActPanel();
+}
+
+function pRenderLotes() {
+  const c=document.getElementById('p-lotes');
+  const ya=new Set(pReg.map(r=>r.fi));
+  const q=(document.getElementById('p-bq').value||'').toLowerCase();
+  const filt=pLV.map((l,i)=>({l,i})).filter(({l})=>!q||l.producto.toLowerCase().includes(q));
+  if(!filt.length){ c.innerHTML=`<div class="sl"><span class="si">🔍</span>Sin resultados</div>`; return; }
+  c.innerHTML=filt.map(({l,i})=>{
+    const ag=ya.has(l.filaIndex), sl=pLS.has(i);
+    return `<div class="lc ${ag?'la':sl?'ls':''}" id="plc-${i}" onclick="pToggle(${i})">
+      <div class="lck" id="pck-${i}">${ag||sl?'✓':''}</div>
+      <div class="lci">
+        <div class="lcp">🧃 ${l.producto}</div>
+        <div class="lcd">${l.cantidad} ${l.unidad} · ${l.fecha}</div>
+        <div class="lcu">Reportado por ${l.persona}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function pBuscar(){ pRenderLotes(); }
+
+function pToggle(i) {
+  const ya=new Set(pReg.map(r=>r.fi));
+  if(ya.has(pLV[i]?.filaIndex)) return;
+  pLS.has(i)?pLS.delete(i):pLS.add(i);
+  pRenderLotes(); pActPanel();
+}
+
+function pActPanel() {
+  const panel=document.getElementById('p-csel'), cont=document.getElementById('p-lcant');
+  if(!pLS.size){ panel.style.display='none'; document.getElementById('p-badd').disabled=true; return; }
+  panel.style.display='block';
+  const grupos={};
+  [...pLS].forEach(i=>{ const p=pLV[i].producto; if(!grupos[p]) grupos[p]=[]; grupos[p].push(i); });
+  cont.innerHTML=Object.entries(grupos).map(([prod,idxs])=>{
+    const tot=idxs.reduce((s,i)=>s+parseFloat(pLV[i].cantidad),0);
+    const u=pLV[idxs[0]].unidad;
+    const det=idxs.map(i=>`${pLV[i].cantidad} ${u} (${pLV[i].fecha})`).join(' + ');
+    const gid=prod.replace(/[^a-zA-Z0-9]/g,'_');
+    return `<div class="lcr">
+      <div class="li"><div class="ln">🧃 ${prod}</div><div class="ld">${det} = ${tot} ${u} total</div>
+      ${idxs.length>1?'<div class="ld" style="color:var(--naranja);margin-top:3px;">⚖️ Se distribuirá proporcionalmente</div>':''}
+      </div>
+      <input type="number" id="pp-${gid}" min="1" placeholder="Ej: 8" inputmode="numeric" oninput="pValAdd()" />
+      <button class="lx" onclick="pQGrupo('${prod}')">✕</button>
+    </div>`;
+  }).join('');
+  pValAdd();
+}
+
+function pQGrupo(prod) {
+  [...pLS].forEach(i=>{ if(pLV[i].producto===prod) pLS.delete(i); });
+  pRenderLotes(); pActPanel();
+}
+
+function pValAdd() {
+  const ins=document.querySelectorAll('[id^="pp-"]');
+  const ok=ins.length>0 && [...ins].every(i=>parseInt(i.value)>0);
+  document.getElementById('p-badd').disabled=!ok||!pLS.size;
+}
+
+function pDistrib(tot,cants) {
+  const s=cants.reduce((a,b)=>a+b,0);
+  let d=cants.map(c=>Math.round(tot*c/s));
+  const diff=tot-d.reduce((a,b)=>a+b,0);
+  if(diff) d[cants.indexOf(Math.max(...cants))]+=diff;
+  return d;
+}
+
+function pAgregar() {
+  const grupos={};
+  [...pLS].forEach(i=>{ const p=pLV[i].producto; if(!grupos[p]) grupos[p]=[]; grupos[p].push(i); });
+  Object.entries(grupos).forEach(([prod,idxs])=>{
+    const gid=prod.replace(/[^a-zA-Z0-9]/g,'_');
+    const inp=document.getElementById(`pp-${gid}`);
+    const tp=parseInt(inp.value);
+    const cants=idxs.map(i=>parseFloat(pLV[i].cantidad));
+    const dist=pDistrib(tp,cants);
+    const gKey=prod+'_'+Date.now();
+    idxs.forEach((idx,j)=>{ const l=pLV[idx]; pReg.push({fi:l.filaIndex,nm:l.producto,cant:l.cantidad,u:l.unidad,fecha:l.fecha,pulpas:dist[j],gKey,tp}); });
+  });
+  pLS.clear(); pRenderLista();
+  pFiltrar(document.getElementById('p-pto').value);
+  pValEnv();
+}
+
+function pRenderLista() {
+  const c=document.getElementById('p-lista');
+  document.getElementById('p-breg').textContent=pReg.length;
+  if(!pReg.length){ c.innerHTML='<p class="rv">Aún no has agregado lotes</p>'; return; }
+  const grupos={};
+  pReg.forEach((r,i)=>{ if(!grupos[r.gKey]) grupos[r.gKey]={nm:r.nm,tp:r.tp,idxs:[]}; grupos[r.gKey].idxs.push(i); });
+  c.innerHTML=Object.values(grupos).map(g=>`
+    <div class="ri">
+      <span class="ri-ic">🧃</span>
+      <div class="ri-info">
+        <div class="ri-nm">${g.nm}</div>
+        <div class="ri-dt">${g.tp} pulpa(s) producida(s)</div>
+      </div>
+      <button class="ri-x" onclick="pElimGrupo(${JSON.stringify(g.idxs)})">✕</button>
+    </div>`).join('');
+}
+
+function pElimGrupo(idxs){ idxs.sort((a,b)=>b-a).forEach(i=>pReg.splice(i,1)); pRenderLista(); pFiltrar(document.getElementById('p-pto').value); pValEnv(); }
+
+function pValEnv() {
+  const ok=document.getElementById('p-pto').value && document.getElementById('p-per').value && pReg.length>0;
+  document.getElementById('p-send').disabled=!ok;
+}
+
+async function pEnviar() {
+  const est=document.getElementById('p-est'), btn=document.getElementById('p-send');
+  btn.disabled=true; est.className='estado ca'; est.textContent='⏳ Registrando pulpas...';
+  const fd=new FormData();
+  fd.append('action','registrarPulpa');
+  fd.append('persona',document.getElementById('p-per').value);
+  fd.append('punto',document.getElementById('p-pto').value);
+  fd.append('totalLotes',pReg.length);
+  pReg.forEach((r,i)=>{ fd.append(`lote_${i}_filaIndex`,r.fi); fd.append(`lote_${i}_producto`,r.nm); fd.append(`lote_${i}_pulpas`,r.pulpas); });
+  try {
+    await fetch(URL_AS,{method:'POST',body:fd,mode:'no-cors'});
+    const ng=new Set(pReg.map(r=>r.gKey)).size;
+    est.className='estado ex'; est.textContent=`✅ ${ng} lote(s) registrado(s) correctamente`;
+    document.getElementById('p-pto').value='';
+    const sp=document.getElementById('p-per'); sp.innerHTML='<option value="">— Primero selecciona el punto —</option>'; sp.disabled=true;
+    pReg=[]; pLS.clear(); pRenderLista(); pFiltrar('');
+  } catch(e){ est.className='estado er'; est.textContent='❌ Error al enviar. Intenta de nuevo.'; btn.disabled=false; }
+}
+</script>
+</body>
+</html>
