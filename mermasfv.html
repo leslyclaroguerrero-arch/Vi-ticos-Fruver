@@ -784,25 +784,23 @@ async function pEnviar() {
     const fecha = new Date().toLocaleDateString('es-CO', {day:'2-digit', month:'2-digit', year:'numeric'});
     const grupos = {};
     pReg.forEach(r => {
-      if (!grupos[r.gKey]) grupos[r.gKey] = { nm: r.nm, tp: r.tp, tipo: r.tipo, kBotados: r.kBotados||0 };
+      if (!grupos[r.gKey]) grupos[r.gKey] = { nm: r.nm, tp: r.tp, tipo: r.tipo, kBotados: r.kBotados||0, danado: r.danado||false };
     });
-    let lineas = `🧃 *REGISTRO DE PULPAS*
-`;
-    lineas += `📍 *Punto:* ${punto}
-`;
-    lineas += `📅 *Fecha:* ${fecha}
-`;
-    lineas += `👤 *Registró:* ${persona}
-
-`;
-    lineas += `*Productos procesados:*
-`;
+    let lineas = `🧃 *REGISTRO DE PULPAS*\n`;
+    lineas += `📍 *Punto:* ${punto}\n`;
+    lineas += `📅 *Fecha:* ${fecha}\n`;
+    lineas += `👤 *Registró:* ${persona}\n\n`;
+    lineas += `*Productos procesados:*\n`;
     Object.values(grupos).forEach(g => {
-      lineas += `• ${g.producto}: *${g.pulpas} pulpa(s)*
-`;
+      if(g.danado){ lineas += `• ${g.nm}: ⚠️ *Se dañó todo — Sin producción*\n`; }
+      else {
+        const lbl = g.tipo==='malla'?'malla(s)/paquete(s)':'pulpa(s)';
+        lineas += `• ${g.nm}: *${g.tp} ${lbl}*`;
+        if(g.kBotados>0) lineas += ` (🗑️ ${g.kBotados} kg botados)`;
+        lineas += `\n`;
+      }
     });
-    lineas += `
-_Por favor agregar al sistema_ ✅`;
+    lineas += `\n_Por favor agregar al sistema_ ✅`;
 
     const waNumeros = {
       "Gran Frutiver San Francisco": "573112251654",
