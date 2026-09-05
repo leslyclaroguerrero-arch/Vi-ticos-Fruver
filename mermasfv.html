@@ -771,7 +771,13 @@ async function pEnviar() {
     lineas += `
 _Por favor agregar al sistema_ ✅`;
 
-    const waUrl = `https://wa.me/573112251654?text=${encodeURIComponent(lineas)}`;
+    const waNumeros = {
+      "Gran Frutiver San Francisco": "573112251654",
+      "Todozuyo El Concor":          "573207290829",
+      "Todozuyo La 70":              "573102748745"
+    };
+    const waNumero = waNumeros[punto] || "573112251654";
+    const waUrl = `https://wa.me/${waNumero}?text=${encodeURIComponent(lineas)}`;
     document.getElementById('p-wa-btn').href = waUrl;
     document.getElementById('p-wa-wrap').style.display = 'block';
 
