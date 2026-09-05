@@ -624,6 +624,15 @@ function pToggle(i) {
   const ya=new Set(pReg.map(r=>r.fi));
   if(ya.has(pLV[i]?.filaIndex)) return;
   pLS.has(i)?pLS.delete(i):pLS.add(i);
+
+  // Auto-seleccionar tipo según el primer lote seleccionado
+  if(pLS.size > 0) {
+    const primerIdx = [...pLS][0];
+    const destino = pLV[primerIdx]?.destino || '';
+    const tipo = destino === 'Va para malla' ? 'malla' : 'pulpa';
+    pSetTipo(tipo);
+  }
+
   pRenderLotes(); pActPanel();
 }
 
