@@ -150,6 +150,10 @@
   .trans-tab.activo-malla{border-color:var(--morado);background:var(--morado-suave);color:var(--morado);}
   .kilos-botados{background:#FEF0EF;border:1.5px solid #FECACA;border-radius:10px;padding:14px;margin-top:8px;}
   .kilos-botados label{color:var(--rojo);}
+  .danado-toggle{display:flex;align-items:center;gap:8px;margin-top:8px;cursor:pointer;user-select:none;}
+  .danado-toggle input[type="checkbox"]{width:16px;height:16px;accent-color:var(--rojo);cursor:pointer;}
+  .danado-toggle span{font-size:0.76rem;font-weight:600;color:var(--rojo);}
+  .lcr.danado-si{background:#FEF0EF;border-color:#FECACA;}
   .btn-wa{display:flex;align-items:center;justify-content:center;gap:10px;width:calc(100% - 32px);margin:12px 16px 0;padding:14px;background:#25D366;color:white;border:none;border-radius:var(--radio);font-size:0.95rem;font-weight:700;font-family:inherit;cursor:pointer;text-decoration:none;}
   .btn-wa:active{background:#1DAE56;}
 </style>
@@ -647,14 +651,35 @@ function pActPanel() {
     const u=pLV[idxs[0]].unidad;
     const det=idxs.map(i=>`${pLV[i].cantidad} ${u} (${pLV[i].fecha})`).join(' + ');
     const gid=prod.replace(/[^a-zA-Z0-9]/g,'_');
-    return `<div class="lcr">
-      <div class="li"><div class="ln">🧃 ${prod}</div><div class="ld">${det} = ${tot} ${u} total</div>
-      ${idxs.length>1?'<div class="ld" style="color:var(--naranja);margin-top:3px;">⚖️ Se distribuirá proporcionalmente</div>':''}
+    return `<div class="lcr" id="lcr-wrap-${gid}">
+      <div class="li">
+        <div class="ln">🧃 ${prod}</div>
+        <div class="ld">${det} = ${tot} ${u} total</div>
+        ${idxs.length>1?'<div class="ld" style="color:var(--naranja);margin-top:3px;">⚖️ Se distribuirá proporcionalmente</div>':''}
+        <label class="danado-toggle">
+          <input type="checkbox" id="chk-danado-${gid}" onchange="pToggleDanado('${gid}')" />
+          <span>🗑️ Se dañó todo antes de procesar</span>
+        </label>
       </div>
       <input type="number" id="pp-${gid}" min="1" placeholder="Ej: 8" inputmode="numeric" oninput="pValAdd()" />
       <button class="lx" onclick="pQGrupo('${prod}')">✕</button>
     </div>`;
   }).join('');
+  pValAdd();
+}
+
+function pToggleDanado(gid) {
+  const chk = document.getElementById(`chk-danado-${gid}`);
+  const inp = document.getElementById(`pp-${gid}`);
+  const wrap = document.getElementById(`lcr-wrap-${gid}`);
+  if (chk.checked) {
+    inp.disabled = true;
+    inp.value = '';
+    wrap.classList.add('danado-si');
+  } else {
+    inp.disabled = false;
+    wrap.classList.remove('danado-si');
+  }
   pValAdd();
 }
 
@@ -664,9 +689,14 @@ function pQGrupo(prod) {
 }
 
 function pValAdd() {
-  const ins=document.querySelectorAll('[id^="pp-"]');
-  const ok=ins.length>0 && [...ins].every(i=>parseInt(i.value)>0);
-  document.getElementById('p-badd').disabled=!ok||!pLS.size;
+  const ins = document.querySelectorAll('[id^="pp-"]');
+  if (!ins.length || !pLS.size) { document.getElementById('p-badd').disabled=true; return; }
+  const ok = [...ins].every(inp => {
+    const gid = inp.id.replace('pp-', '');
+    const chk = document.getElementById(`chk-danado-${gid}`);
+    return (chk && chk.checked) || parseInt(inp.value) > 0;
+  });
+  document.getElementById('p-badd').disabled = !ok;
 }
 
 function pDistrib(tot,cants) {
@@ -684,12 +714,15 @@ function pAgregar() {
   const kBotados = parseFloat(kbInput.value) || 0;
   Object.entries(grupos).forEach(([prod,idxs])=>{
     const gid=prod.replace(/[^a-zA-Z0-9]/g,'_');
+    const chk=document.getElementById(`chk-danado-${gid}`);
+    const danado = chk && chk.checked;
     const inp=document.getElementById(`pp-${gid}`);
-    const tp=parseInt(inp.value);
+    const tp = danado ? 0 : parseInt(inp.value);
+    const tipo = danado ? 'botado' : pTipoTrans;
     const cants=idxs.map(i=>parseFloat(pLV[i].cantidad));
-    const dist=pDistrib(tp,cants);
+    const dist = danado ? cants.map(()=>0) : pDistrib(tp,cants);
     const gKey=prod+'_'+Date.now();
-    idxs.forEach((idx,j)=>{ const l=pLV[idx]; pReg.push({fi:l.filaIndex,nm:l.producto,cant:l.cantidad,u:l.unidad,fecha:l.fecha,pulpas:dist[j],tipo:pTipoTrans,kBotados:j===0?kBotados:0,gKey,tp}); });
+    idxs.forEach((idx,j)=>{ const l=pLV[idx]; pReg.push({fi:l.filaIndex,nm:l.producto,cant:l.cantidad,u:l.unidad,fecha:l.fecha,pulpas:dist[j],tipo,kBotados:j===0?(danado?parseFloat(l.cant||l.cantidad)||0:kBotados):0,gKey,tp,danado}); });
   });
   kbInput.value='';
   pLS.clear(); pRenderLista();
@@ -702,7 +735,7 @@ function pRenderLista() {
   document.getElementById('p-breg').textContent=pReg.length;
   if(!pReg.length){ c.innerHTML='<p class="rv">Aún no has agregado lotes</p>'; return; }
   const grupos={};
-  pReg.forEach((r,i)=>{ if(!grupos[r.gKey]) grupos[r.gKey]={nm:r.nm,tp:r.tp,tipo:r.tipo,kBotados:r.kBotados||0,idxs:[]}; grupos[r.gKey].idxs.push(i); });
+  pReg.forEach((r,i)=>{ if(!grupos[r.gKey]) grupos[r.gKey]={nm:r.nm,tp:r.tp,tipo:r.tipo,kBotados:r.kBotados||0,danado:r.danado||false,idxs:[]}; grupos[r.gKey].idxs.push(i); });
   c.innerHTML=Object.values(grupos).map(g=>`
     <div class="ri">
       <span class="ri-ic">🧃</span>
