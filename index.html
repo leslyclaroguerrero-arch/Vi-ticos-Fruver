@@ -5,59 +5,163 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Planilla de Viáticos – Fruver Barranquilla</title>
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Segoe UI', Arial, sans-serif; background: #f5f7f2; color: #1a2a1a; min-height: 100vh; }
-  header { background: #1e4d2b; color: #fff; padding: 18px 20px 14px; display: flex; align-items: center; gap: 12px; }
-  header .logo { font-size: 28px; }
-  header h1 { font-size: 18px; font-weight: 700; line-height: 1.2; }
-  header p { font-size: 11px; opacity: .7; margin-top: 2px; }
-  .section { background: #fff; margin: 14px 14px 0; border-radius: 12px; padding: 16px; border: 1px solid #dde8da; }
-  .section-title { font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #1e4d2b; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #eef3ec; }
-  .field { margin-bottom: 12px; }
-  .field label { display: block; font-size: 12px; color: #556; margin-bottom: 4px; font-weight: 600; }
-  .field input, .field select, .field textarea { width: 100%; border: 1.5px solid #cdd8ca; border-radius: 8px; padding: 10px 12px; font-size: 15px; color: #1a2a1a; background: #f9fbf8; outline: none; transition: border-color .15s; font-family: inherit; }
-  .field input:focus, .field select:focus, .field textarea:focus { border-color: #1e4d2b; background: #fff; }
-  .field textarea { resize: vertical; min-height: 60px; }
-  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  .gasto-item { border: 1px solid #dde8da; border-radius: 10px; padding: 12px; margin-bottom: 8px; background: #f9fbf8; }
-  .gasto-item .gasto-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
-  .cat-tag { font-size: 12px; background: #e8f2e8; color: #1e4d2b; border-radius: 20px; padding: 2px 10px; font-weight: 600; }
-  .eliminar { background: none; border: none; color: #b55; font-size: 18px; cursor: pointer; padding: 0 4px; }
-  .gasto-desc { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
-  .gasto-monto { font-size: 18px; font-weight: 700; color: #b85c00; }
-  .evidencia-thumb { width: 100%; max-height: 130px; object-fit: cover; border-radius: 6px; margin-top: 8px; border: 1px solid #dde8da; }
-  .upload-status { font-size: 11px; margin-top: 5px; padding: 3px 10px; border-radius: 10px; display: inline-block; }
-  .status-pending { background: #fff8e1; color: #b85c00; }
-  .status-ok      { background: #e8f5e9; color: #1e7a3a; text-decoration: none; }
-  .status-error   { background: #fdecea; color: #c0392b; }
-  .add-gasto-form { border: 1.5px dashed #1e4d2b; border-radius: 10px; padding: 14px; background: #f0f7f0; margin-bottom: 10px; display: none; }
-  .add-gasto-form.visible { display: block; }
-  .cat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 10px; }
-  .cat-btn { border: 1.5px solid #cdd8ca; background: #fff; border-radius: 8px; padding: 7px 4px; font-size: 11px; cursor: pointer; text-align: center; color: #1a2a1a; transition: all .15s; line-height: 1.4; }
-  .cat-btn.active { border-color: #1e4d2b; background: #1e4d2b; color: #fff; }
-  .btn { display: block; width: 100%; padding: 13px; border: none; border-radius: 10px; font-size: 15px; font-weight: 700; cursor: pointer; font-family: inherit; transition: opacity .15s; }
-  .btn:active { opacity: .8; }
-  .btn:disabled { opacity: .6; cursor: not-allowed; }
-  .btn-green   { background: #1e4d2b; color: #fff; }
-  .btn-outline { background: #fff; color: #1e4d2b; border: 1.5px solid #1e4d2b; }
-  .btn-small   { padding: 9px 14px; font-size: 13px; width: auto; display: inline-block; }
-  #balance-box { margin: 14px 14px 0; border-radius: 12px; padding: 20px; border: 2px solid #1e4d2b; background: #fff; text-align: center; }
-  .balance-label { font-size: 12px; color: #556; text-transform: uppercase; letter-spacing: 1px; }
-  .balance-valor { font-size: 38px; font-weight: 800; margin: 4px 0 2px; line-height: 1; }
-  .balance-det   { font-size: 13px; color: #778; margin-top: 4px; }
-  .balance-pos  { color: #1e7a3a; }
-  .balance-neg  { color: #c0392b; }
-  .balance-zero { color: #888; }
-  .resumen-cats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 14px; }
-  .resumen-cat { background: #f5f7f2; border: 1px solid #dde8da; border-radius: 8px; padding: 8px 10px; font-size: 13px; }
-  .resumen-cat span { font-weight: 700; color: #b85c00; display: block; }
-  .acciones { padding: 14px; display: flex; flex-direction: column; gap: 10px; }
-  #progress-wrap { display: none; margin: 14px 14px 0; background: #fff; border: 1px solid #dde8da; border-radius: 10px; padding: 14px; }
-  #progress-wrap p { font-size: 13px; color: #556; margin-bottom: 8px; }
-  #progress-bar-bg { background: #eef3ec; border-radius: 20px; height: 10px; }
-  #progress-bar { background: #1e4d2b; height: 10px; border-radius: 20px; width: 0%; transition: width .4s; }
-  #toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #1e4d2b; color: #fff; padding: 12px 24px; border-radius: 30px; font-size: 14px; font-weight: 600; opacity: 0; transition: opacity .3s; pointer-events: none; z-index: 999; white-space: nowrap; box-shadow: 0 4px 16px rgba(0,0,0,.2); }
-  #toast.show { opacity: 1; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Segoe UI', Arial, sans-serif; background: #f5f7f2; color: #1a2a1a; min-height: 100vh; }
+
+/* ── HEADER ── */
+header { background: #1e4d2b; color: #fff; padding: 18px 20px 14px; display: flex; align-items: center; gap: 12px; }
+header .logo { font-size: 28px; }
+header h1 { font-size: 18px; font-weight: 700; line-height: 1.2; }
+header p  { font-size: 11px; opacity: .7; margin-top: 2px; }
+
+/* ── TABS ── */
+.tabs { display: flex; background: #163d22; }
+.tab-btn { flex: 1; padding: 12px 8px; border: none; background: transparent; color: rgba(255,255,255,.55);
+           font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit;
+           border-bottom: 3px solid transparent; transition: all .15s; letter-spacing: .3px; }
+.tab-btn.active { color: #fff; border-bottom-color: #6fcf8a; background: rgba(255,255,255,.06); }
+.tab-pane { display: none; }
+.tab-pane.active { display: block; }
+
+/* ── FORM ELEMENTS ── */
+.section { background: #fff; margin: 14px 14px 0; border-radius: 12px; padding: 16px; border: 1px solid #dde8da; }
+.section-title { font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;
+                 color: #1e4d2b; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #eef3ec; }
+.field { margin-bottom: 12px; }
+.field label { display: block; font-size: 12px; color: #556; margin-bottom: 4px; font-weight: 600; }
+.field input, .field select, .field textarea {
+  width: 100%; border: 1.5px solid #cdd8ca; border-radius: 8px; padding: 10px 12px;
+  font-size: 15px; color: #1a2a1a; background: #f9fbf8; outline: none; transition: border-color .15s; font-family: inherit; }
+.field input:focus, .field select:focus, .field textarea:focus { border-color: #1e4d2b; background: #fff; }
+.field textarea { resize: vertical; min-height: 60px; }
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+/* ── GASTO ITEMS ── */
+.gasto-item { border: 1px solid #dde8da; border-radius: 10px; padding: 12px; margin-bottom: 8px; background: #f9fbf8; }
+.gasto-item .gasto-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.cat-tag { font-size: 12px; background: #e8f2e8; color: #1e4d2b; border-radius: 20px; padding: 2px 10px; font-weight: 600; }
+.eliminar { background: none; border: none; color: #b55; font-size: 18px; cursor: pointer; padding: 0 4px; }
+.gasto-desc { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+.gasto-monto { font-size: 18px; font-weight: 700; color: #b85c00; }
+.evidencia-thumb { width: 100%; max-height: 130px; object-fit: cover; border-radius: 6px; margin-top: 8px; border: 1px solid #dde8da; }
+.upload-status { font-size: 11px; margin-top: 5px; padding: 3px 10px; border-radius: 10px; display: inline-block; }
+.status-pending { background: #fff8e1; color: #b85c00; }
+.status-ok      { background: #e8f5e9; color: #1e7a3a; text-decoration: none; }
+.status-error   { background: #fdecea; color: #c0392b; }
+
+/* ── ADD GASTO FORM ── */
+.add-gasto-form { border: 1.5px dashed #1e4d2b; border-radius: 10px; padding: 14px; background: #f0f7f0; margin-bottom: 10px; display: none; }
+.add-gasto-form.visible { display: block; }
+.cat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 10px; }
+.cat-btn { border: 1.5px solid #cdd8ca; background: #fff; border-radius: 8px; padding: 7px 4px;
+           font-size: 11px; cursor: pointer; text-align: center; color: #1a2a1a; transition: all .15s; line-height: 1.4; }
+.cat-btn.active { border-color: #1e4d2b; background: #1e4d2b; color: #fff; }
+
+/* ── BUTTONS ── */
+.btn { display: block; width: 100%; padding: 13px; border: none; border-radius: 10px;
+       font-size: 15px; font-weight: 700; cursor: pointer; font-family: inherit; transition: opacity .15s; }
+.btn:active { opacity: .8; }
+.btn:disabled { opacity: .6; cursor: not-allowed; }
+.btn-green   { background: #1e4d2b; color: #fff; }
+.btn-outline { background: #fff; color: #1e4d2b; border: 1.5px solid #1e4d2b; }
+.btn-small   { padding: 9px 14px; font-size: 13px; width: auto; display: inline-block; }
+.btn-danger  { background: #fff; color: #b55; border: 1.5px solid #b55; }
+
+/* ── BALANCE ── */
+#balance-box { margin: 14px 14px 0; border-radius: 12px; padding: 20px; border: 2px solid #1e4d2b; background: #fff; text-align: center; }
+.balance-label { font-size: 12px; color: #556; text-transform: uppercase; letter-spacing: 1px; }
+.balance-valor { font-size: 38px; font-weight: 800; margin: 4px 0 2px; line-height: 1; }
+.balance-det   { font-size: 13px; color: #778; margin-top: 4px; }
+.balance-pos  { color: #1e7a3a; }
+.balance-neg  { color: #c0392b; }
+.balance-zero { color: #888; }
+.resumen-cats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 14px; }
+.resumen-cat  { background: #f5f7f2; border: 1px solid #dde8da; border-radius: 8px; padding: 8px 10px; font-size: 13px; }
+.resumen-cat span { font-weight: 700; color: #b85c00; display: block; }
+
+/* ── ACCIONES ── */
+.acciones { padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+
+/* ── PROGRESS ── */
+#progress-wrap { display: none; margin: 14px 14px 0; background: #fff; border: 1px solid #dde8da; border-radius: 10px; padding: 14px; }
+#progress-wrap p { font-size: 13px; color: #556; margin-bottom: 8px; }
+#progress-bar-bg { background: #eef3ec; border-radius: 20px; height: 10px; }
+#progress-bar    { background: #1e4d2b; height: 10px; border-radius: 20px; width: 0%; transition: width .4s; }
+
+/* ── TOAST ── */
+#toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #1e4d2b;
+         color: #fff; padding: 12px 24px; border-radius: 30px; font-size: 14px; font-weight: 600;
+         opacity: 0; transition: opacity .3s; pointer-events: none; z-index: 999;
+         white-space: nowrap; box-shadow: 0 4px 16px rgba(0,0,0,.2); }
+#toast.show { opacity: 1; }
+
+/* ══════════════════════════════════
+   PESTAÑA 2 – HISTORIAL DEL CARRO
+   ══════════════════════════════════ */
+
+/* Selector de conductor */
+.conductor-selector { display: flex; flex-direction: column; gap: 8px; margin-bottom: 4px; }
+.conductor-card { border: 2px solid #dde8da; border-radius: 12px; padding: 14px 16px;
+                  background: #fff; cursor: pointer; display: flex; align-items: center;
+                  gap: 12px; transition: all .15s; }
+.conductor-card:hover { border-color: #1e4d2b; background: #f0f7f0; }
+.conductor-card.selected { border-color: #1e4d2b; background: #1e4d2b; color: #fff; }
+.conductor-card .avatar { width: 40px; height: 40px; border-radius: 50%; background: #e8f2e8;
+                           display: flex; align-items: center; justify-content: center;
+                           font-size: 18px; flex-shrink: 0; }
+.conductor-card.selected .avatar { background: rgba(255,255,255,.2); }
+.conductor-card .info { flex: 1; }
+.conductor-card .nombre { font-size: 15px; font-weight: 700; }
+.conductor-card .placa  { font-size: 12px; opacity: .6; margin-top: 1px; }
+.conductor-card.selected .placa { opacity: .75; }
+
+/* Viaje card en historial */
+.viaje-card { border: 1px solid #dde8da; border-radius: 10px; padding: 12px; margin-bottom: 8px; background: #fff; }
+.viaje-card-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
+.viaje-tipo { font-size: 11px; font-weight: 700; letter-spacing: .8px; padding: 3px 10px;
+              border-radius: 20px; text-transform: uppercase; }
+.tipo-domicilio  { background: #e3f2fd; color: #1565c0; }
+.tipo-batallon   { background: #e8f5e9; color: #1b5e20; }
+.tipo-fruver     { background: #fff3e0; color: #e65100; }
+.viaje-fecha   { font-size: 12px; color: #778; }
+.viaje-destino { font-size: 15px; font-weight: 700; margin: 4px 0 2px; }
+.viaje-origen  { font-size: 12px; color: #556; }
+.viaje-gastos  { font-size: 13px; color: #b85c00; font-weight: 600; margin-top: 4px; }
+.viaje-sin-gastos { font-size: 12px; color: #aaa; }
+.viaje-fuente  { font-size: 10px; background: #f0f0f0; color: #778; border-radius: 10px;
+                 padding: 1px 8px; display: inline-block; margin-top: 4px; }
+
+/* Filtros historial */
+.filtros { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+.filtro-btn { border: 1.5px solid #cdd8ca; background: #fff; border-radius: 20px; padding: 5px 14px;
+              font-size: 12px; font-weight: 600; cursor: pointer; color: #556; transition: all .15s; font-family: inherit; }
+.filtro-btn.active { border-color: #1e4d2b; background: #1e4d2b; color: #fff; }
+
+/* Resumen mensual */
+.resumen-mensual { background: #1e4d2b; color: #fff; border-radius: 12px; padding: 16px; margin-bottom: 14px; }
+.resumen-mensual h3 { font-size: 13px; opacity: .7; font-weight: 600; margin-bottom: 10px; letter-spacing: .5px; }
+.resumen-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.resumen-stat { text-align: center; }
+.resumen-stat .valor { font-size: 22px; font-weight: 800; line-height: 1; }
+.resumen-stat .etiq  { font-size: 10px; opacity: .65; margin-top: 2px; letter-spacing: .5px; text-transform: uppercase; }
+
+/* Formulario nuevo viaje */
+.tipo-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px; }
+.tipo-btn  { border: 2px solid #cdd8ca; background: #fff; border-radius: 10px; padding: 10px 6px;
+             font-size: 12px; font-weight: 700; cursor: pointer; text-align: center; transition: all .15s;
+             line-height: 1.5; font-family: inherit; }
+.tipo-btn.active { border-color: #1e4d2b; background: #1e4d2b; color: #fff; }
+
+/* Estado vacío */
+.empty-state { text-align: center; padding: 32px 16px; color: #aaa; }
+.empty-state .icon { font-size: 40px; margin-bottom: 8px; }
+.empty-state p { font-size: 14px; }
+
+/* Mes selector */
+.mes-selector { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.mes-selector select { flex: 1; border: 1.5px solid #cdd8ca; border-radius: 8px; padding: 8px 12px;
+                        font-size: 14px; background: #f9fbf8; font-family: inherit; color: #1a2a1a; outline: none; }
+.mes-selector select:focus { border-color: #1e4d2b; }
 </style>
 </head>
 <body>
@@ -67,74 +171,234 @@
 <header>
   <div class="logo">🥦</div>
   <div>
-    <h1>Planilla de Viáticos</h1>
-    <p>Fruver Barranquilla · Entregas al Batallón</p>
+    <h1>Fruver Barranquilla</h1>
+    <p>Gestión de viáticos y transporte · Entregas al Batallón</p>
   </div>
 </header>
 
-<div class="section">
-  <div class="section-title">Información del viaje</div>
-  <div class="row2">
-    <div class="field"><label>Fecha</label><input type="date" id="fecha"></div>
-    <div class="field"><label>Destino</label><input type="text" id="destino" value="Batallón" placeholder="Ej: Batallón No. 4"></div>
-  </div>
-  <div class="field"><label>Conductor</label><input type="text" id="conductor" placeholder="Nombre completo"></div>
-  <div class="field"><label>Encargada de entrega</label><input type="text" id="encargada" placeholder="Nombre completo"></div>
-  <div class="field"><label>Dinero entregado (COP $)</label><input type="text" id="presupuesto" value="0" inputmode="numeric" oninput="formatearCampo(this); actualizarBalance()"></div>
-  <div class="field"><label>Observaciones</label><textarea id="notas" placeholder="Notas del viaje (opcional)"></textarea></div>
+<div class="tabs">
+  <button class="tab-btn active" onclick="cambiarTab('viaticos')">📊 Viáticos</button>
+  <button class="tab-btn"       onclick="cambiarTab('historial')">🚐 Historial del carro</button>
 </div>
 
-<div class="section">
-  <div class="section-title">Gastos del viaje</div>
-  <div id="gastos-lista"></div>
-  <div class="add-gasto-form" id="form-gasto">
-    <div style="font-size:13px;font-weight:700;color:#1e4d2b;margin-bottom:10px;">Nuevo gasto</div>
-    <div class="cat-grid">
-      <button class="cat-btn active" data-cat="combustible" onclick="selCat(this)">⛽<br>Combustible</button>
-      <button class="cat-btn" data-cat="peaje"      onclick="selCat(this)">🛣️<br>Peaje/Pesaje</button>
-      <button class="cat-btn" data-cat="comida"     onclick="selCat(this)">🍱<br>Comida</button>
-      <button class="cat-btn" data-cat="viatico"    onclick="selCat(this)">💵<br>Viático</button>
-      <button class="cat-btn" data-cat="imprevisto" onclick="selCat(this)">⚠️<br>Imprevisto</button>
-      <button class="cat-btn" data-cat="otro"       onclick="selCat(this)">📋<br>Otro</button>
+<!-- ══════════════════════════════════════════════
+     PESTAÑA 1 – VIÁTICOS (original + conductor selector)
+     ══════════════════════════════════════════════ -->
+<div class="tab-pane active" id="tab-viaticos">
+
+  <div class="section">
+    <div class="section-title">Información del viaje</div>
+    <div class="row2">
+      <div class="field"><label>Fecha</label><input type="date" id="fecha"></div>
+      <div class="field"><label>Destino</label><input type="text" id="destino" value="Batallón" placeholder="Ej: Batallón No. 4"></div>
     </div>
-    <div class="field"><label>Descripción</label><input type="text" id="g-desc" placeholder="Ej: Gasolina Estación del Norte"></div>
-    <div class="field"><label>Monto (COP $)</label><input type="text" id="g-monto" placeholder="Ej: 80.000" inputmode="numeric" oninput="formatearCampo(this)"></div>
     <div class="field">
-      <label>Foto de factura o evidencia</label>
-      <input type="file" id="g-foto" accept="image/*" capture="environment"
-        style="font-size:13px;background:#fff;border:1.5px solid #cdd8ca;border-radius:8px;padding:8px 10px;">
+      <label>Conductor</label>
+      <select id="conductor">
+        <option value="">— Selecciona conductor —</option>
+        <option value="Jonathan Castro">Jonathan Castro</option>
+        <option value="Edwin Pérez Ardila">Edwin Pérez Ardila</option>
+        <option value="Juan Andrés">Juan Andrés</option>
+      </select>
     </div>
-    <div style="display:flex;gap:8px;margin-top:4px;">
-      <button class="btn btn-outline btn-small" onclick="cancelarGasto()">Cancelar</button>
-      <button class="btn btn-green btn-small" onclick="guardarGasto()" style="flex:1;">Guardar gasto ✓</button>
+    <div class="field"><label>Encargada de entrega</label><input type="text" id="encargada" placeholder="Nombre completo"></div>
+    <div class="field"><label>Dinero entregado (COP $)</label><input type="text" id="presupuesto" value="0" inputmode="numeric" oninput="formatearCampo(this); actualizarBalance()"></div>
+    <div class="field"><label>Observaciones</label><textarea id="notas" placeholder="Notas del viaje (opcional)"></textarea></div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Gastos del viaje</div>
+    <div id="gastos-lista"></div>
+    <div class="add-gasto-form" id="form-gasto">
+      <div style="font-size:13px;font-weight:700;color:#1e4d2b;margin-bottom:10px;">Nuevo gasto</div>
+      <div class="cat-grid">
+        <button class="cat-btn active" data-cat="combustible" onclick="selCat(this,'v')">⛽<br>Combustible</button>
+        <button class="cat-btn" data-cat="peaje"      onclick="selCat(this,'v')">🛣️<br>Peaje/Pesaje</button>
+        <button class="cat-btn" data-cat="comida"     onclick="selCat(this,'v')">🍱<br>Comida</button>
+        <button class="cat-btn" data-cat="viatico"    onclick="selCat(this,'v')">💵<br>Viático</button>
+        <button class="cat-btn" data-cat="imprevisto" onclick="selCat(this,'v')">⚠️<br>Imprevisto</button>
+        <button class="cat-btn" data-cat="otro"       onclick="selCat(this,'v')">📋<br>Otro</button>
+      </div>
+      <div class="field"><label>Descripción</label><input type="text" id="g-desc" placeholder="Ej: Gasolina Estación del Norte"></div>
+      <div class="field"><label>Monto (COP $)</label><input type="text" id="g-monto" placeholder="Ej: 80.000" inputmode="numeric" oninput="formatearCampo(this)"></div>
+      <div class="field">
+        <label>Foto de factura o evidencia</label>
+        <input type="file" id="g-foto" accept="image/*" capture="environment"
+          style="font-size:13px;background:#fff;border:1.5px solid #cdd8ca;border-radius:8px;padding:8px 10px;">
+      </div>
+      <div style="display:flex;gap:8px;margin-top:4px;">
+        <button class="btn btn-outline btn-small" onclick="cancelarGasto()">Cancelar</button>
+        <button class="btn btn-green btn-small" onclick="guardarGasto()" style="flex:1;">Guardar gasto ✓</button>
+      </div>
+    </div>
+    <button class="btn btn-outline" id="btn-agregar" onclick="mostrarForm()" style="margin-top:4px;">+ Agregar gasto</button>
+  </div>
+
+  <div id="balance-box">
+    <div class="balance-label">Balance del viaje</div>
+    <div class="balance-valor balance-zero" id="balance-valor">$ —</div>
+    <div class="balance-det" id="balance-det">Ingresa el dinero entregado y los gastos</div>
+    <div class="resumen-cats" id="resumen-cats" style="display:none;"></div>
+  </div>
+
+  <div id="progress-wrap">
+    <p id="progress-txt">Procesando…</p>
+    <div id="progress-bar-bg"><div id="progress-bar"></div></div>
+  </div>
+
+  <div class="acciones">
+    <button class="btn btn-green" id="btn-enviar" onclick="enviarRegistro()">📊 Enviar registro a Google Sheets</button>
+    <button class="btn btn-outline" onclick="window.print()">📄 Imprimir / Guardar PDF</button>
+    <button class="btn btn-danger"  onclick="limpiarTodo(false)">🗑 Limpiar planilla</button>
+  </div>
+  <div style="height:30px;"></div>
+</div><!-- /tab-viaticos -->
+
+
+<!-- ══════════════════════════════════════════════
+     PESTAÑA 2 – HISTORIAL DEL CARRO
+     ══════════════════════════════════════════════ -->
+<div class="tab-pane" id="tab-historial">
+
+  <!-- Selector de conductor -->
+  <div class="section">
+    <div class="section-title">Selecciona el conductor</div>
+    <div class="conductor-selector">
+      <div class="conductor-card" data-conductor="Jonathan Castro" onclick="seleccionarConductor(this)">
+        <div class="avatar">🚐</div>
+        <div class="info">
+          <div class="nombre">Jonathan Castro</div>
+          <div class="placa">Conductor</div>
+        </div>
+      </div>
+      <div class="conductor-card" data-conductor="Edwin Pérez Ardila" onclick="seleccionarConductor(this)">
+        <div class="avatar">🚐</div>
+        <div class="info">
+          <div class="nombre">Edwin Pérez Ardila</div>
+          <div class="placa">Conductor</div>
+        </div>
+      </div>
+      <div class="conductor-card" data-conductor="Juan Andrés" onclick="seleccionarConductor(this)">
+        <div class="avatar">🚐</div>
+        <div class="info">
+          <div class="nombre">Juan Andrés</div>
+          <div class="placa">Conductor</div>
+        </div>
+      </div>
     </div>
   </div>
-  <button class="btn btn-outline" id="btn-agregar" onclick="mostrarForm()" style="margin-top:4px;">+ Agregar gasto</button>
-</div>
 
-<div id="balance-box">
-  <div class="balance-label">Balance del viaje</div>
-  <div class="balance-valor balance-zero" id="balance-valor">$ —</div>
-  <div class="balance-det" id="balance-det">Ingresa el dinero entregado y los gastos</div>
-  <div class="resumen-cats" id="resumen-cats" style="display:none;"></div>
-</div>
+  <!-- Panel del conductor seleccionado (oculto al inicio) -->
+  <div id="panel-conductor" style="display:none;">
 
-<div id="progress-wrap">
-  <p id="progress-txt">Procesando…</p>
-  <div id="progress-bar-bg"><div id="progress-bar"></div></div>
-</div>
+    <!-- Registrar nuevo viaje -->
+    <div class="section">
+      <div class="section-title">Registrar nuevo viaje</div>
 
-<div class="acciones">
-  <button class="btn btn-green" id="btn-enviar" onclick="enviarRegistro()">📊 Enviar registro a Google Sheets</button>
-  <button class="btn btn-outline" onclick="window.print()">📄 Imprimir / Guardar PDF</button>
-  <button class="btn" onclick="limpiarTodo(false)" style="background:#fff;color:#b55;border:1.5px solid #b55;">🗑 Limpiar planilla</button>
-</div>
-<div style="height:30px;"></div>
+      <div class="row2">
+        <div class="field"><label>Fecha</label><input type="date" id="h-fecha"></div>
+        <div class="field">
+          <label>Tipo de servicio</label>
+          <div class="tipo-grid" style="margin-top:4px;">
+            <button class="tipo-btn active" data-tipo="Domicilio" onclick="selTipo(this)">📦<br>Domicilio</button>
+            <button class="tipo-btn" data-tipo="Batallón"  onclick="selTipo(this)">🪖<br>Batallón</button>
+            <button class="tipo-btn" data-tipo="Fruver"    onclick="selTipo(this)">🥦<br>Fruver</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Destino (siempre visible) -->
+      <div class="field">
+        <label>Destino / dirección</label>
+        <input type="text" id="h-destino" placeholder="Ej: Cra 15 #30-45, Barranquilla">
+      </div>
+
+      <!-- Campo extra para domicilio: quién solicitó -->
+      <div class="field" id="campo-cliente" style="display:none;">
+        <label>Cliente o referencia del domicilio</label>
+        <input type="text" id="h-cliente" placeholder="Ej: Restaurante El Buen Sabor">
+      </div>
+
+      <div class="field"><label>Observaciones (opcional)</label><textarea id="h-notas" placeholder="Notas del viaje" style="min-height:46px;"></textarea></div>
+
+      <!-- Gastos opcionales -->
+      <div style="border-top:1px solid #eef3ec;margin-top:4px;padding-top:12px;">
+        <div style="font-size:12px;font-weight:700;color:#556;letter-spacing:.5px;margin-bottom:8px;">GASTOS OPCIONALES</div>
+        <div id="h-gastos-lista"></div>
+        <div class="add-gasto-form" id="h-form-gasto">
+          <div style="font-size:13px;font-weight:700;color:#1e4d2b;margin-bottom:10px;">Agregar gasto</div>
+          <div class="cat-grid">
+            <button class="cat-btn active" data-cat="combustible" onclick="selCat(this,'h')">⛽<br>Combustible</button>
+            <button class="cat-btn" data-cat="peaje"      onclick="selCat(this,'h')">🛣️<br>Peaje/Pesaje</button>
+            <button class="cat-btn" data-cat="comida"     onclick="selCat(this,'h')">🍱<br>Comida</button>
+            <button class="cat-btn" data-cat="viatico"    onclick="selCat(this,'h')">💵<br>Viático</button>
+            <button class="cat-btn" data-cat="imprevisto" onclick="selCat(this,'h')">⚠️<br>Imprevisto</button>
+            <button class="cat-btn" data-cat="otro"       onclick="selCat(this,'h')">📋<br>Otro</button>
+          </div>
+          <div class="field"><label>Descripción del gasto</label><input type="text" id="hg-desc" placeholder="Ej: Gasolina"></div>
+          <div class="field"><label>Monto (COP $)</label><input type="text" id="hg-monto" inputmode="numeric" oninput="formatearCampo(this)" placeholder="Ej: 45.000"></div>
+          <div class="field">
+            <label>Foto de evidencia (opcional)</label>
+            <input type="file" id="hg-foto" accept="image/*" capture="environment"
+              style="font-size:13px;background:#fff;border:1.5px solid #cdd8ca;border-radius:8px;padding:8px 10px;">
+          </div>
+          <div style="display:flex;gap:8px;margin-top:4px;">
+            <button class="btn btn-outline btn-small" onclick="cancelarGastoH()">Cancelar</button>
+            <button class="btn btn-green btn-small" onclick="guardarGastoH()" style="flex:1;">Guardar ✓</button>
+          </div>
+        </div>
+        <button class="btn btn-outline btn-small" id="h-btn-agregar" onclick="mostrarFormH()" style="margin-top:4px;width:auto;">+ Agregar gasto</button>
+      </div>
+
+      <div style="margin-top:12px;">
+        <button class="btn btn-green" id="btn-guardar-viaje" onclick="guardarViaje()">✅ Guardar viaje</button>
+      </div>
+    </div>
+
+    <!-- Historial mensual -->
+    <div class="section">
+      <div class="section-title">Historial mensual</div>
+
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px;flex-wrap:wrap;">
+        <div class="mes-selector" style="flex:1;margin-bottom:0;">
+          <select id="filtro-mes" onchange="renderHistorial()"></select>
+        </div>
+        <div class="filtros" style="margin-bottom:0;">
+          <button class="filtro-btn active" data-ftipo="Todos" onclick="selFiltro(this)">Todos</button>
+          <button class="filtro-btn" data-ftipo="Domicilio" onclick="selFiltro(this)">📦 Domicilio</button>
+          <button class="filtro-btn" data-ftipo="Batallón"  onclick="selFiltro(this)">🪖 Batallón</button>
+          <button class="filtro-btn" data-ftipo="Fruver"    onclick="selFiltro(this)">🥦 Fruver</button>
+        </div>
+      </div>
+
+      <div id="resumen-mensual-box" style="display:none;" class="resumen-mensual">
+        <h3 id="resumen-titulo">RESUMEN DEL MES</h3>
+        <div class="resumen-grid">
+          <div class="resumen-stat"><div class="valor" id="r-viajes">0</div><div class="etiq">Viajes</div></div>
+          <div class="resumen-stat"><div class="valor" id="r-tipos">—</div><div class="etiq">Tipo frecuente</div></div>
+          <div class="resumen-stat"><div class="valor" id="r-gastos">$0</div><div class="etiq">Total gastos</div></div>
+        </div>
+      </div>
+
+      <div id="historial-lista"></div>
+
+      <div style="margin-top:10px;">
+        <button class="btn btn-outline" id="btn-enviar-historial" onclick="enviarHistorial()">📊 Enviar historial a Sheets</button>
+      </div>
+    </div>
+
+  </div><!-- /panel-conductor -->
+
+  <div style="height:30px;"></div>
+</div><!-- /tab-historial -->
+
 
 <script>
+/* ════════════════════════════════════════════════════════════════
+   CONSTANTES COMPARTIDAS
+   ════════════════════════════════════════════════════════════════ */
 const SHEETS_URL = "https://script.google.com/macros/s/AKfycbw2Jn-PXmRasYa9MmixxlnDAtg4Xkvx-5wv1qrOHzti2MBbhgng7qNPn-qnzl4i0RofAA/exec";
 
-// Nombre de categoría para Drive (carpeta) y para mostrar
 const CATS = {
   combustible: { label: "⛽ Combustible",   carpeta: "Combustible"  },
   peaje:       { label: "🛣️ Peaje/Pesaje",  carpeta: "Peaje-Pesaje" },
@@ -144,50 +408,86 @@ const CATS = {
   otro:        { label: "📋 Otro",           carpeta: "Otro"         }
 };
 
+const MESES = ["Enero","Febrero","Marzo","Abril","Mayo","Junio",
+               "Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+
+/* ════════════════════════════════════════════════════════════════
+   ESTADO GLOBAL
+   ════════════════════════════════════════════════════════════════ */
+// Pestaña 1 – Viáticos
 let gastos    = [];
 let catActiva = "combustible";
 
-document.getElementById("fecha").value = new Date().toISOString().split("T")[0];
+// Pestaña 2 – Historial
+let conductorActivo  = null;
+let tipoActivo       = "Domicilio";
+let filtroTipo       = "Todos";
+let catActivaH       = "combustible";
+let gastosViaje      = [];      // gastos del viaje que se está creando
+let viajesHistorial  = {};      // { "conductor": [ ...viajes ] }
 
-// ── Formateo de campos COP ────────────────────────────────
+/* ════════════════════════════════════════════════════════════════
+   TABS
+   ════════════════════════════════════════════════════════════════ */
+function cambiarTab(tab) {
+  document.querySelectorAll(".tab-btn").forEach((b,i) => {
+    b.classList.toggle("active", (i === 0 && tab==="viaticos") || (i === 1 && tab==="historial"));
+  });
+  document.querySelectorAll(".tab-pane").forEach(p => p.classList.remove("active"));
+  document.getElementById("tab-" + tab).classList.add("active");
+}
+
+/* ════════════════════════════════════════════════════════════════
+   UTILIDADES COMPARTIDAS
+   ════════════════════════════════════════════════════════════════ */
 function formatearCampo(input) {
-  const pos   = input.selectionStart;
+  const pos  = input.selectionStart;
   const antes = input.value.length;
-  const soloDigitos = input.value.replace(/\D/g, "");
-  if (!soloDigitos) { input.value = ""; return; }
-  input.value = parseInt(soloDigitos, 10).toLocaleString("es-CO");
-  const nuevaPos = pos + (input.value.length - antes);
-  try { input.setSelectionRange(nuevaPos, nuevaPos); } catch(e) {}
+  const solo = input.value.replace(/\D/g, "");
+  if (!solo) { input.value = ""; return; }
+  input.value = parseInt(solo, 10).toLocaleString("es-CO");
+  const nueva = pos + (input.value.length - antes);
+  try { input.setSelectionRange(nueva, nueva); } catch(e) {}
 }
 
-// Leer valor numérico limpio desde campo formateado
 function leerValor(id) {
-  return parseFloat(document.getElementById(id).value.replace(/\./g, "").replace(",", ".")) || 0;
+  return parseFloat((document.getElementById(id).value||"0").replace(/\./g,"").replace(",",".")) || 0;
 }
 
-// Nombre único del viaje (también nombre de la carpeta en Drive)
-function nombreViaje() {
-  const conductor = document.getElementById("conductor").value.trim() || "Sin conductor";
-  const destino   = document.getElementById("destino").value.trim()   || "Sin destino";
-  const fecha     = document.getElementById("fecha").value            || new Date().toISOString().split("T")[0];
-  return `${conductor} - ${destino} - ${fecha}`;
+function cop(n) { return "$ " + Math.abs(n).toLocaleString("es-CO"); }
+
+function mostrarToast(msg, color) {
+  const t = document.getElementById("toast");
+  t.textContent = msg; t.style.background = color || "#1e4d2b";
+  t.classList.add("show"); setTimeout(() => t.classList.remove("show"), 4000);
 }
 
-// Convierte la descripción en nombre de archivo válido
 function nombreArchivo(desc, mimeType) {
   const ext  = mimeType ? "." + mimeType.split("/")[1].replace("jpeg","jpg") : ".jpg";
   const base = desc.trim()
-    .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // quitar tildes
-    .replace(/[^a-zA-Z0-9 _\-]/g, "")                // solo alfanumérico
-    .replace(/\s+/g, "_")
-    .substring(0, 80);
+    .normalize("NFD").replace(/[\u0300-\u036f]/g,"")
+    .replace(/[^a-zA-Z0-9 _\-]/g,"").replace(/\s+/g,"_").substring(0,80);
   return base + ext;
 }
 
-function selCat(btn) {
-  document.querySelectorAll(".cat-btn").forEach(b => b.classList.remove("active"));
+function selCat(btn, scope) {
+  const grid = btn.closest(".cat-grid");
+  grid.querySelectorAll(".cat-btn").forEach(b => b.classList.remove("active"));
   btn.classList.add("active");
-  catActiva = btn.dataset.cat;
+  if (scope === "v") catActiva  = btn.dataset.cat;
+  else               catActivaH = btn.dataset.cat;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   PESTAÑA 1 – VIÁTICOS
+   ════════════════════════════════════════════════════════════════ */
+document.getElementById("fecha").value = new Date().toISOString().split("T")[0];
+
+function nombreViaje() {
+  const conductor = document.getElementById("conductor").value || "Sin conductor";
+  const destino   = document.getElementById("destino").value   || "Sin destino";
+  const fecha     = document.getElementById("fecha").value     || new Date().toISOString().split("T")[0];
+  return `${conductor} - ${destino} - ${fecha}`;
 }
 
 function mostrarForm() {
@@ -199,52 +499,31 @@ function mostrarForm() {
 function cancelarGasto() {
   document.getElementById("form-gasto").classList.remove("visible");
   document.getElementById("btn-agregar").style.display = "block";
-  document.getElementById("g-desc").value  = "";
-  document.getElementById("g-monto").value = "";
-  document.getElementById("g-foto").value  = "";
-  document.getElementById("presupuesto").value = document.getElementById("presupuesto").value; // mantener
+  ["g-desc","g-monto","g-foto"].forEach(id => document.getElementById(id).value = "");
 }
 
 function guardarGasto() {
   const desc  = document.getElementById("g-desc").value.trim();
   const monto = leerValor("g-monto");
   if (!desc || isNaN(monto) || monto <= 0) { alert("Ingresa la descripción y el monto."); return; }
-
   const file = document.getElementById("g-foto").files[0];
-
   const agregar = (base64, mimeType) => {
-    gastos.push({
-      id:       Date.now(),
-      cat:      catActiva,
-      desc,
-      monto,
-      base64:   base64  || null,
-      mimeType: mimeType || null,
-      // Nombre del archivo = descripción del gasto
-      fileName: base64 ? nombreArchivo(desc, mimeType) : null,
-      driveUrl: null
-    });
-    renderGastos();
-    actualizarBalance();
-    cancelarGasto();
+    gastos.push({ id: Date.now(), cat: catActiva, desc, monto,
+                  base64: base64||null, mimeType: mimeType||null,
+                  fileName: base64 ? nombreArchivo(desc,mimeType) : null, driveUrl: null });
+    renderGastos(); actualizarBalance(); cancelarGasto();
   };
-
   if (file) {
-    const reader = new FileReader();
-    reader.onload = e => agregar(e.target.result.split(",")[1], file.type);
-    reader.readAsDataURL(file);
-  } else {
-    agregar(null, null);
-  }
+    const r = new FileReader();
+    r.onload = e => agregar(e.target.result.split(",")[1], file.type);
+    r.readAsDataURL(file);
+  } else agregar(null, null);
 }
 
 function eliminarGasto(id) {
   gastos = gastos.filter(g => g.id !== id);
-  renderGastos();
-  actualizarBalance();
+  renderGastos(); actualizarBalance();
 }
-
-function cop(n) { return "$ " + Math.abs(n).toLocaleString("es-CO"); }
 
 function renderGastos() {
   const lista = document.getElementById("gastos-lista");
@@ -263,13 +542,12 @@ function renderGastos() {
       ${g.base64 ? `<img src="data:${g.mimeType};base64,${g.base64}" class="evidencia-thumb" alt="Evidencia">` : ""}
       ${g.base64 && !g.driveUrl ? `<span class="upload-status status-pending" id="st-${g.id}">📎 Pendiente de subir</span>` : ""}
       ${g.driveUrl ? `<a href="${g.driveUrl}" target="_blank" class="upload-status status-ok">✓ Ver en Drive</a>` : ""}
-    </div>
-  `).join("");
+    </div>`).join("");
 }
 
 function actualizarBalance() {
   const presupuesto  = leerValor("presupuesto");
-  const totalGastado = gastos.reduce((s,g) => s + g.monto, 0);
+  const totalGastado = gastos.reduce((s,g) => s+g.monto, 0);
   const balance      = presupuesto - totalGastado;
   const valEl = document.getElementById("balance-valor");
   const detEl = document.getElementById("balance-det");
@@ -295,15 +573,7 @@ function actualizarBalance() {
   gastos.forEach(g => { cats[g.cat] = (cats[g.cat]||0) + g.monto; });
   const entries = Object.entries(cats);
   resEl.style.display = entries.length ? "grid" : "none";
-  resEl.innerHTML = entries.map(([k,v]) =>
-    `<div class="resumen-cat">${CATS[k].label}<span>${cop(v)}</span></div>`
-  ).join("");
-}
-
-function mostrarToast(msg, color) {
-  const t = document.getElementById("toast");
-  t.textContent = msg; t.style.background = color || "#1e4d2b";
-  t.classList.add("show"); setTimeout(() => t.classList.remove("show"), 4000);
+  resEl.innerHTML = entries.map(([k,v]) => `<div class="resumen-cat">${CATS[k].label}<span>${cop(v)}</span></div>`).join("");
 }
 
 function setProgreso(pct, txt) {
@@ -313,50 +583,34 @@ function setProgreso(pct, txt) {
 }
 function ocultarProgreso() { document.getElementById("progress-wrap").style.display = "none"; }
 
-// Subir imagen — fetch normal para leer respuesta
 async function subirImagen(gasto, viaje) {
   const resp = await fetch(SHEETS_URL, {
-    method: "POST",
-    headers: { "Content-Type": "text/plain" },
-    body: JSON.stringify({
-      tipo:            "imagen",
-      base64:          gasto.base64,
-      mimeType:        gasto.mimeType,
-      nombreArchivo:   gasto.fileName,        // descripción del gasto
-      nombreCategoria: CATS[gasto.cat].carpeta, // nombre carpeta de categoría
-      nombreViaje:     viaje
-    })
+    method: "POST", headers: { "Content-Type": "text/plain" },
+    body: JSON.stringify({ tipo: "imagen", base64: gasto.base64, mimeType: gasto.mimeType,
+      nombreArchivo: gasto.fileName, nombreCategoria: CATS[gasto.cat].carpeta, nombreViaje: viaje })
   });
   const data = await resp.json();
   return data.ok ? data.url : null;
 }
 
-// Enviar fila al Sheets — no-cors
 async function enviarFila(payload) {
-  await fetch(SHEETS_URL, {
-    method: "POST",
-    mode: "no-cors",
-    headers: { "Content-Type": "text/plain" },
-    body: JSON.stringify(payload)
-  });
+  await fetch(SHEETS_URL, { method: "POST", mode: "no-cors",
+    headers: { "Content-Type": "text/plain" }, body: JSON.stringify(payload) });
 }
 
 async function enviarRegistro() {
-  const conductor  = document.getElementById("conductor").value.trim();
+  const conductor   = document.getElementById("conductor").value;
   const presupuesto = leerValor("presupuesto");
-  if (!conductor || !presupuesto) { alert("Completa el nombre del conductor y el dinero entregado."); return; }
+  if (!conductor || !presupuesto) { alert("Selecciona el conductor y el dinero entregado."); return; }
 
   const viaje = nombreViaje();
   const btn   = document.getElementById("btn-enviar");
   btn.disabled = true; btn.textContent = "⏳ Enviando…";
 
-  // 1 — Subir imágenes una por una a su carpeta de categoría
   const conImg = gastos.filter(g => g.base64 && !g.driveUrl);
   for (let i = 0; i < conImg.length; i++) {
-    setProgreso(
-      Math.round((i / Math.max(conImg.length,1)) * 70),
-      `Subiendo evidencia ${i+1} de ${conImg.length}: "${conImg[i].desc}"…`
-    );
+    setProgreso(Math.round((i / Math.max(conImg.length,1)) * 70),
+      `Subiendo evidencia ${i+1} de ${conImg.length}: "${conImg[i].desc}"…`);
     try {
       const url = await subirImagen(conImg[i], viaje);
       const idx = gastos.findIndex(x => x.id === conImg[i].id);
@@ -368,11 +622,8 @@ async function enviarRegistro() {
     } catch(err) { console.warn("Error imagen", err); }
   }
 
-  // 2 — Armar detalle de gastos
   const detalleGastos = gastos.map(g =>
-    `${CATS[g.cat].carpeta}: ${g.desc} (${cop(g.monto)})${g.driveUrl ? " -> "+g.driveUrl : ""}`
-  ).join(" | ");
-
+    `${CATS[g.cat].carpeta}: ${g.desc} (${cop(g.monto)})${g.driveUrl ? " -> "+g.driveUrl : ""}`).join(" | ");
   const totalGastado = gastos.reduce((s,g) => s+g.monto, 0);
   const balance      = presupuesto - totalGastado;
   const cats = {};
@@ -380,29 +631,34 @@ async function enviarRegistro() {
 
   setProgreso(85, "Guardando en Google Sheets…");
 
-  // 3 — Enviar fila
   await enviarFila({
-    tipo:         "registro",
-    nombreViaje:  viaje,
-    fecha:        document.getElementById("fecha").value,
-    destino:      document.getElementById("destino").value,
-    conductor,
-    encargada:    document.getElementById("encargada").value.trim(),
-    presupuesto,
-    totalGastado,
-    balance,
-    estado:       balance >= 0
-      ? `Sobró $${balance.toLocaleString("es-CO")}`
-      : `Faltaron $${Math.abs(balance).toLocaleString("es-CO")}`,
-    cats,
-    detalleGastos,
-    notas: document.getElementById("notas").value.trim()
+    tipo: "registro", nombreViaje: viaje,
+    fecha: document.getElementById("fecha").value,
+    destino: document.getElementById("destino").value,
+    conductor, encargada: document.getElementById("encargada").value.trim(),
+    presupuesto, totalGastado, balance,
+    estado: balance >= 0 ? `Sobró $${balance.toLocaleString("es-CO")}` : `Faltaron $${Math.abs(balance).toLocaleString("es-CO")}`,
+    cats, detalleGastos, notas: document.getElementById("notas").value.trim()
   });
+
+  // ── También agregar al historial del carro ──
+  const viajeHistorial = {
+    id: Date.now(), fuente: "viatico",
+    fecha: document.getElementById("fecha").value,
+    tipo: "Batallón",
+    destino: document.getElementById("destino").value,
+    cliente: "",
+    notas: document.getElementById("notas").value.trim(),
+    gastos: gastos.map(g => ({ cat: g.cat, desc: g.desc, monto: g.monto })),
+    totalGastos: totalGastado
+  };
+  if (!viajesHistorial[conductor]) viajesHistorial[conductor] = [];
+  viajesHistorial[conductor].push(viajeHistorial);
 
   setProgreso(100, "¡Listo!");
   setTimeout(() => {
     ocultarProgreso();
-    mostrarToast("✓ Registro enviado correctamente", "#1e4d2b");
+    mostrarToast("✓ Registro enviado y guardado en historial", "#1e4d2b");
     limpiarTodo(true);
   }, 800);
 }
@@ -411,16 +667,265 @@ function limpiarTodo(silencioso) {
   if (!silencioso && !confirm("¿Borrar todos los datos de la planilla?")) return;
   gastos = [];
   document.getElementById("fecha").value = new Date().toISOString().split("T")[0];
-  ["conductor","encargada","notas"].forEach(id => document.getElementById(id).value = "");
+  ["encargada","notas"].forEach(id => document.getElementById(id).value = "");
   document.getElementById("presupuesto").value = "0";
   document.getElementById("destino").value = "Batallón";
+  document.getElementById("conductor").value = "";
   const btn = document.getElementById("btn-enviar");
-  btn.textContent = "📊 Enviar registro a Google Sheets";
-  btn.disabled = false;
+  btn.textContent = "📊 Enviar registro a Google Sheets"; btn.disabled = false;
   renderGastos(); actualizarBalance();
 }
 
+/* ════════════════════════════════════════════════════════════════
+   PESTAÑA 2 – HISTORIAL DEL CARRO
+   ════════════════════════════════════════════════════════════════ */
+
+// Inicializar selector de mes
+function inicializarMeses() {
+  const sel  = document.getElementById("filtro-mes");
+  const hoy  = new Date();
+  sel.innerHTML = "";
+  for (let i = 0; i < 12; i++) {
+    const d    = new Date(hoy.getFullYear(), hoy.getMonth() - i, 1);
+    const val  = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}`;
+    const txt  = `${MESES[d.getMonth()]} ${d.getFullYear()}`;
+    const opt  = document.createElement("option");
+    opt.value  = val; opt.textContent = txt;
+    sel.appendChild(opt);
+  }
+}
+inicializarMeses();
+
+document.getElementById("h-fecha").value = new Date().toISOString().split("T")[0];
+
+function seleccionarConductor(card) {
+  document.querySelectorAll(".conductor-card").forEach(c => c.classList.remove("selected"));
+  card.classList.add("selected");
+  conductorActivo = card.dataset.conductor;
+  document.getElementById("panel-conductor").style.display = "block";
+  if (!viajesHistorial[conductorActivo]) viajesHistorial[conductorActivo] = [];
+  renderHistorial();
+}
+
+function selTipo(btn) {
+  document.querySelectorAll(".tipo-btn").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+  tipoActivo = btn.dataset.tipo;
+  document.getElementById("campo-cliente").style.display = tipoActivo === "Domicilio" ? "block" : "none";
+}
+
+function selFiltro(btn) {
+  document.querySelectorAll(".filtro-btn").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+  filtroTipo = btn.dataset.ftipo;
+  renderHistorial();
+}
+
+// Gastos del nuevo viaje
+function mostrarFormH() {
+  document.getElementById("h-form-gasto").classList.add("visible");
+  document.getElementById("h-btn-agregar").style.display = "none";
+  document.getElementById("hg-desc").focus();
+}
+
+function cancelarGastoH() {
+  document.getElementById("h-form-gasto").classList.remove("visible");
+  document.getElementById("h-btn-agregar").style.display = "inline-block";
+  ["hg-desc","hg-monto","hg-foto"].forEach(id => document.getElementById(id).value = "");
+}
+
+function leerValorDir(id) {
+  const el = document.getElementById(id);
+  if (!el) return 0;
+  return parseFloat((el.value||"0").replace(/\./g,"").replace(",",".")) || 0;
+}
+
+function guardarGastoH() {
+  const desc  = document.getElementById("hg-desc").value.trim();
+  const monto = leerValorDir("hg-monto");
+  if (!desc || monto <= 0) { alert("Ingresa descripción y monto del gasto."); return; }
+  const file = document.getElementById("hg-foto").files[0];
+  const agregar = (base64, mimeType) => {
+    gastosViaje.push({ id: Date.now(), cat: catActivaH, desc, monto,
+                       base64: base64||null, mimeType: mimeType||null,
+                       fileName: base64 ? nombreArchivo(desc,mimeType) : null });
+    renderGastosViaje(); cancelarGastoH();
+  };
+  if (file) {
+    const r = new FileReader(); r.onload = e => agregar(e.target.result.split(",")[1], file.type); r.readAsDataURL(file);
+  } else agregar(null, null);
+}
+
+function eliminarGastoViaje(id) {
+  gastosViaje = gastosViaje.filter(g => g.id !== id);
+  renderGastosViaje();
+}
+
+function renderGastosViaje() {
+  const lista = document.getElementById("h-gastos-lista");
+  if (!gastosViaje.length) { lista.innerHTML = ""; return; }
+  lista.innerHTML = gastosViaje.map(g => `
+    <div class="gasto-item" id="hgi-${g.id}">
+      <div class="gasto-head">
+        <span class="cat-tag">${CATS[g.cat].label}</span>
+        <button class="eliminar" onclick="eliminarGastoViaje(${g.id})">✕</button>
+      </div>
+      <div class="gasto-desc">${g.desc}</div>
+      <div class="gasto-monto">${cop(g.monto)}</div>
+      ${g.base64 ? `<img src="data:${g.mimeType};base64,${g.base64}" class="evidencia-thumb" alt="Evidencia">` : ""}
+    </div>`).join("");
+}
+
+function guardarViaje() {
+  if (!conductorActivo) { alert("Selecciona un conductor."); return; }
+  const destino = document.getElementById("h-destino").value.trim();
+  const fecha   = document.getElementById("h-fecha").value;
+  if (!destino || !fecha) { alert("Ingresa la fecha y el destino."); return; }
+
+  const totalGastos = gastosViaje.reduce((s,g) => s+g.monto, 0);
+  const viaje = {
+    id: Date.now(), fuente: "directo",
+    fecha, tipo: tipoActivo,
+    destino,
+    cliente: document.getElementById("h-cliente").value.trim(),
+    notas:   document.getElementById("h-notas").value.trim(),
+    gastos:  gastosViaje.map(g => ({ cat: g.cat, desc: g.desc, monto: g.monto })),
+    totalGastos
+  };
+  if (!viajesHistorial[conductorActivo]) viajesHistorial[conductorActivo] = [];
+  viajesHistorial[conductorActivo].push(viaje);
+
+  // Limpiar form
+  document.getElementById("h-destino").value = "";
+  document.getElementById("h-cliente").value = "";
+  document.getElementById("h-notas").value   = "";
+  document.getElementById("h-fecha").value   = new Date().toISOString().split("T")[0];
+  gastosViaje = [];
+  renderGastosViaje();
+  document.querySelectorAll(".tipo-btn").forEach((b,i) => b.classList.toggle("active", i===0));
+  tipoActivo = "Domicilio";
+  document.getElementById("campo-cliente").style.display = "none";
+
+  mostrarToast("✓ Viaje guardado en el historial");
+  renderHistorial();
+}
+
+function claseTipo(tipo) {
+  if (tipo === "Domicilio")  return "tipo-domicilio";
+  if (tipo === "Batallón")   return "tipo-batallon";
+  return "tipo-fruver";
+}
+function emojiTipo(tipo) {
+  if (tipo === "Domicilio") return "📦";
+  if (tipo === "Batallón")  return "🪖";
+  return "🥦";
+}
+
+function renderHistorial() {
+  if (!conductorActivo) return;
+  const mesSel  = document.getElementById("filtro-mes").value; // "YYYY-MM"
+  const viajes  = viajesHistorial[conductorActivo] || [];
+
+  const filtrados = viajes.filter(v => {
+    const mes     = v.fecha.substring(0, 7);
+    const mesOk   = mes === mesSel;
+    const tipoOk  = filtroTipo === "Todos" || v.tipo === filtroTipo;
+    return mesOk && tipoOk;
+  });
+
+  const lista = document.getElementById("historial-lista");
+
+  if (!filtrados.length) {
+    lista.innerHTML = `
+      <div class="empty-state">
+        <div class="icon">📭</div>
+        <p>No hay viajes registrados para este mes.</p>
+      </div>`;
+    document.getElementById("resumen-mensual-box").style.display = "none";
+    return;
+  }
+
+  // Resumen
+  const totalG  = filtrados.reduce((s,v) => s + v.totalGastos, 0);
+  const conteos = {};
+  filtrados.forEach(v => { conteos[v.tipo] = (conteos[v.tipo]||0) + 1; });
+  const tipoFrec = Object.entries(conteos).sort((a,b) => b[1]-a[1])[0][0];
+
+  const box = document.getElementById("resumen-mensual-box");
+  box.style.display = "block";
+  document.getElementById("resumen-titulo").textContent =
+    `${MESES[parseInt(mesSel.split("-")[1])-1].toUpperCase()} ${mesSel.split("-")[0]} · ${conductorActivo.split(" ")[0].toUpperCase()}`;
+  document.getElementById("r-viajes").textContent  = filtrados.length;
+  document.getElementById("r-tipos").textContent   = emojiTipo(tipoFrec) + " " + tipoFrec;
+  document.getElementById("r-gastos").textContent  = totalG > 0 ? cop(totalG) : "—";
+
+  // Ordenar por fecha desc
+  const ordenados = [...filtrados].sort((a,b) => b.fecha.localeCompare(a.fecha));
+
+  lista.innerHTML = ordenados.map(v => {
+    const gastosList = v.gastos.length
+      ? v.gastos.map(g => `${CATS[g.cat].label} ${g.desc}: ${cop(g.monto)}`).join(" · ")
+      : null;
+    const fechaObj = new Date(v.fecha + "T12:00:00");
+    const fechaStr = fechaObj.toLocaleDateString("es-CO", { weekday:"short", day:"numeric", month:"short" });
+
+    return `
+      <div class="viaje-card">
+        <div class="viaje-card-head">
+          <span class="viaje-tipo ${claseTipo(v.tipo)}">${emojiTipo(v.tipo)} ${v.tipo}</span>
+          <span class="viaje-fecha">${fechaStr}</span>
+        </div>
+        <div class="viaje-destino">${v.destino}</div>
+        ${v.cliente ? `<div class="viaje-origen">👤 ${v.cliente}</div>` : ""}
+        ${v.notas   ? `<div class="viaje-origen" style="color:#888;font-style:italic;">📝 ${v.notas}</div>` : ""}
+        ${gastosList
+          ? `<div class="viaje-gastos">💸 ${gastosList} <strong>(Total: ${cop(v.totalGastos)})</strong></div>`
+          : `<div class="viaje-sin-gastos">Sin gastos registrados</div>`}
+        <span class="viaje-fuente">${v.fuente === "viatico" ? "🔗 Desde viáticos" : "✏️ Directo"}</span>
+      </div>`;
+  }).join("");
+}
+
+async function enviarHistorial() {
+  if (!conductorActivo) { alert("Selecciona un conductor primero."); return; }
+  const mesSel   = document.getElementById("filtro-mes").value;
+  const viajes   = (viajesHistorial[conductorActivo] || [])
+    .filter(v => v.fecha.substring(0,7) === mesSel);
+
+  if (!viajes.length) { alert("No hay viajes en este mes para enviar."); return; }
+
+  const btn = document.getElementById("btn-enviar-historial");
+  btn.disabled = true; btn.textContent = "⏳ Enviando…";
+
+  try {
+    await fetch(SHEETS_URL, {
+      method: "POST", mode: "no-cors", headers: { "Content-Type": "text/plain" },
+      body: JSON.stringify({
+        tipo:       "historial",
+        conductor:  conductorActivo,
+        mes:        mesSel,
+        viajes:     viajes.map(v => ({
+          fecha: v.fecha, tipo: v.tipo, destino: v.destino,
+          cliente: v.cliente, notas: v.notas,
+          totalGastos: v.totalGastos,
+          detalleGastos: v.gastos.map(g => `${CATS[g.cat].carpeta}: ${g.desc} (${cop(g.monto)})`).join(" | "),
+          fuente: v.fuente
+        }))
+      })
+    });
+    mostrarToast("✓ Historial enviado a Sheets");
+  } catch(e) {
+    mostrarToast("⚠ Error al enviar. Intenta de nuevo.", "#c0392b");
+  }
+
+  btn.disabled = false; btn.textContent = "📊 Enviar historial a Sheets";
+}
+
+/* ════════════════════════════════════════════════════════════════
+   INICIO
+   ════════════════════════════════════════════════════════════════ */
 renderGastos();
+actualizarBalance();
 </script>
 </body>
 </html>
