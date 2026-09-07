@@ -416,7 +416,9 @@ header p  { font-size: 11px; opacity: .65; margin-top: 1px; }
 
   <!-- Lista de viajes -->
   <div class="section" style="margin-top:14px;">
-    <div class="section-title">Viajes registrados</div>
+    <div class="section-title">Viajes registrados
+      <span id="h-cargando" style="font-size:11px;font-weight:400;color:#1e7a3a;margin-left:8px;display:none;">⏳ Cargando…</span>
+    </div>
     <div id="h-lista"></div>
   </div>
 
@@ -455,11 +457,11 @@ let dCat          = "combustible";
 let dConductor    = null;
 let dTipo         = "Domicilio a cliente";
 
-// Pestaña 3 – Historial (almacén en memoria)
-// Estructura: [ { id, fuente:"viatico"|"domicilio", conductor, fecha, tipo, destino, cliente, notas, gastos:[], totalGastos } ]
-let todosLosViajes = [];
-let hConductor     = "Todos";
-let hFiltroTipo    = "Todos";
+// Pestaña 3 – Historial
+let todosLosViajes   = [];
+let hConductor       = "Todos";
+let hFiltroTipo      = "Todos";
+let historialCargado = false;
 
 /* ════════════════════════════════════════════════
    TABS
@@ -469,7 +471,10 @@ function cambiarTab(tab, btn) {
   btn.classList.add("active");
   document.querySelectorAll(".tab-pane").forEach(p => p.classList.remove("active"));
   document.getElementById("tab-" + tab).classList.add("active");
-  if (tab === "historial") renderHistorial();
+  if (tab === "historial") {
+    if (!historialCargado) cargarHistorialDesdeSheets();
+    else renderHistorial();
+  }
 }
 
 /* ════════════════════════════════════════════════
@@ -922,6 +927,69 @@ function renderHistorial() {
   }).join("");
 }
 
+
+/* ════════════════════════════════════════════════
+   CARGA INICIAL DEL HISTORIAL DESDE SHEETS
+   ════════════════════════════════════════════════ */
+async function cargarHistorialDesdeSheets() {
+  const cargando = document.getElementById("h-cargando");
+  const lista    = document.getElementById("h-lista");
+  cargando.style.display = "inline";
+  lista.innerHTML = "";
+
+  try {
+    const resp = await fetch(SHEETS_URL + "?action=historial", { method: "GET" });
+    const data = await resp.json();
+
+    if (data.ok && Array.isArray(data.viajes)) {
+      // Convertir filas del Sheets al formato interno
+      // El Sheets devuelve: { fecha, conductor, tipo, referencia, totalGastos, notas }
+      const nuevos = data.viajes.map((v, i) => ({
+        id:          "sh_" + i,
+        fuente:      v.tipo === "Viático" ? "viatico" : "domicilio",
+        conductor:   v.conductor  || "",
+        fecha:       normalizarFecha(v.fecha),
+        tipo:        v.tipo       || "",
+        destino:     v.referencia || "",
+        cliente:     v.referencia || "",
+        notas:       v.notas      || "",
+        gastos:      [],           // el historial resumido no tiene detalle
+        totalGastos: Number(v.totalGastos) || 0
+      }));
+
+      // Combinar con los registrados en esta sesión (sin duplicar)
+      const idsSesion = new Set(todosLosViajes.map(v => v.id));
+      nuevos.forEach(v => { if (!idsSesion.has(v.id)) todosLosViajes.push(v); });
+    }
+  } catch(err) {
+    console.warn("Error cargando historial:", err);
+    lista.innerHTML = `<div class="empty-state"><div class="icon">⚠️</div><p style="color:#c0392b;">No se pudo conectar con Sheets.<br><span style="font-size:12px;">Los viajes registrados en esta sesión sí están disponibles.</span></p></div>`;
+  }
+
+  historialCargado = true;
+  cargando.style.display = "none";
+  renderHistorial();
+}
+
+// Convertir fecha del Sheets (puede venir como "8/3/2026", "2026-08-03", o Date serializado)
+function normalizarFecha(f) {
+  if (!f) return "";
+  const s = String(f).trim();
+  // Formato ISO ya correcto
+  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+  // Formato M/D/YYYY
+  const partes = s.split("/");
+  if (partes.length === 3) {
+    const [m, d, a] = partes;
+    return `${a}-${m.padStart(2,"0")}-${d.padStart(2,"0")}`;
+  }
+  // Intentar parsear como fecha
+  try {
+    const dt = new Date(s);
+    if (!isNaN(dt)) return dt.toISOString().split("T")[0];
+  } catch(e) {}
+  return s;
+}
 
 /* ════════════════════════════════════════════════
    INICIO
