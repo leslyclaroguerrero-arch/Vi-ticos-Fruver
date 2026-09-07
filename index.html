@@ -211,6 +211,18 @@ header p  { font-size: 11px; opacity: .65; margin-top: 1px; }
 .empty-state { text-align: center; padding: 30px 16px; color: #bbb; }
 .empty-state .icon { font-size: 36px; margin-bottom: 8px; }
 .empty-state p { font-size: 14px; }
+
+/* ── Lista de servicios del día ── */
+.servicio-item { border: 1px solid #dde8da; border-radius: 10px; padding: 11px 13px;
+                 margin-bottom: 8px; background: #f9fbf8; display: flex;
+                 justify-content: space-between; align-items: flex-start; gap: 8px; }
+.servicio-info { flex: 1; }
+.servicio-cliente { font-size: 14px; font-weight: 700; color: #1a2a1a; }
+.servicio-notas  { font-size: 12px; color: #778; margin-top: 2px; }
+.servicio-gastos { font-size: 12px; color: #b85c00; font-weight: 600; margin-top: 3px; }
+.servicio-num { font-size: 11px; background: #1e4d2b; color: #fff; border-radius: 50%;
+                width: 20px; height: 20px; display: flex; align-items: center;
+                justify-content: center; font-weight: 700; flex-shrink: 0; margin-top: 1px; }
 </style>
 </head>
 <body>
@@ -332,8 +344,9 @@ header p  { font-size: 11px; opacity: .65; margin-top: 1px; }
      ═══════════════════════════════════════════════════ -->
 <div class="tab-pane" id="tab-domicilios">
 
+  <!-- PASO 1: Conductor, fecha y tipo (fijos para toda la jornada) -->
   <div class="section">
-    <div class="section-title">Registrar servicio</div>
+    <div class="section-title">Datos de la jornada</div>
 
     <div class="field">
       <label>Conductor</label>
@@ -363,51 +376,73 @@ header p  { font-size: 11px; opacity: .65; margin-top: 1px; }
         </div>
       </div>
     </div>
-
-    <div class="field"><label>Cliente o referencia</label>
-      <input type="text" id="d-cliente" placeholder="Ej: Restaurante El Buen Sabor">
-    </div>
-    <div class="field"><label>Observaciones (opcional)</label>
-      <textarea id="d-notas" placeholder="Notas del servicio" style="min-height:46px;"></textarea>
-    </div>
   </div>
 
-  <!-- Gastos opcionales -->
+  <!-- PASO 2: Lista de servicios del día -->
   <div class="section">
-    <div class="section-title">Gastos del servicio <span style="font-weight:400;opacity:.6;">(opcional)</span></div>
-    <div id="d-gastos-lista"></div>
-    <div class="add-gasto-form" id="d-form-gasto">
-      <div style="font-size:13px;font-weight:700;color:#1e4d2b;margin-bottom:10px;">Agregar gasto</div>
-      <div class="cat-grid">
-        <button class="cat-btn active" data-cat="combustible" onclick="selCat(this,'d')">⛽<br>Combustible</button>
-        <button class="cat-btn" data-cat="peaje"      onclick="selCat(this,'d')">🛣️<br>Peaje/Pesaje</button>
-        <button class="cat-btn" data-cat="comida"     onclick="selCat(this,'d')">🍱<br>Comida</button>
-        <button class="cat-btn" data-cat="viatico"    onclick="selCat(this,'d')">💵<br>Viático</button>
-        <button class="cat-btn" data-cat="imprevisto" onclick="selCat(this,'d')">⚠️<br>Imprevisto</button>
-        <button class="cat-btn" data-cat="otro"       onclick="selCat(this,'d')">📋<br>Otro</button>
-      </div>
-      <div class="field"><label>Descripción del gasto</label>
-        <input type="text" id="dg-desc" placeholder="Ej: Gasolina">
-      </div>
-      <div class="field"><label>Monto (COP $)</label>
-        <input type="text" id="dg-monto" inputmode="numeric" oninput="formatearCampo(this)" placeholder="Ej: 45.000">
+    <div class="section-title">Servicios del día
+      <span id="d-contador" style="font-weight:400;color:#1e7a3a;margin-left:6px;font-size:12px;"></span>
+    </div>
+
+    <!-- Lista de servicios ya agregados -->
+    <div id="d-servicios-lista"></div>
+
+    <!-- Formulario para agregar un servicio -->
+    <div class="add-gasto-form visible" id="d-form-servicio" style="display:block;">
+      <div style="font-size:13px;font-weight:700;color:#1e4d2b;margin-bottom:10px;">Nuevo servicio</div>
+
+      <div class="field">
+        <label>Cliente o referencia</label>
+        <input type="text" id="d-cliente" placeholder="Ej: Restaurante El Buen Sabor">
       </div>
       <div class="field">
-        <label>Foto evidencia (opcional)</label>
-        <input type="file" id="dg-foto" accept="image/*" capture="environment"
-          style="font-size:13px;background:#fff;border:1.5px solid #cdd8ca;border-radius:8px;padding:8px 10px;">
+        <label>Observaciones (opcional)</label>
+        <textarea id="d-notas" placeholder="Notas del servicio" style="min-height:40px;"></textarea>
       </div>
-      <div style="display:flex;gap:8px;margin-top:4px;">
-        <button class="btn btn-outline btn-small" onclick="cancelarGastoD()">Cancelar</button>
-        <button class="btn btn-green btn-small" onclick="guardarGastoD()" style="flex:1;">Guardar ✓</button>
+
+      <!-- Gastos opcionales del servicio -->
+      <div style="border-top:1px solid #dde8da;margin-top:8px;padding-top:10px;">
+        <div style="font-size:11px;font-weight:700;color:#778;letter-spacing:.5px;margin-bottom:8px;">GASTOS OPCIONALES</div>
+        <div id="d-gastos-lista"></div>
+        <div class="add-gasto-form" id="d-form-gasto">
+          <div style="font-size:12px;font-weight:700;color:#1e4d2b;margin-bottom:8px;">Agregar gasto</div>
+          <div class="cat-grid">
+            <button class="cat-btn active" data-cat="combustible" onclick="selCat(this,'d')">⛽<br>Combustible</button>
+            <button class="cat-btn" data-cat="peaje"      onclick="selCat(this,'d')">🛣️<br>Peaje</button>
+            <button class="cat-btn" data-cat="comida"     onclick="selCat(this,'d')">🍱<br>Comida</button>
+            <button class="cat-btn" data-cat="viatico"    onclick="selCat(this,'d')">💵<br>Viático</button>
+            <button class="cat-btn" data-cat="imprevisto" onclick="selCat(this,'d')">⚠️<br>Imprevisto</button>
+            <button class="cat-btn" data-cat="otro"       onclick="selCat(this,'d')">📋<br>Otro</button>
+          </div>
+          <div class="field"><label>Descripción</label>
+            <input type="text" id="dg-desc" placeholder="Ej: Gasolina">
+          </div>
+          <div class="field"><label>Monto (COP $)</label>
+            <input type="text" id="dg-monto" inputmode="numeric" oninput="formatearCampo(this)" placeholder="Ej: 45.000">
+          </div>
+          <div class="field">
+            <label>Foto (opcional)</label>
+            <input type="file" id="dg-foto" accept="image/*" capture="environment"
+              style="font-size:13px;background:#fff;border:1.5px solid #cdd8ca;border-radius:8px;padding:8px 10px;">
+          </div>
+          <div style="display:flex;gap:8px;margin-top:4px;">
+            <button class="btn btn-outline btn-small" onclick="cancelarGastoD()">Cancelar</button>
+            <button class="btn btn-green btn-small" onclick="guardarGastoD()" style="flex:1;">Guardar ✓</button>
+          </div>
+        </div>
+        <button class="btn btn-outline btn-small" id="d-btn-agregar" onclick="mostrarFormD()" style="margin-top:4px;">+ Agregar gasto</button>
+      </div>
+
+      <div style="margin-top:12px;">
+        <button class="btn btn-green" onclick="agregarServicioALista()">+ Agregar a la lista</button>
       </div>
     </div>
-    <button class="btn btn-outline btn-small" id="d-btn-agregar" onclick="mostrarFormD()" style="margin-top:4px;">+ Agregar gasto</button>
   </div>
 
+  <!-- Botón guardar toda la jornada -->
   <div class="acciones">
-    <button class="btn btn-green" id="d-btn-guardar" onclick="guardarDomicilio()">✅ Guardar servicio</button>
-    <button class="btn btn-danger" onclick="limpiarDomicilio(false)">🗑 Limpiar formulario</button>
+    <button class="btn btn-green" id="d-btn-guardar" onclick="guardarTodosLosServicios()">✅ Guardar toda la jornada</button>
+    <button class="btn btn-danger" onclick="limpiarDomicilio(false)">🗑 Limpiar todo</button>
   </div>
   <div style="height:30px;"></div>
 </div>
@@ -818,51 +853,118 @@ function eliminarGastoD(id) {
   renderGastosLista(dGastos, "d-gastos-lista", "eliminarGastoD");
 }
 
-async function guardarDomicilio() {
-  if (!dConductor) { alert("Selecciona un conductor."); return; }
+// Lista de servicios acumulados en la jornada (antes de guardar todo)
+let dServicios = [];
+
+function renderServiciosLista() {
+  const lista = document.getElementById("d-servicios-lista");
+  const cont  = document.getElementById("d-contador");
+  cont.textContent = dServicios.length ? `(${dServicios.length} agregado${dServicios.length>1?"s":""})` : "";
+  if (!dServicios.length) { lista.innerHTML = ""; return; }
+  lista.innerHTML = dServicios.map((s, i) => {
+    const totalG = s.gastos.reduce((a,g) => a+g.monto, 0);
+    return `
+      <div class="servicio-item">
+        <div class="servicio-num">${i+1}</div>
+        <div class="servicio-info">
+          <div class="servicio-cliente">👤 ${s.cliente}</div>
+          ${s.notas ? `<div class="servicio-notas">📝 ${s.notas}</div>` : ""}
+          ${totalG > 0
+            ? `<div class="servicio-gastos">💸 ${s.gastos.map(g=>CATS[g.cat].label+": "+cop(g.monto)).join(" · ")}</div>`
+            : `<div class="servicio-gastos" style="color:#bbb;">Sin gastos</div>`}
+        </div>
+        <button class="eliminar" onclick="eliminarServicio(${i})">✕</button>
+      </div>`;
+  }).join("");
+}
+
+function eliminarServicio(idx) {
+  dServicios.splice(idx, 1);
+  renderServiciosLista();
+}
+
+function agregarServicioALista() {
+  if (!dConductor) { alert("Selecciona un conductor primero."); return; }
+  if (!document.getElementById("d-fecha").value) { alert("Selecciona la fecha."); return; }
   const cliente = document.getElementById("d-cliente").value.trim();
-  const fecha   = document.getElementById("d-fecha").value;
-  if (!cliente || !fecha) { alert("Ingresa la fecha y el cliente o referencia."); return; }
+  if (!cliente) { alert("Ingresa el cliente o referencia."); return; }
+
+  dServicios.push({
+    cliente,
+    notas:  document.getElementById("d-notas").value.trim(),
+    gastos: dGastos.map(g => ({ cat: g.cat, desc: g.desc, monto: g.monto }))
+  });
+
+  // Limpiar solo el mini-formulario (conductor, fecha y tipo se mantienen)
+  dGastos = [];
+  document.getElementById("d-cliente").value = "";
+  document.getElementById("d-notas").value   = "";
+  renderGastosLista(dGastos, "d-gastos-lista", "eliminarGastoD");
+  renderServiciosLista();
+  document.getElementById("d-cliente").focus();
+  toast("✓ Servicio agregado a la lista");
+}
+
+async function guardarTodosLosServicios() {
+  if (!dConductor) { alert("Selecciona un conductor."); return; }
+  const fecha = document.getElementById("d-fecha").value;
+  if (!fecha)  { alert("Selecciona la fecha."); return; }
+
+  // Si hay algo escrito en el form actual, pedirle que lo agregue primero
+  const clienteForm = document.getElementById("d-cliente").value.trim();
+  if (clienteForm && dServicios.length === 0) {
+    alert("Tienes un servicio sin agregar a la lista. Presiona '+ Agregar a la lista' primero.");
+    return;
+  }
+  if (clienteForm) {
+    if (confirm(`Tienes "${clienteForm}" sin agregar. ¿Agregarlo antes de guardar?`)) {
+      agregarServicioALista();
+    }
+  }
+
+  if (!dServicios.length) { alert("Agrega al menos un servicio a la lista."); return; }
 
   const btn = document.getElementById("d-btn-guardar");
   btn.disabled = true; btn.textContent = "⏳ Guardando…";
 
-  const totalGastos   = dGastos.reduce((s,g) => s+g.monto, 0);
-  const detalleGastos = dGastos.map(g => `${CATS[g.cat].carpeta}: ${g.desc} (${cop(g.monto)})`).join(" | ");
+  // Guardar cada servicio como fila independiente en Sheets
+  for (const s of dServicios) {
+    const totalGastos   = s.gastos.reduce((a,g) => a+g.monto, 0);
+    const detalleGastos = s.gastos.map(g => `${CATS[g.cat].carpeta}: ${g.desc} (${cop(g.monto)})`).join(" | ");
 
-  // Guardar en Sheets (hoja Domicilios + hoja Historial, lo maneja el Apps Script)
-  await fetch(SHEETS_URL, {
-    method:"POST", mode:"no-cors", headers:{"Content-Type":"text/plain"},
-    body: JSON.stringify({
-      tipo: "domicilio",
+    await fetch(SHEETS_URL, {
+      method:"POST", mode:"no-cors", headers:{"Content-Type":"text/plain"},
+      body: JSON.stringify({
+        tipo: "domicilio",
+        conductor: dConductor, fecha,
+        tipoServicio: dTipo,
+        cliente: s.cliente,
+        notas: s.notas,
+        totalGastos, detalleGastos
+      })
+    });
+
+    // Agregar al historial en memoria
+    todosLosViajes.push({
+      id: Date.now() + Math.random(), fuente: "domicilio",
       conductor: dConductor, fecha,
-      tipoServicio: dTipo,
-      cliente,
-      notas:    document.getElementById("d-notas").value.trim(),
-      totalGastos, detalleGastos
-    })
-  });
+      tipo: dTipo,
+      destino: s.cliente, cliente: s.cliente,
+      notas: s.notas,
+      gastos: s.gastos,
+      totalGastos
+    });
+  }
 
-  // Guardar en historial memoria (para ver en pestaña 3 sin recargar)
-  todosLosViajes.push({
-    id: Date.now(), fuente: "domicilio",
-    conductor: dConductor, fecha,
-    tipo: dTipo,
-    destino: cliente,   // el campo visible en historial es el cliente/referencia
-    cliente,
-    notas:   document.getElementById("d-notas").value.trim(),
-    gastos:  dGastos.map(g => ({ cat: g.cat, desc: g.desc, monto: g.monto })),
-    totalGastos
-  });
-
-  toast("✓ Servicio guardado");
+  toast(`✓ ${dServicios.length} servicio${dServicios.length>1?"s":""} guardados`);
   limpiarDomicilio(true);
-  btn.disabled = false; btn.textContent = "✅ Guardar servicio";
+  btn.disabled = false; btn.textContent = "✅ Guardar toda la jornada";
 }
 
 function limpiarDomicilio(silencioso) {
-  if (!silencioso && !confirm("¿Limpiar el formulario?")) return;
-  dGastos = [];
+  if (!silencioso && !confirm("¿Limpiar todo el formulario?")) return;
+  dGastos    = [];
+  dServicios = [];
   dConductor = null;
   document.querySelectorAll("#tab-domicilios .conductor-card").forEach(c => c.classList.remove("selected"));
   document.getElementById("d-fecha").value   = hoyISO();
@@ -871,6 +973,7 @@ function limpiarDomicilio(silencioso) {
   document.querySelectorAll(".tipo-btn").forEach((b,i) => b.classList.toggle("active", i===0));
   dTipo = "Domicilio a cliente";
   renderGastosLista(dGastos, "d-gastos-lista", "eliminarGastoD");
+  renderServiciosLista();
 }
 
 /* ════════════════════════════════════════════════
