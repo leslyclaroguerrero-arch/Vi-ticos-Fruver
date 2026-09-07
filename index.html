@@ -366,16 +366,7 @@ header p  { font-size: 11px; opacity: .65; margin-top: 1px; }
       </div>
     </div>
 
-    <div class="row2">
-      <div class="field"><label>Fecha</label><input type="date" id="d-fecha"></div>
-      <div class="field">
-        <label>Tipo de servicio</label>
-        <div class="tipo-grid tipo-grid-2" style="margin-top:4px;">
-          <button class="tipo-btn active" data-tipo="Domicilio a cliente" onclick="selTipoD(this)">📦<br>Domicilio<br>a cliente</button>
-          <button class="tipo-btn" data-tipo="Transporte de mercancía" onclick="selTipoD(this)">🏪<br>Transporte<br>de mercancía</button>
-        </div>
-      </div>
-    </div>
+    <div class="field"><label>Fecha</label><input type="date" id="d-fecha"></div>
   </div>
 
   <!-- PASO 2: Lista de servicios del día -->
@@ -390,6 +381,14 @@ header p  { font-size: 11px; opacity: .65; margin-top: 1px; }
     <!-- Formulario para agregar un servicio -->
     <div class="add-gasto-form visible" id="d-form-servicio" style="display:block;">
       <div style="font-size:13px;font-weight:700;color:#1e4d2b;margin-bottom:10px;">Nuevo servicio</div>
+
+      <div class="field">
+        <label>Tipo de servicio</label>
+        <div class="tipo-grid tipo-grid-2" style="margin-top:4px;">
+          <button class="tipo-btn active" data-tipo="Domicilio a cliente" onclick="selTipoD(this)">📦<br>Domicilio<br>a cliente</button>
+          <button class="tipo-btn" data-tipo="Transporte de mercancía" onclick="selTipoD(this)">🏪<br>Transporte<br>de mercancía</button>
+        </div>
+      </div>
 
       <div class="field">
         <label>Cliente o referencia</label>
@@ -862,11 +861,15 @@ function renderServiciosLista() {
   cont.textContent = dServicios.length ? `(${dServicios.length} agregado${dServicios.length>1?"s":""})` : "";
   if (!dServicios.length) { lista.innerHTML = ""; return; }
   lista.innerHTML = dServicios.map((s, i) => {
-    const totalG = s.gastos.reduce((a,g) => a+g.monto, 0);
+    const totalG   = s.gastos.reduce((a,g) => a+g.monto, 0);
+    const tipoTag  = s.tipo === "Domicilio a cliente"
+      ? `<span style="font-size:10px;background:#e3f2fd;color:#1565c0;border-radius:10px;padding:1px 8px;font-weight:700;">📦 Domicilio</span>`
+      : `<span style="font-size:10px;background:#fff3e0;color:#e65100;border-radius:10px;padding:1px 8px;font-weight:700;">🏪 Mercancía</span>`;
     return `
       <div class="servicio-item">
         <div class="servicio-num">${i+1}</div>
         <div class="servicio-info">
+          <div style="margin-bottom:4px;">${tipoTag}</div>
           <div class="servicio-cliente">👤 ${s.cliente}</div>
           ${s.notas ? `<div class="servicio-notas">📝 ${s.notas}</div>` : ""}
           ${totalG > 0
@@ -890,15 +893,19 @@ function agregarServicioALista() {
   if (!cliente) { alert("Ingresa el cliente o referencia."); return; }
 
   dServicios.push({
+    tipo:   dTipo,   // cada servicio tiene su propio tipo
     cliente,
     notas:  document.getElementById("d-notas").value.trim(),
     gastos: dGastos.map(g => ({ cat: g.cat, desc: g.desc, monto: g.monto }))
   });
 
-  // Limpiar solo el mini-formulario (conductor, fecha y tipo se mantienen)
+  // Limpiar solo el mini-formulario, mantener conductor y fecha
   dGastos = [];
   document.getElementById("d-cliente").value = "";
   document.getElementById("d-notas").value   = "";
+  // Resetear tipo al primero visualmente
+  document.querySelectorAll(".tipo-btn").forEach((b,i) => b.classList.toggle("active", i===0));
+  dTipo = "Domicilio a cliente";
   renderGastosLista(dGastos, "d-gastos-lista", "eliminarGastoD");
   renderServiciosLista();
   document.getElementById("d-cliente").focus();
@@ -937,7 +944,7 @@ async function guardarTodosLosServicios() {
       body: JSON.stringify({
         tipo: "domicilio",
         conductor: dConductor, fecha,
-        tipoServicio: dTipo,
+        tipoServicio: s.tipo,   // tipo individual de cada servicio
         cliente: s.cliente,
         notas: s.notas,
         totalGastos, detalleGastos
@@ -948,7 +955,7 @@ async function guardarTodosLosServicios() {
     todosLosViajes.push({
       id: Date.now() + Math.random(), fuente: "domicilio",
       conductor: dConductor, fecha,
-      tipo: dTipo,
+      tipo: s.tipo,             // tipo individual
       destino: s.cliente, cliente: s.cliente,
       notas: s.notas,
       gastos: s.gastos,
