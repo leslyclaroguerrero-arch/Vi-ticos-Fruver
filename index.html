@@ -867,9 +867,14 @@ function badgeEmoji(tipo) {
 function renderHistorial() {
   const mes = document.getElementById("h-mes").value;
 
+  // Normalizar texto para comparación (quita tildes, pasa a minúsculas)
+  const norm = s => (s||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().trim();
+
   const filtrados = todosLosViajes.filter(v => {
     const mesOk       = v.fecha.substring(0,7) === mes;
-    const conductorOk = hConductor === "Todos" || v.conductor === hConductor;
+    // Filtro conductor: comparar por primer apellido normalizado para tolerar variaciones
+    const conductorOk = hConductor === "Todos" ||
+                        norm(v.conductor).includes(norm(hConductor.split(" ")[0]));
     const tipoOk      = hFiltroTipo === "Todos" || v.tipo === hFiltroTipo;
     return mesOk && conductorOk && tipoOk;
   });
@@ -906,23 +911,17 @@ function renderHistorial() {
   lista.innerHTML = ordenados.map(v => {
     const fechaStr = new Date(v.fecha + "T12:00:00")
       .toLocaleDateString("es-CO", { weekday:"short", day:"numeric", month:"short" });
-    const gastosList = v.gastos.length
-      ? v.gastos.map(g => `${CATS[g.cat].label} ${g.desc}: ${cop(g.monto)}`).join(" · ")
-      : null;
     return `
       <div class="viaje-card">
         <div class="viaje-card-head">
           <span class="badge ${badgeClase(v.tipo)}">${badgeEmoji(v.tipo)} ${v.tipo}</span>
           <span class="viaje-fecha">${fechaStr}</span>
         </div>
-        <div class="viaje-destino">${v.destino}</div>
-        ${v.conductor && hConductor==="Todos" ? `<div class="viaje-detalle">🚐 ${v.conductor}</div>` : ""}
-        ${v.cliente   ? `<div class="viaje-detalle">👤 ${v.cliente}</div>` : ""}
-        ${v.notas     ? `<div class="viaje-detalle" style="font-style:italic;color:#888;">📝 ${v.notas}</div>` : ""}
-        ${gastosList
-          ? `<div class="viaje-gastos">💸 ${gastosList} · <strong>Total: ${cop(v.totalGastos)}</strong></div>`
-          : `<div class="viaje-sin-g">Sin gastos registrados</div>`}
-        <span class="viaje-fuente">${v.fuente === "viatico" ? "🚛 Viático" : "📦 Servicio local"}</span>
+        <div class="viaje-destino">📍 ${v.destino || v.cliente || "—"}</div>
+        <div class="viaje-detalle">👤 ${v.conductor || "—"}</div>
+        ${v.totalGastos > 0
+          ? `<div class="viaje-gastos">💰 Total gastos: <strong>${cop(v.totalGastos)}</strong></div>`
+          : `<div class="viaje-sin-g">Sin gastos</div>`}
       </div>`;
   }).join("");
 }
@@ -938,12 +937,15 @@ async function cargarHistorialDesdeSheets() {
   lista.innerHTML = "";
 
   try {
-    const resp = await fetch(SHEETS_URL + "?action=historial", { method: "GET" });
+    // Usar POST (igual que el resto de llamadas) para evitar problemas de CORS
+    const resp = await fetch(SHEETS_URL, {
+      method:  "POST",
+      headers: { "Content-Type": "text/plain" },
+      body:    JSON.stringify({ tipo: "leerHistorial" })
+    });
     const data = await resp.json();
 
     if (data.ok && Array.isArray(data.viajes)) {
-      // Convertir filas del Sheets al formato interno
-      // El Sheets devuelve: { fecha, conductor, tipo, referencia, totalGastos, notas }
       const nuevos = data.viajes.map((v, i) => ({
         id:          "sh_" + i,
         fuente:      v.tipo === "Viático" ? "viatico" : "domicilio",
@@ -953,7 +955,7 @@ async function cargarHistorialDesdeSheets() {
         destino:     v.referencia || "",
         cliente:     v.referencia || "",
         notas:       v.notas      || "",
-        gastos:      [],           // el historial resumido no tiene detalle
+        gastos:      [],
         totalGastos: Number(v.totalGastos) || 0
       }));
 
