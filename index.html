@@ -158,7 +158,42 @@ header p  { font-size: 11px; opacity: .65; margin-top: 1px; }
 .res-total .num    { font-size: 30px; font-weight: 800; }
 
 /* Viaje card historial */
-.viaje-card { border: 1px solid #dde8da; border-radius: 10px; padding: 12px; margin-bottom: 8px; background: #fff; }
+.viaje-card { border: 1px solid #dde8da; border-radius: 10px; padding: 12px; margin-bottom: 8px; background: #fff; cursor: pointer; transition: box-shadow .15s; }
+.viaje-card:hover { box-shadow: 0 2px 12px rgba(30,77,43,.12); border-color: #b0cdb5; }
+
+/* ── MODAL DETALLE VIAJE ── */
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.45);
+                 z-index: 500; align-items: flex-end; justify-content: center; }
+.modal-overlay.open { display: flex; }
+.modal-box { background: #fff; border-radius: 20px 20px 0 0; width: 100%; max-width: 600px;
+             padding: 0 0 30px; max-height: 90vh; overflow-y: auto;
+             animation: slideUp .25s ease; }
+@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+.modal-handle { width: 40px; height: 4px; background: #cdd8ca; border-radius: 4px;
+                margin: 12px auto 16px; }
+.modal-header { padding: 0 18px 14px; border-bottom: 1px solid #eef3ec; }
+.modal-tipo { font-size: 11px; font-weight: 700; letter-spacing: .8px; text-transform: uppercase; margin-bottom: 6px; }
+.modal-destino { font-size: 20px; font-weight: 800; color: #1a2a1a; margin-bottom: 4px; }
+.modal-meta { font-size: 13px; color: #556; }
+.modal-body { padding: 16px 18px; }
+.modal-section-title { font-size: 11px; font-weight: 700; letter-spacing: 1.2px;
+                        text-transform: uppercase; color: #1e4d2b; margin-bottom: 10px;
+                        padding-bottom: 6px; border-bottom: 1px solid #eef3ec; }
+.cat-row { display: flex; justify-content: space-between; align-items: center;
+           padding: 8px 0; border-bottom: 1px solid #f5f7f2; font-size: 14px; }
+.cat-row:last-child { border-bottom: none; }
+.cat-row .cat-nombre { color: #334; }
+.cat-row .cat-valor  { font-weight: 700; color: #b85c00; }
+.cat-total { display: flex; justify-content: space-between; padding: 12px 0 0;
+             font-size: 16px; font-weight: 800; border-top: 2px solid #1e4d2b;
+             margin-top: 6px; color: #1a2a1a; }
+.modal-evidencias { display: block; margin-top: 14px; background: #1e4d2b; color: #fff;
+                    border-radius: 10px; padding: 13px; text-align: center;
+                    text-decoration: none; font-size: 15px; font-weight: 700; }
+.modal-sin-gastos { text-align: center; padding: 16px; color: #aaa; font-size: 14px; }
+.modal-close { display: block; width: calc(100% - 36px); margin: 0 18px; padding: 13px;
+               background: #f5f7f2; border: none; border-radius: 10px; font-size: 15px;
+               font-weight: 700; cursor: pointer; font-family: inherit; color: #556; }
 .viaje-card-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
 .badge { font-size: 11px; font-weight: 700; letter-spacing: .6px; padding: 3px 10px;
          border-radius: 20px; text-transform: uppercase; }
@@ -181,6 +216,24 @@ header p  { font-size: 11px; opacity: .65; margin-top: 1px; }
 <body>
 
 <div id="toast"></div>
+
+<!-- ── MODAL DETALLE VIAJE ── -->
+<div class="modal-overlay" id="modal-overlay" onclick="cerrarModal(event)">
+  <div class="modal-box" id="modal-box">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <div class="modal-tipo" id="m-tipo"></div>
+      <div class="modal-destino" id="m-destino"></div>
+      <div class="modal-meta" id="m-meta"></div>
+    </div>
+    <div class="modal-body">
+      <div class="modal-section-title">Resumen de gastos</div>
+      <div id="m-gastos"></div>
+      <div id="m-evidencias-wrap"></div>
+    </div>
+    <button class="modal-close" onclick="cerrarModal()">Cerrar</button>
+  </div>
+</div>
 
 <header>
   <div class="logo">🥦</div>
@@ -908,11 +961,11 @@ function renderHistorial() {
 
   // — Lista de viajes ordenados por fecha desc —
   const ordenados = [...filtrados].sort((a,b) => b.fecha.localeCompare(a.fecha));
-  lista.innerHTML = ordenados.map(v => {
+  lista.innerHTML = ordenados.map((v, idx) => {
     const fechaStr = new Date(v.fecha + "T12:00:00")
       .toLocaleDateString("es-CO", { weekday:"short", day:"numeric", month:"short" });
     return `
-      <div class="viaje-card">
+      <div class="viaje-card" onclick="abrirDetalle(${idx})">
         <div class="viaje-card-head">
           <span class="badge ${badgeClase(v.tipo)}">${badgeEmoji(v.tipo)} ${v.tipo}</span>
           <span class="viaje-fecha">${fechaStr}</span>
@@ -920,12 +973,126 @@ function renderHistorial() {
         <div class="viaje-destino">📍 ${v.destino || v.cliente || "—"}</div>
         <div class="viaje-detalle">👤 ${v.conductor || "—"}</div>
         ${v.totalGastos > 0
-          ? `<div class="viaje-gastos">💰 Total gastos: <strong>${cop(v.totalGastos)}</strong></div>`
+          ? `<div class="viaje-gastos">💰 Total: <strong>${cop(v.totalGastos)}</strong></div>`
           : `<div class="viaje-sin-g">Sin gastos</div>`}
+        <div style="font-size:11px;color:#b0cdb5;margin-top:6px;">Toca para ver detalle →</div>
       </div>`;
   }).join("");
+  // guardar referencia a los viajes ordenados para el modal
+  window._viajesOrdenados = ordenados;
 }
 
+
+/* ════════════════════════════════════════════════
+   MODAL DETALLE DE VIAJE
+   ════════════════════════════════════════════════ */
+
+const CATS_LABELS = {
+  combustible: "⛽ Combustible",
+  peaje:       "🛣️ Peaje / Pesaje",
+  comida:      "🍱 Comida",
+  viatico:     "💵 Viático",
+  imprevisto:  "⚠️ Imprevisto",
+  otro:        "📋 Otro"
+};
+
+// Abre el modal con el detalle del viaje seleccionado
+async function abrirDetalle(idx) {
+  const v = window._viajesOrdenados[idx];
+  if (!v) return;
+
+  // Rellenar cabecera con info básica inmediatamente
+  document.getElementById("m-tipo").innerHTML =
+    `<span class="badge ${badgeClase(v.tipo)}">${badgeEmoji(v.tipo)} ${v.tipo}</span>`;
+  document.getElementById("m-destino").textContent = v.destino || v.cliente || "—";
+  const fechaStr = new Date(v.fecha + "T12:00:00")
+    .toLocaleDateString("es-CO", { weekday:"long", day:"numeric", month:"long", year:"numeric" });
+  document.getElementById("m-meta").textContent = `👤 ${v.conductor || "—"} · ${fechaStr}`;
+  document.getElementById("m-gastos").innerHTML =
+    `<div style="text-align:center;padding:16px;color:#aaa;font-size:13px;">⏳ Cargando detalle…</div>`;
+  document.getElementById("m-evidencias-wrap").innerHTML = "";
+  document.getElementById("modal-overlay").classList.add("open");
+  document.body.style.overflow = "hidden";
+
+  // Si el viaje ya tiene detalle cargado, mostrar directo
+  if (v.detalle) {
+    renderDetalleModal(v);
+    return;
+  }
+
+  // Si viene del Sheets (fuente "viatico" o "domicilio") pedir detalle al Apps Script
+  try {
+    const resp = await fetch(SHEETS_URL, {
+      method:  "POST",
+      headers: { "Content-Type": "text/plain" },
+      body:    JSON.stringify({
+        tipo:      "leerDetalleViaje",
+        fuente:    v.fuente,
+        conductor: v.conductor,
+        fecha:     v.fecha,
+        destino:   v.destino || v.cliente || ""
+      })
+    });
+    const data = await resp.json();
+    if (data.ok && data.detalle) {
+      v.detalle = data.detalle; // cachear para no volver a pedir
+    }
+  } catch(err) {
+    console.warn("Error cargando detalle:", err);
+  }
+
+  renderDetalleModal(v);
+}
+
+function renderDetalleModal(v) {
+  const det = v.detalle;
+
+  if (!det || v.totalGastos === 0) {
+    document.getElementById("m-gastos").innerHTML =
+      `<div class="modal-sin-gastos">Este viaje no tuvo gastos registrados.</div>`;
+    document.getElementById("m-evidencias-wrap").innerHTML = "";
+    return;
+  }
+
+  // Construir filas de categorías (solo las que tienen valor > 0)
+  const cats = [
+    { key:"combustible", label: CATS_LABELS.combustible },
+    { key:"peaje",       label: CATS_LABELS.peaje       },
+    { key:"comida",      label: CATS_LABELS.comida      },
+    { key:"viatico",     label: CATS_LABELS.viatico     },
+    { key:"imprevisto",  label: CATS_LABELS.imprevisto  },
+    { key:"otro",        label: CATS_LABELS.otro        }
+  ];
+
+  const filas = cats
+    .filter(c => det[c.key] && det[c.key] > 0)
+    .map(c => `
+      <div class="cat-row">
+        <span class="cat-nombre">${c.label}</span>
+        <span class="cat-valor">${cop(det[c.key])}</span>
+      </div>`).join("");
+
+  const totalHtml = `
+    <div class="cat-total">
+      <span>Total gastos</span>
+      <span>${cop(v.totalGastos)}</span>
+    </div>`;
+
+  document.getElementById("m-gastos").innerHTML = filas + totalHtml;
+
+  // Link a evidencias en Drive (si existe)
+  const evHtml = det.urlEvidencias
+    ? `<a href="${det.urlEvidencias}" target="_blank" class="modal-evidencias">📁 Ver evidencias en Drive</a>`
+    : "";
+  document.getElementById("m-evidencias-wrap").innerHTML = evHtml;
+}
+
+function cerrarModal(event) {
+  // Si el click fue dentro del modal-box, no cerrar
+  if (event && event.target !== document.getElementById("modal-overlay")) return;
+  document.getElementById("modal-overlay").classList.remove("open");
+  document.body.style.overflow = "";
+}
 
 /* ════════════════════════════════════════════════
    CARGA INICIAL DEL HISTORIAL DESDE SHEETS
