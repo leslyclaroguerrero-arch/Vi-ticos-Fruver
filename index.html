@@ -3,79 +3,91 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Planilla de Viáticos – Fruver Barranquilla</title>
+<title>Transportes Fruver – Barranquilla</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: 'Segoe UI', Arial, sans-serif; background: #f5f7f2; color: #1a2a1a; min-height: 100vh; }
 
 /* ── HEADER ── */
-header { background: #1e4d2b; color: #fff; padding: 18px 20px 14px; display: flex; align-items: center; gap: 12px; }
-header .logo { font-size: 28px; }
-header h1 { font-size: 18px; font-weight: 700; line-height: 1.2; }
-header p  { font-size: 11px; opacity: .7; margin-top: 2px; }
+header { background: #1e4d2b; color: #fff; padding: 16px 20px 12px; display: flex; align-items: center; gap: 12px; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,.2); }
+header .logo { font-size: 26px; }
+header h1 { font-size: 17px; font-weight: 700; line-height: 1.2; }
+header p  { font-size: 11px; opacity: .65; margin-top: 1px; }
 
 /* ── TABS ── */
-.tabs { display: flex; background: #163d22; }
-.tab-btn { flex: 1; padding: 12px 8px; border: none; background: transparent; color: rgba(255,255,255,.55);
-           font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit;
-           border-bottom: 3px solid transparent; transition: all .15s; letter-spacing: .3px; }
-.tab-btn.active { color: #fff; border-bottom-color: #6fcf8a; background: rgba(255,255,255,.06); }
+.tabs { display: flex; background: #163d22; border-bottom: 1px solid #0f2e18; }
+.tab-btn { flex: 1; padding: 11px 4px; border: none; background: transparent;
+           color: rgba(255,255,255,.5); font-size: 12px; font-weight: 600;
+           cursor: pointer; font-family: inherit; border-bottom: 3px solid transparent;
+           transition: all .15s; line-height: 1.3; }
+.tab-btn.active { color: #fff; border-bottom-color: #6fcf8a; background: rgba(255,255,255,.07); }
 .tab-pane { display: none; }
 .tab-pane.active { display: block; }
 
-/* ── FORM ELEMENTS ── */
+/* ── SECTIONS ── */
 .section { background: #fff; margin: 14px 14px 0; border-radius: 12px; padding: 16px; border: 1px solid #dde8da; }
-.section-title { font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;
+.section-title { font-size: 11px; font-weight: 700; letter-spacing: 1.4px; text-transform: uppercase;
                  color: #1e4d2b; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #eef3ec; }
+
+/* ── FIELDS ── */
 .field { margin-bottom: 12px; }
 .field label { display: block; font-size: 12px; color: #556; margin-bottom: 4px; font-weight: 600; }
 .field input, .field select, .field textarea {
   width: 100%; border: 1.5px solid #cdd8ca; border-radius: 8px; padding: 10px 12px;
-  font-size: 15px; color: #1a2a1a; background: #f9fbf8; outline: none; transition: border-color .15s; font-family: inherit; }
+  font-size: 15px; color: #1a2a1a; background: #f9fbf8; outline: none;
+  transition: border-color .15s; font-family: inherit; }
 .field input:focus, .field select:focus, .field textarea:focus { border-color: #1e4d2b; background: #fff; }
-.field textarea { resize: vertical; min-height: 60px; }
+.field textarea { resize: vertical; min-height: 52px; }
 .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 
-/* ── GASTO ITEMS ── */
+/* ── TIPO SERVICIO SELECTOR ── */
+.tipo-grid { display: grid; gap: 8px; margin-bottom: 4px; }
+.tipo-grid-2 { grid-template-columns: 1fr 1fr; }
+.tipo-grid-1 { grid-template-columns: 1fr; }
+.tipo-btn { border: 2px solid #cdd8ca; background: #fff; border-radius: 10px; padding: 11px 8px;
+            font-size: 13px; font-weight: 700; cursor: pointer; text-align: center;
+            transition: all .15s; line-height: 1.5; font-family: inherit; color: #1a2a1a; }
+.tipo-btn.active { border-color: #1e4d2b; background: #1e4d2b; color: #fff; }
+
+/* ── GASTOS ── */
 .gasto-item { border: 1px solid #dde8da; border-radius: 10px; padding: 12px; margin-bottom: 8px; background: #f9fbf8; }
-.gasto-item .gasto-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.gasto-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
 .cat-tag { font-size: 12px; background: #e8f2e8; color: #1e4d2b; border-radius: 20px; padding: 2px 10px; font-weight: 600; }
-.eliminar { background: none; border: none; color: #b55; font-size: 18px; cursor: pointer; padding: 0 4px; }
-.gasto-desc { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+.eliminar { background: none; border: none; color: #b55; font-size: 18px; cursor: pointer; padding: 0 4px; line-height: 1; }
+.gasto-desc  { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
 .gasto-monto { font-size: 18px; font-weight: 700; color: #b85c00; }
-.evidencia-thumb { width: 100%; max-height: 130px; object-fit: cover; border-radius: 6px; margin-top: 8px; border: 1px solid #dde8da; }
+.evidencia-thumb { width: 100%; max-height: 120px; object-fit: cover; border-radius: 6px; margin-top: 8px; border: 1px solid #dde8da; }
 .upload-status { font-size: 11px; margin-top: 5px; padding: 3px 10px; border-radius: 10px; display: inline-block; }
 .status-pending { background: #fff8e1; color: #b85c00; }
 .status-ok      { background: #e8f5e9; color: #1e7a3a; text-decoration: none; }
-.status-error   { background: #fdecea; color: #c0392b; }
 
-/* ── ADD GASTO FORM ── */
 .add-gasto-form { border: 1.5px dashed #1e4d2b; border-radius: 10px; padding: 14px; background: #f0f7f0; margin-bottom: 10px; display: none; }
 .add-gasto-form.visible { display: block; }
 .cat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 10px; }
 .cat-btn { border: 1.5px solid #cdd8ca; background: #fff; border-radius: 8px; padding: 7px 4px;
-           font-size: 11px; cursor: pointer; text-align: center; color: #1a2a1a; transition: all .15s; line-height: 1.4; }
+           font-size: 11px; cursor: pointer; text-align: center; color: #1a2a1a;
+           transition: all .15s; line-height: 1.4; font-family: inherit; }
 .cat-btn.active { border-color: #1e4d2b; background: #1e4d2b; color: #fff; }
 
 /* ── BUTTONS ── */
 .btn { display: block; width: 100%; padding: 13px; border: none; border-radius: 10px;
        font-size: 15px; font-weight: 700; cursor: pointer; font-family: inherit; transition: opacity .15s; }
 .btn:active { opacity: .8; }
-.btn:disabled { opacity: .6; cursor: not-allowed; }
+.btn:disabled { opacity: .55; cursor: not-allowed; }
 .btn-green   { background: #1e4d2b; color: #fff; }
 .btn-outline { background: #fff; color: #1e4d2b; border: 1.5px solid #1e4d2b; }
-.btn-small   { padding: 9px 14px; font-size: 13px; width: auto; display: inline-block; }
 .btn-danger  { background: #fff; color: #b55; border: 1.5px solid #b55; }
+.btn-small   { padding: 9px 14px; font-size: 13px; width: auto; display: inline-block; }
 
 /* ── BALANCE ── */
-#balance-box { margin: 14px 14px 0; border-radius: 12px; padding: 20px; border: 2px solid #1e4d2b; background: #fff; text-align: center; }
-.balance-label { font-size: 12px; color: #556; text-transform: uppercase; letter-spacing: 1px; }
-.balance-valor { font-size: 38px; font-weight: 800; margin: 4px 0 2px; line-height: 1; }
+.balance-box { margin: 14px 14px 0; border-radius: 12px; padding: 18px; border: 2px solid #1e4d2b; background: #fff; text-align: center; }
+.balance-label { font-size: 11px; color: #556; text-transform: uppercase; letter-spacing: 1px; }
+.balance-valor { font-size: 36px; font-weight: 800; margin: 4px 0 2px; line-height: 1; }
 .balance-det   { font-size: 13px; color: #778; margin-top: 4px; }
-.balance-pos  { color: #1e7a3a; }
-.balance-neg  { color: #c0392b; }
-.balance-zero { color: #888; }
-.resumen-cats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 14px; }
+.bal-pos  { color: #1e7a3a; }
+.bal-neg  { color: #c0392b; }
+.bal-zero { color: #888; }
+.resumen-cats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
 .resumen-cat  { background: #f5f7f2; border: 1px solid #dde8da; border-radius: 8px; padding: 8px 10px; font-size: 13px; }
 .resumen-cat span { font-weight: 700; color: #b85c00; display: block; }
 
@@ -83,85 +95,87 @@ header p  { font-size: 11px; opacity: .7; margin-top: 2px; }
 .acciones { padding: 14px; display: flex; flex-direction: column; gap: 10px; }
 
 /* ── PROGRESS ── */
-#progress-wrap { display: none; margin: 14px 14px 0; background: #fff; border: 1px solid #dde8da; border-radius: 10px; padding: 14px; }
-#progress-wrap p { font-size: 13px; color: #556; margin-bottom: 8px; }
-#progress-bar-bg { background: #eef3ec; border-radius: 20px; height: 10px; }
-#progress-bar    { background: #1e4d2b; height: 10px; border-radius: 20px; width: 0%; transition: width .4s; }
+.progress-wrap { display: none; margin: 14px 14px 0; background: #fff; border: 1px solid #dde8da; border-radius: 10px; padding: 14px; }
+.progress-wrap p { font-size: 13px; color: #556; margin-bottom: 8px; }
+.progress-bg  { background: #eef3ec; border-radius: 20px; height: 10px; }
+.progress-bar { background: #1e4d2b; height: 10px; border-radius: 20px; width: 0%; transition: width .4s; }
 
 /* ── TOAST ── */
-#toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #1e4d2b;
-         color: #fff; padding: 12px 24px; border-radius: 30px; font-size: 14px; font-weight: 600;
-         opacity: 0; transition: opacity .3s; pointer-events: none; z-index: 999;
-         white-space: nowrap; box-shadow: 0 4px 16px rgba(0,0,0,.2); }
+#toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+         background: #1e4d2b; color: #fff; padding: 12px 24px; border-radius: 30px;
+         font-size: 14px; font-weight: 600; opacity: 0; transition: opacity .3s;
+         pointer-events: none; z-index: 999; white-space: nowrap;
+         box-shadow: 0 4px 16px rgba(0,0,0,.2); max-width: 90vw; text-align: center; }
 #toast.show { opacity: 1; }
 
-/* ══════════════════════════════════
-   PESTAÑA 2 – HISTORIAL DEL CARRO
-   ══════════════════════════════════ */
-
-/* Selector de conductor */
-.conductor-selector { display: flex; flex-direction: column; gap: 8px; margin-bottom: 4px; }
-.conductor-card { border: 2px solid #dde8da; border-radius: 12px; padding: 14px 16px;
+/* ══════════════════════════════
+   PESTAÑA 2 – DOMICILIOS
+   ══════════════════════════════ */
+.conductor-selector { display: flex; flex-direction: column; gap: 8px; }
+.conductor-card { border: 2px solid #dde8da; border-radius: 12px; padding: 13px 16px;
                   background: #fff; cursor: pointer; display: flex; align-items: center;
                   gap: 12px; transition: all .15s; }
-.conductor-card:hover { border-color: #1e4d2b; background: #f0f7f0; }
+.conductor-card:hover   { border-color: #1e4d2b; background: #f0f7f0; }
 .conductor-card.selected { border-color: #1e4d2b; background: #1e4d2b; color: #fff; }
-.conductor-card .avatar { width: 40px; height: 40px; border-radius: 50%; background: #e8f2e8;
+.conductor-card .avatar { width: 38px; height: 38px; border-radius: 50%; background: #e8f2e8;
                            display: flex; align-items: center; justify-content: center;
-                           font-size: 18px; flex-shrink: 0; }
+                           font-size: 17px; flex-shrink: 0; }
 .conductor-card.selected .avatar { background: rgba(255,255,255,.2); }
-.conductor-card .info { flex: 1; }
-.conductor-card .nombre { font-size: 15px; font-weight: 700; }
-.conductor-card .placa  { font-size: 12px; opacity: .6; margin-top: 1px; }
-.conductor-card.selected .placa { opacity: .75; }
+.conductor-nombre { font-size: 15px; font-weight: 700; }
+.conductor-sub    { font-size: 12px; opacity: .6; margin-top: 1px; }
+.conductor-card.selected .conductor-sub { opacity: .75; }
 
-/* Viaje card en historial */
-.viaje-card { border: 1px solid #dde8da; border-radius: 10px; padding: 12px; margin-bottom: 8px; background: #fff; }
-.viaje-card-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
-.viaje-tipo { font-size: 11px; font-weight: 700; letter-spacing: .8px; padding: 3px 10px;
-              border-radius: 20px; text-transform: uppercase; }
-.tipo-domicilio  { background: #e3f2fd; color: #1565c0; }
-.tipo-batallon   { background: #e8f5e9; color: #1b5e20; }
-.tipo-fruver     { background: #fff3e0; color: #e65100; }
-.viaje-fecha   { font-size: 12px; color: #778; }
-.viaje-destino { font-size: 15px; font-weight: 700; margin: 4px 0 2px; }
-.viaje-origen  { font-size: 12px; color: #556; }
-.viaje-gastos  { font-size: 13px; color: #b85c00; font-weight: 600; margin-top: 4px; }
-.viaje-sin-gastos { font-size: 12px; color: #aaa; }
-.viaje-fuente  { font-size: 10px; background: #f0f0f0; color: #778; border-radius: 10px;
-                 padding: 1px 8px; display: inline-block; margin-top: 4px; }
+/* ══════════════════════════════
+   PESTAÑA 3 – HISTORIAL
+   ══════════════════════════════ */
+.hist-conductor-tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+.hc-btn { border: 1.5px solid #cdd8ca; background: #fff; border-radius: 20px; padding: 6px 14px;
+          font-size: 12px; font-weight: 600; cursor: pointer; color: #556;
+          transition: all .15s; font-family: inherit; }
+.hc-btn.active { border-color: #1e4d2b; background: #1e4d2b; color: #fff; }
 
-/* Filtros historial */
-.filtros { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
-.filtro-btn { border: 1.5px solid #cdd8ca; background: #fff; border-radius: 20px; padding: 5px 14px;
-              font-size: 12px; font-weight: 600; cursor: pointer; color: #556; transition: all .15s; font-family: inherit; }
-.filtro-btn.active { border-color: #1e4d2b; background: #1e4d2b; color: #fff; }
+.mes-wrap { display: flex; gap: 8px; align-items: center; margin-bottom: 12px; }
+.mes-wrap select { flex: 1; border: 1.5px solid #cdd8ca; border-radius: 8px; padding: 8px 12px;
+                   font-size: 14px; background: #f9fbf8; font-family: inherit; color: #1a2a1a; outline: none; }
+.mes-wrap select:focus { border-color: #1e4d2b; }
+
+.filtro-tipo-wrap { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+.ft-btn { border: 1.5px solid #cdd8ca; background: #fff; border-radius: 20px; padding: 5px 13px;
+          font-size: 12px; font-weight: 600; cursor: pointer; color: #556;
+          transition: all .15s; font-family: inherit; }
+.ft-btn.active { border-color: #1e4d2b; background: #1e4d2b; color: #fff; }
 
 /* Resumen mensual */
-.resumen-mensual { background: #1e4d2b; color: #fff; border-radius: 12px; padding: 16px; margin-bottom: 14px; }
-.resumen-mensual h3 { font-size: 13px; opacity: .7; font-weight: 600; margin-bottom: 10px; letter-spacing: .5px; }
-.resumen-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-.resumen-stat { text-align: center; }
-.resumen-stat .valor { font-size: 22px; font-weight: 800; line-height: 1; }
-.resumen-stat .etiq  { font-size: 10px; opacity: .65; margin-top: 2px; letter-spacing: .5px; text-transform: uppercase; }
+.resumen-box { background: #1e4d2b; color: #fff; border-radius: 12px; padding: 16px; margin-bottom: 14px; }
+.resumen-box h3 { font-size: 11px; opacity: .65; font-weight: 700; letter-spacing: 1px; margin-bottom: 12px; text-transform: uppercase; }
+.res-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+.res-bloque { background: rgba(255,255,255,.1); border-radius: 10px; padding: 12px; text-align: center; }
+.res-bloque .titulo { font-size: 11px; opacity: .7; letter-spacing: .5px; margin-bottom: 6px; text-transform: uppercase; }
+.res-bloque .num   { font-size: 26px; font-weight: 800; line-height: 1; }
+.res-bloque .sub   { font-size: 11px; opacity: .65; margin-top: 3px; }
+.res-total { background: rgba(255,255,255,.15); border-radius: 10px; padding: 12px; text-align: center; margin-top: 8px; }
+.res-total .titulo { font-size: 11px; opacity: .7; letter-spacing: .5px; margin-bottom: 4px; text-transform: uppercase; }
+.res-total .num    { font-size: 30px; font-weight: 800; }
 
-/* Formulario nuevo viaje */
-.tipo-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px; }
-.tipo-btn  { border: 2px solid #cdd8ca; background: #fff; border-radius: 10px; padding: 10px 6px;
-             font-size: 12px; font-weight: 700; cursor: pointer; text-align: center; transition: all .15s;
-             line-height: 1.5; font-family: inherit; }
-.tipo-btn.active { border-color: #1e4d2b; background: #1e4d2b; color: #fff; }
+/* Viaje card historial */
+.viaje-card { border: 1px solid #dde8da; border-radius: 10px; padding: 12px; margin-bottom: 8px; background: #fff; }
+.viaje-card-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
+.badge { font-size: 11px; font-weight: 700; letter-spacing: .6px; padding: 3px 10px;
+         border-radius: 20px; text-transform: uppercase; }
+.badge-viatico   { background: #e8f5e9; color: #1b5e20; }
+.badge-domicilio { background: #e3f2fd; color: #1565c0; }
+.badge-mercancia { background: #fff3e0; color: #e65100; }
+.viaje-fecha   { font-size: 12px; color: #778; }
+.viaje-destino { font-size: 15px; font-weight: 700; margin: 4px 0 2px; }
+.viaje-detalle { font-size: 12px; color: #556; margin-bottom: 2px; }
+.viaje-gastos  { font-size: 13px; color: #b85c00; font-weight: 600; margin-top: 4px; }
+.viaje-sin-g   { font-size: 12px; color: #bbb; margin-top: 4px; }
+.viaje-fuente  { font-size: 10px; background: #f0f0f0; color: #778; border-radius: 10px;
+                 padding: 2px 8px; display: inline-block; margin-top: 6px; }
 
-/* Estado vacío */
-.empty-state { text-align: center; padding: 32px 16px; color: #aaa; }
-.empty-state .icon { font-size: 40px; margin-bottom: 8px; }
+.empty-state { text-align: center; padding: 30px 16px; color: #bbb; }
+.empty-state .icon { font-size: 36px; margin-bottom: 8px; }
 .empty-state p { font-size: 14px; }
-
-/* Mes selector */
-.mes-selector { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
-.mes-selector select { flex: 1; border: 1.5px solid #cdd8ca; border-radius: 8px; padding: 8px 12px;
-                        font-size: 14px; background: #f9fbf8; font-family: inherit; color: #1a2a1a; outline: none; }
-.mes-selector select:focus { border-color: #1e4d2b; }
 </style>
 </head>
 <body>
@@ -171,45 +185,49 @@ header p  { font-size: 11px; opacity: .7; margin-top: 2px; }
 <header>
   <div class="logo">🥦</div>
   <div>
-    <h1>Fruver Barranquilla</h1>
-    <p>Gestión de viáticos y transporte · Entregas al Batallón</p>
+    <h1>Transportes Fruver</h1>
+    <p>Barranquilla · Viáticos, domicilios y seguimiento</p>
   </div>
 </header>
 
 <div class="tabs">
-  <button class="tab-btn active" onclick="cambiarTab('viaticos')">📊 Viáticos</button>
-  <button class="tab-btn"       onclick="cambiarTab('historial')">🚐 Historial del carro</button>
+  <button class="tab-btn active" onclick="cambiarTab('viaticos',this)">🚛 Viáticos</button>
+  <button class="tab-btn"        onclick="cambiarTab('domicilios',this)">📦 Domicilios</button>
+  <button class="tab-btn"        onclick="cambiarTab('historial',this)">📋 Historial</button>
 </div>
 
-<!-- ══════════════════════════════════════════════
-     PESTAÑA 1 – VIÁTICOS (original + conductor selector)
-     ══════════════════════════════════════════════ -->
+<!-- ═══════════════════════════════════════════════════
+     PESTAÑA 1 — VIÁTICOS (viajes fuera de la ciudad)
+     ═══════════════════════════════════════════════════ -->
 <div class="tab-pane active" id="tab-viaticos">
 
   <div class="section">
     <div class="section-title">Información del viaje</div>
     <div class="row2">
-      <div class="field"><label>Fecha</label><input type="date" id="fecha"></div>
-      <div class="field"><label>Destino</label><input type="text" id="destino" value="Batallón" placeholder="Ej: Batallón No. 4"></div>
+      <div class="field"><label>Fecha</label><input type="date" id="v-fecha"></div>
+      <div class="field"><label>Destino</label><input type="text" id="v-destino" placeholder="Ej: Batallón Cartagena"></div>
     </div>
     <div class="field">
       <label>Conductor</label>
-      <select id="conductor">
+      <select id="v-conductor">
         <option value="">— Selecciona conductor —</option>
-        <option value="Jonathan Castro">Jonathan Castro</option>
-        <option value="Edwin Pérez Ardila">Edwin Pérez Ardila</option>
-        <option value="Juan Andrés">Juan Andrés</option>
+        <option>Jonathan Castro</option>
+        <option>Edwin Pérez Ardila</option>
+        <option>Juan Andrés</option>
       </select>
     </div>
-    <div class="field"><label>Encargada de entrega</label><input type="text" id="encargada" placeholder="Nombre completo"></div>
-    <div class="field"><label>Dinero entregado (COP $)</label><input type="text" id="presupuesto" value="0" inputmode="numeric" oninput="formatearCampo(this); actualizarBalance()"></div>
-    <div class="field"><label>Observaciones</label><textarea id="notas" placeholder="Notas del viaje (opcional)"></textarea></div>
+    <div class="field"><label>Encargada de entrega</label><input type="text" id="v-encargada" placeholder="Nombre completo"></div>
+    <div class="field"><label>Dinero entregado (COP $)</label>
+      <input type="text" id="v-presupuesto" value="0" inputmode="numeric"
+        oninput="formatearCampo(this); actualizarBalance()">
+    </div>
+    <div class="field"><label>Observaciones</label><textarea id="v-notas" placeholder="Notas del viaje (opcional)"></textarea></div>
   </div>
 
   <div class="section">
     <div class="section-title">Gastos del viaje</div>
-    <div id="gastos-lista"></div>
-    <div class="add-gasto-form" id="form-gasto">
+    <div id="v-gastos-lista"></div>
+    <div class="add-gasto-form" id="v-form-gasto">
       <div style="font-size:13px;font-weight:700;color:#1e4d2b;margin-bottom:10px;">Nuevo gasto</div>
       <div class="cat-grid">
         <button class="cat-btn active" data-cat="combustible" onclick="selCat(this,'v')">⛽<br>Combustible</button>
@@ -219,712 +237,696 @@ header p  { font-size: 11px; opacity: .7; margin-top: 2px; }
         <button class="cat-btn" data-cat="imprevisto" onclick="selCat(this,'v')">⚠️<br>Imprevisto</button>
         <button class="cat-btn" data-cat="otro"       onclick="selCat(this,'v')">📋<br>Otro</button>
       </div>
-      <div class="field"><label>Descripción</label><input type="text" id="g-desc" placeholder="Ej: Gasolina Estación del Norte"></div>
-      <div class="field"><label>Monto (COP $)</label><input type="text" id="g-monto" placeholder="Ej: 80.000" inputmode="numeric" oninput="formatearCampo(this)"></div>
+      <div class="field"><label>Descripción</label><input type="text" id="vg-desc" placeholder="Ej: Gasolina Estación del Norte"></div>
+      <div class="field"><label>Monto (COP $)</label>
+        <input type="text" id="vg-monto" placeholder="Ej: 80.000" inputmode="numeric" oninput="formatearCampo(this)">
+      </div>
       <div class="field">
-        <label>Foto de factura o evidencia</label>
-        <input type="file" id="g-foto" accept="image/*" capture="environment"
+        <label>Foto de factura / evidencia</label>
+        <input type="file" id="vg-foto" accept="image/*" capture="environment"
           style="font-size:13px;background:#fff;border:1.5px solid #cdd8ca;border-radius:8px;padding:8px 10px;">
       </div>
       <div style="display:flex;gap:8px;margin-top:4px;">
-        <button class="btn btn-outline btn-small" onclick="cancelarGasto()">Cancelar</button>
-        <button class="btn btn-green btn-small" onclick="guardarGasto()" style="flex:1;">Guardar gasto ✓</button>
+        <button class="btn btn-outline btn-small" onclick="cancelarGastoV()">Cancelar</button>
+        <button class="btn btn-green btn-small" onclick="guardarGastoV()" style="flex:1;">Guardar gasto ✓</button>
       </div>
     </div>
-    <button class="btn btn-outline" id="btn-agregar" onclick="mostrarForm()" style="margin-top:4px;">+ Agregar gasto</button>
+    <button class="btn btn-outline" id="v-btn-agregar" onclick="mostrarFormV()" style="margin-top:4px;">+ Agregar gasto</button>
   </div>
 
-  <div id="balance-box">
+  <div class="balance-box" id="balance-box">
     <div class="balance-label">Balance del viaje</div>
-    <div class="balance-valor balance-zero" id="balance-valor">$ —</div>
+    <div class="balance-valor bal-zero" id="balance-valor">$ —</div>
     <div class="balance-det" id="balance-det">Ingresa el dinero entregado y los gastos</div>
     <div class="resumen-cats" id="resumen-cats" style="display:none;"></div>
   </div>
 
-  <div id="progress-wrap">
-    <p id="progress-txt">Procesando…</p>
-    <div id="progress-bar-bg"><div id="progress-bar"></div></div>
+  <div class="progress-wrap" id="v-progress">
+    <p id="v-progress-txt">Procesando…</p>
+    <div class="progress-bg"><div class="progress-bar" id="v-progress-bar"></div></div>
   </div>
 
   <div class="acciones">
-    <button class="btn btn-green" id="btn-enviar" onclick="enviarRegistro()">📊 Enviar registro a Google Sheets</button>
-    <button class="btn btn-outline" onclick="window.print()">📄 Imprimir / Guardar PDF</button>
-    <button class="btn btn-danger"  onclick="limpiarTodo(false)">🗑 Limpiar planilla</button>
+    <button class="btn btn-green" id="v-btn-enviar" onclick="enviarViatico()">📊 Enviar registro a Google Sheets</button>
+    <button class="btn btn-danger" onclick="limpiarViatico(false)">🗑 Limpiar planilla</button>
   </div>
   <div style="height:30px;"></div>
-</div><!-- /tab-viaticos -->
+</div>
 
 
-<!-- ══════════════════════════════════════════════
-     PESTAÑA 2 – HISTORIAL DEL CARRO
-     ══════════════════════════════════════════════ -->
+<!-- ═══════════════════════════════════════════════════
+     PESTAÑA 2 — DOMICILIOS / TRANSPORTE (dentro ciudad)
+     ═══════════════════════════════════════════════════ -->
+<div class="tab-pane" id="tab-domicilios">
+
+  <div class="section">
+    <div class="section-title">Registrar servicio</div>
+
+    <div class="field">
+      <label>Conductor</label>
+      <div class="conductor-selector" style="margin-top:4px;">
+        <div class="conductor-card" data-conductor="Jonathan Castro" onclick="selConductorD(this)">
+          <div class="avatar">🚐</div>
+          <div><div class="conductor-nombre">Jonathan Castro</div><div class="conductor-sub">Conductor</div></div>
+        </div>
+        <div class="conductor-card" data-conductor="Edwin Pérez Ardila" onclick="selConductorD(this)">
+          <div class="avatar">🚐</div>
+          <div><div class="conductor-nombre">Edwin Pérez Ardila</div><div class="conductor-sub">Conductor</div></div>
+        </div>
+        <div class="conductor-card" data-conductor="Juan Andrés" onclick="selConductorD(this)">
+          <div class="avatar">🚐</div>
+          <div><div class="conductor-nombre">Juan Andrés</div><div class="conductor-sub">Conductor</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row2">
+      <div class="field"><label>Fecha</label><input type="date" id="d-fecha"></div>
+      <div class="field">
+        <label>Tipo de servicio</label>
+        <div class="tipo-grid tipo-grid-2" style="margin-top:4px;">
+          <button class="tipo-btn active" data-tipo="Domicilio a cliente" onclick="selTipoD(this)">📦<br>Domicilio<br>a cliente</button>
+          <button class="tipo-btn" data-tipo="Transporte de mercancía" onclick="selTipoD(this)">🏪<br>Transporte<br>de mercancía</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="field"><label>Cliente o referencia</label>
+      <input type="text" id="d-cliente" placeholder="Ej: Restaurante El Buen Sabor">
+    </div>
+    <div class="field"><label>Observaciones (opcional)</label>
+      <textarea id="d-notas" placeholder="Notas del servicio" style="min-height:46px;"></textarea>
+    </div>
+  </div>
+
+  <!-- Gastos opcionales -->
+  <div class="section">
+    <div class="section-title">Gastos del servicio <span style="font-weight:400;opacity:.6;">(opcional)</span></div>
+    <div id="d-gastos-lista"></div>
+    <div class="add-gasto-form" id="d-form-gasto">
+      <div style="font-size:13px;font-weight:700;color:#1e4d2b;margin-bottom:10px;">Agregar gasto</div>
+      <div class="cat-grid">
+        <button class="cat-btn active" data-cat="combustible" onclick="selCat(this,'d')">⛽<br>Combustible</button>
+        <button class="cat-btn" data-cat="peaje"      onclick="selCat(this,'d')">🛣️<br>Peaje/Pesaje</button>
+        <button class="cat-btn" data-cat="comida"     onclick="selCat(this,'d')">🍱<br>Comida</button>
+        <button class="cat-btn" data-cat="viatico"    onclick="selCat(this,'d')">💵<br>Viático</button>
+        <button class="cat-btn" data-cat="imprevisto" onclick="selCat(this,'d')">⚠️<br>Imprevisto</button>
+        <button class="cat-btn" data-cat="otro"       onclick="selCat(this,'d')">📋<br>Otro</button>
+      </div>
+      <div class="field"><label>Descripción del gasto</label>
+        <input type="text" id="dg-desc" placeholder="Ej: Gasolina">
+      </div>
+      <div class="field"><label>Monto (COP $)</label>
+        <input type="text" id="dg-monto" inputmode="numeric" oninput="formatearCampo(this)" placeholder="Ej: 45.000">
+      </div>
+      <div class="field">
+        <label>Foto evidencia (opcional)</label>
+        <input type="file" id="dg-foto" accept="image/*" capture="environment"
+          style="font-size:13px;background:#fff;border:1.5px solid #cdd8ca;border-radius:8px;padding:8px 10px;">
+      </div>
+      <div style="display:flex;gap:8px;margin-top:4px;">
+        <button class="btn btn-outline btn-small" onclick="cancelarGastoD()">Cancelar</button>
+        <button class="btn btn-green btn-small" onclick="guardarGastoD()" style="flex:1;">Guardar ✓</button>
+      </div>
+    </div>
+    <button class="btn btn-outline btn-small" id="d-btn-agregar" onclick="mostrarFormD()" style="margin-top:4px;">+ Agregar gasto</button>
+  </div>
+
+  <div class="acciones">
+    <button class="btn btn-green" id="d-btn-guardar" onclick="guardarDomicilio()">✅ Guardar servicio</button>
+    <button class="btn btn-danger" onclick="limpiarDomicilio(false)">🗑 Limpiar formulario</button>
+  </div>
+  <div style="height:30px;"></div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════
+     PESTAÑA 3 — HISTORIAL (todos los viajes)
+     ═══════════════════════════════════════════════════ -->
 <div class="tab-pane" id="tab-historial">
 
-  <!-- Selector de conductor -->
   <div class="section">
-    <div class="section-title">Selecciona el conductor</div>
-    <div class="conductor-selector">
-      <div class="conductor-card" data-conductor="Jonathan Castro" onclick="seleccionarConductor(this)">
-        <div class="avatar">🚐</div>
-        <div class="info">
-          <div class="nombre">Jonathan Castro</div>
-          <div class="placa">Conductor</div>
-        </div>
-      </div>
-      <div class="conductor-card" data-conductor="Edwin Pérez Ardila" onclick="seleccionarConductor(this)">
-        <div class="avatar">🚐</div>
-        <div class="info">
-          <div class="nombre">Edwin Pérez Ardila</div>
-          <div class="placa">Conductor</div>
-        </div>
-      </div>
-      <div class="conductor-card" data-conductor="Juan Andrés" onclick="seleccionarConductor(this)">
-        <div class="avatar">🚐</div>
-        <div class="info">
-          <div class="nombre">Juan Andrés</div>
-          <div class="placa">Conductor</div>
-        </div>
-      </div>
+    <div class="section-title">Filtros</div>
+
+    <!-- Selector conductor -->
+    <div style="font-size:12px;font-weight:600;color:#556;margin-bottom:6px;">Conductor</div>
+    <div class="hist-conductor-tabs" id="hist-conductor-tabs">
+      <button class="hc-btn active" data-hc="Todos" onclick="selHConductor(this)">Todos</button>
+      <button class="hc-btn" data-hc="Jonathan Castro"   onclick="selHConductor(this)">Jonathan</button>
+      <button class="hc-btn" data-hc="Edwin Pérez Ardila" onclick="selHConductor(this)">Edwin</button>
+      <button class="hc-btn" data-hc="Juan Andrés"       onclick="selHConductor(this)">Juan Andrés</button>
+    </div>
+
+    <!-- Selector mes -->
+    <div style="font-size:12px;font-weight:600;color:#556;margin-bottom:6px;">Mes</div>
+    <div class="mes-wrap">
+      <select id="h-mes" onchange="renderHistorial()"></select>
+    </div>
+
+    <!-- Filtro tipo -->
+    <div style="font-size:12px;font-weight:600;color:#556;margin-bottom:6px;">Tipo de viaje</div>
+    <div class="filtro-tipo-wrap">
+      <button class="ft-btn active" data-ft="Todos"                   onclick="selFTipo(this)">Todos</button>
+      <button class="ft-btn" data-ft="Viático"                        onclick="selFTipo(this)">🚛 Viáticos</button>
+      <button class="ft-btn" data-ft="Domicilio a cliente"            onclick="selFTipo(this)">📦 Domicilios</button>
+      <button class="ft-btn" data-ft="Transporte de mercancía"        onclick="selFTipo(this)">🏪 Mercancía</button>
     </div>
   </div>
 
-  <!-- Panel del conductor seleccionado (oculto al inicio) -->
-  <div id="panel-conductor" style="display:none;">
-
-    <!-- Registrar nuevo viaje -->
-    <div class="section">
-      <div class="section-title">Registrar nuevo viaje</div>
-
-      <div class="row2">
-        <div class="field"><label>Fecha</label><input type="date" id="h-fecha"></div>
-        <div class="field">
-          <label>Tipo de servicio</label>
-          <div class="tipo-grid" style="margin-top:4px;">
-            <button class="tipo-btn active" data-tipo="Domicilio" onclick="selTipo(this)">📦<br>Domicilio</button>
-            <button class="tipo-btn" data-tipo="Batallón"  onclick="selTipo(this)">🪖<br>Batallón</button>
-            <button class="tipo-btn" data-tipo="Fruver"    onclick="selTipo(this)">🥦<br>Fruver</button>
-          </div>
-        </div>
+  <!-- Resumen mensual -->
+  <div class="resumen-box" id="h-resumen" style="display:none;margin:14px 14px 0;">
+    <h3 id="h-resumen-titulo">RESUMEN DEL MES</h3>
+    <div class="res-grid-2">
+      <div class="res-bloque">
+        <div class="titulo">Viáticos</div>
+        <div class="num" id="h-r-viaticos">0</div>
+        <div class="sub" id="h-r-viaticos-g">Sin gastos</div>
       </div>
-
-      <!-- Destino (siempre visible) -->
-      <div class="field">
-        <label>Destino / dirección</label>
-        <input type="text" id="h-destino" placeholder="Ej: Cra 15 #30-45, Barranquilla">
-      </div>
-
-      <!-- Campo extra para domicilio: quién solicitó -->
-      <div class="field" id="campo-cliente" style="display:none;">
-        <label>Cliente o referencia del domicilio</label>
-        <input type="text" id="h-cliente" placeholder="Ej: Restaurante El Buen Sabor">
-      </div>
-
-      <div class="field"><label>Observaciones (opcional)</label><textarea id="h-notas" placeholder="Notas del viaje" style="min-height:46px;"></textarea></div>
-
-      <!-- Gastos opcionales -->
-      <div style="border-top:1px solid #eef3ec;margin-top:4px;padding-top:12px;">
-        <div style="font-size:12px;font-weight:700;color:#556;letter-spacing:.5px;margin-bottom:8px;">GASTOS OPCIONALES</div>
-        <div id="h-gastos-lista"></div>
-        <div class="add-gasto-form" id="h-form-gasto">
-          <div style="font-size:13px;font-weight:700;color:#1e4d2b;margin-bottom:10px;">Agregar gasto</div>
-          <div class="cat-grid">
-            <button class="cat-btn active" data-cat="combustible" onclick="selCat(this,'h')">⛽<br>Combustible</button>
-            <button class="cat-btn" data-cat="peaje"      onclick="selCat(this,'h')">🛣️<br>Peaje/Pesaje</button>
-            <button class="cat-btn" data-cat="comida"     onclick="selCat(this,'h')">🍱<br>Comida</button>
-            <button class="cat-btn" data-cat="viatico"    onclick="selCat(this,'h')">💵<br>Viático</button>
-            <button class="cat-btn" data-cat="imprevisto" onclick="selCat(this,'h')">⚠️<br>Imprevisto</button>
-            <button class="cat-btn" data-cat="otro"       onclick="selCat(this,'h')">📋<br>Otro</button>
-          </div>
-          <div class="field"><label>Descripción del gasto</label><input type="text" id="hg-desc" placeholder="Ej: Gasolina"></div>
-          <div class="field"><label>Monto (COP $)</label><input type="text" id="hg-monto" inputmode="numeric" oninput="formatearCampo(this)" placeholder="Ej: 45.000"></div>
-          <div class="field">
-            <label>Foto de evidencia (opcional)</label>
-            <input type="file" id="hg-foto" accept="image/*" capture="environment"
-              style="font-size:13px;background:#fff;border:1.5px solid #cdd8ca;border-radius:8px;padding:8px 10px;">
-          </div>
-          <div style="display:flex;gap:8px;margin-top:4px;">
-            <button class="btn btn-outline btn-small" onclick="cancelarGastoH()">Cancelar</button>
-            <button class="btn btn-green btn-small" onclick="guardarGastoH()" style="flex:1;">Guardar ✓</button>
-          </div>
-        </div>
-        <button class="btn btn-outline btn-small" id="h-btn-agregar" onclick="mostrarFormH()" style="margin-top:4px;width:auto;">+ Agregar gasto</button>
-      </div>
-
-      <div style="margin-top:12px;">
-        <button class="btn btn-green" id="btn-guardar-viaje" onclick="guardarViaje()">✅ Guardar viaje</button>
+      <div class="res-bloque">
+        <div class="titulo">Domicilios / Transporte</div>
+        <div class="num" id="h-r-domicilios">0</div>
+        <div class="sub" id="h-r-domicilios-g">Sin gastos</div>
       </div>
     </div>
-
-    <!-- Historial mensual -->
-    <div class="section">
-      <div class="section-title">Historial mensual</div>
-
-      <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px;flex-wrap:wrap;">
-        <div class="mes-selector" style="flex:1;margin-bottom:0;">
-          <select id="filtro-mes" onchange="renderHistorial()"></select>
-        </div>
-        <div class="filtros" style="margin-bottom:0;">
-          <button class="filtro-btn active" data-ftipo="Todos" onclick="selFiltro(this)">Todos</button>
-          <button class="filtro-btn" data-ftipo="Domicilio" onclick="selFiltro(this)">📦 Domicilio</button>
-          <button class="filtro-btn" data-ftipo="Batallón"  onclick="selFiltro(this)">🪖 Batallón</button>
-          <button class="filtro-btn" data-ftipo="Fruver"    onclick="selFiltro(this)">🥦 Fruver</button>
-        </div>
-      </div>
-
-      <div id="resumen-mensual-box" style="display:none;" class="resumen-mensual">
-        <h3 id="resumen-titulo">RESUMEN DEL MES</h3>
-        <div class="resumen-grid">
-          <div class="resumen-stat"><div class="valor" id="r-viajes">0</div><div class="etiq">Viajes</div></div>
-          <div class="resumen-stat"><div class="valor" id="r-tipos">—</div><div class="etiq">Tipo frecuente</div></div>
-          <div class="resumen-stat"><div class="valor" id="r-gastos">$0</div><div class="etiq">Total gastos</div></div>
-        </div>
-      </div>
-
-      <div id="historial-lista"></div>
-
-      <div style="margin-top:10px;">
-        <button class="btn btn-outline" id="btn-enviar-historial" onclick="enviarHistorial()">📊 Enviar historial a Sheets</button>
-      </div>
+    <div class="res-total">
+      <div class="titulo">Total viajes · Total gastos</div>
+      <div class="num" id="h-r-total">0 viajes · $0</div>
     </div>
+  </div>
 
-  </div><!-- /panel-conductor -->
+  <!-- Lista de viajes -->
+  <div class="section" style="margin-top:14px;">
+    <div class="section-title">Viajes registrados</div>
+    <div id="h-lista"></div>
+  </div>
 
   <div style="height:30px;"></div>
-</div><!-- /tab-historial -->
+</div>
 
 
 <script>
-/* ════════════════════════════════════════════════════════════════
-   CONSTANTES COMPARTIDAS
-   ════════════════════════════════════════════════════════════════ */
+/* ════════════════════════════════════════════════
+   CONSTANTES
+   ════════════════════════════════════════════════ */
 const SHEETS_URL = "https://script.google.com/macros/s/AKfycbw2Jn-PXmRasYa9MmixxlnDAtg4Xkvx-5wv1qrOHzti2MBbhgng7qNPn-qnzl4i0RofAA/exec";
 
 const CATS = {
-  combustible: { label: "⛽ Combustible",   carpeta: "Combustible"  },
-  peaje:       { label: "🛣️ Peaje/Pesaje",  carpeta: "Peaje-Pesaje" },
-  comida:      { label: "🍱 Comida",         carpeta: "Comida"       },
-  viatico:     { label: "💵 Viático",        carpeta: "Viatico"      },
-  imprevisto:  { label: "⚠️ Imprevisto",     carpeta: "Imprevisto"   },
-  otro:        { label: "📋 Otro",           carpeta: "Otro"         }
+  combustible: { label: "⛽ Combustible",  carpeta: "Combustible"  },
+  peaje:       { label: "🛣️ Peaje/Pesaje", carpeta: "Peaje-Pesaje" },
+  comida:      { label: "🍱 Comida",        carpeta: "Comida"       },
+  viatico:     { label: "💵 Viático",       carpeta: "Viatico"      },
+  imprevisto:  { label: "⚠️ Imprevisto",    carpeta: "Imprevisto"   },
+  otro:        { label: "📋 Otro",          carpeta: "Otro"         }
 };
 
 const MESES = ["Enero","Febrero","Marzo","Abril","Mayo","Junio",
                "Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
 
-/* ════════════════════════════════════════════════════════════════
+/* ════════════════════════════════════════════════
    ESTADO GLOBAL
-   ════════════════════════════════════════════════════════════════ */
+   ════════════════════════════════════════════════ */
 // Pestaña 1 – Viáticos
-let gastos    = [];
-let catActiva = "combustible";
+let vGastos   = [];
+let vCat      = "combustible";
 
-// Pestaña 2 – Historial
-let conductorActivo  = null;
-let tipoActivo       = "Domicilio";
-let filtroTipo       = "Todos";
-let catActivaH       = "combustible";
-let gastosViaje      = [];      // gastos del viaje que se está creando
-let viajesHistorial  = {};      // { "conductor": [ ...viajes ] }
+// Pestaña 2 – Domicilios
+let dGastos       = [];
+let dCat          = "combustible";
+let dConductor    = null;
+let dTipo         = "Domicilio a cliente";
 
-/* ════════════════════════════════════════════════════════════════
+// Pestaña 3 – Historial (almacén en memoria)
+// Estructura: [ { id, fuente:"viatico"|"domicilio", conductor, fecha, tipo, destino, cliente, notas, gastos:[], totalGastos } ]
+let todosLosViajes = [];
+let hConductor     = "Todos";
+let hFiltroTipo    = "Todos";
+
+/* ════════════════════════════════════════════════
    TABS
-   ════════════════════════════════════════════════════════════════ */
-function cambiarTab(tab) {
-  document.querySelectorAll(".tab-btn").forEach((b,i) => {
-    b.classList.toggle("active", (i === 0 && tab==="viaticos") || (i === 1 && tab==="historial"));
-  });
+   ════════════════════════════════════════════════ */
+function cambiarTab(tab, btn) {
+  document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
   document.querySelectorAll(".tab-pane").forEach(p => p.classList.remove("active"));
   document.getElementById("tab-" + tab).classList.add("active");
+  if (tab === "historial") renderHistorial();
 }
 
-/* ════════════════════════════════════════════════════════════════
+/* ════════════════════════════════════════════════
    UTILIDADES COMPARTIDAS
-   ════════════════════════════════════════════════════════════════ */
+   ════════════════════════════════════════════════ */
 function formatearCampo(input) {
-  const pos  = input.selectionStart;
+  const pos   = input.selectionStart;
   const antes = input.value.length;
-  const solo = input.value.replace(/\D/g, "");
+  const solo  = input.value.replace(/\D/g,"");
   if (!solo) { input.value = ""; return; }
-  input.value = parseInt(solo, 10).toLocaleString("es-CO");
+  input.value = parseInt(solo,10).toLocaleString("es-CO");
   const nueva = pos + (input.value.length - antes);
-  try { input.setSelectionRange(nueva, nueva); } catch(e) {}
+  try { input.setSelectionRange(nueva,nueva); } catch(e) {}
 }
 
-function leerValor(id) {
-  return parseFloat((document.getElementById(id).value||"0").replace(/\./g,"").replace(",",".")) || 0;
-}
-
-function cop(n) { return "$ " + Math.abs(n).toLocaleString("es-CO"); }
-
-function mostrarToast(msg, color) {
-  const t = document.getElementById("toast");
-  t.textContent = msg; t.style.background = color || "#1e4d2b";
-  t.classList.add("show"); setTimeout(() => t.classList.remove("show"), 4000);
-}
-
-function nombreArchivo(desc, mimeType) {
-  const ext  = mimeType ? "." + mimeType.split("/")[1].replace("jpeg","jpg") : ".jpg";
-  const base = desc.trim()
-    .normalize("NFD").replace(/[\u0300-\u036f]/g,"")
-    .replace(/[^a-zA-Z0-9 _\-]/g,"").replace(/\s+/g,"_").substring(0,80);
-  return base + ext;
-}
-
-function selCat(btn, scope) {
-  const grid = btn.closest(".cat-grid");
-  grid.querySelectorAll(".cat-btn").forEach(b => b.classList.remove("active"));
-  btn.classList.add("active");
-  if (scope === "v") catActiva  = btn.dataset.cat;
-  else               catActivaH = btn.dataset.cat;
-}
-
-/* ════════════════════════════════════════════════════════════════
-   PESTAÑA 1 – VIÁTICOS
-   ════════════════════════════════════════════════════════════════ */
-document.getElementById("fecha").value = new Date().toISOString().split("T")[0];
-
-function nombreViaje() {
-  const conductor = document.getElementById("conductor").value || "Sin conductor";
-  const destino   = document.getElementById("destino").value   || "Sin destino";
-  const fecha     = document.getElementById("fecha").value     || new Date().toISOString().split("T")[0];
-  return `${conductor} - ${destino} - ${fecha}`;
-}
-
-function mostrarForm() {
-  document.getElementById("form-gasto").classList.add("visible");
-  document.getElementById("btn-agregar").style.display = "none";
-  document.getElementById("g-desc").focus();
-}
-
-function cancelarGasto() {
-  document.getElementById("form-gasto").classList.remove("visible");
-  document.getElementById("btn-agregar").style.display = "block";
-  ["g-desc","g-monto","g-foto"].forEach(id => document.getElementById(id).value = "");
-}
-
-function guardarGasto() {
-  const desc  = document.getElementById("g-desc").value.trim();
-  const monto = leerValor("g-monto");
-  if (!desc || isNaN(monto) || monto <= 0) { alert("Ingresa la descripción y el monto."); return; }
-  const file = document.getElementById("g-foto").files[0];
-  const agregar = (base64, mimeType) => {
-    gastos.push({ id: Date.now(), cat: catActiva, desc, monto,
-                  base64: base64||null, mimeType: mimeType||null,
-                  fileName: base64 ? nombreArchivo(desc,mimeType) : null, driveUrl: null });
-    renderGastos(); actualizarBalance(); cancelarGasto();
-  };
-  if (file) {
-    const r = new FileReader();
-    r.onload = e => agregar(e.target.result.split(",")[1], file.type);
-    r.readAsDataURL(file);
-  } else agregar(null, null);
-}
-
-function eliminarGasto(id) {
-  gastos = gastos.filter(g => g.id !== id);
-  renderGastos(); actualizarBalance();
-}
-
-function renderGastos() {
-  const lista = document.getElementById("gastos-lista");
-  if (!gastos.length) {
-    lista.innerHTML = '<p style="color:#aaa;font-size:13px;text-align:center;padding:10px 0;">Sin gastos aún</p>';
-    return;
-  }
-  lista.innerHTML = gastos.map(g => `
-    <div class="gasto-item" id="gi-${g.id}">
-      <div class="gasto-head">
-        <span class="cat-tag">${CATS[g.cat].label}</span>
-        <button class="eliminar" onclick="eliminarGasto(${g.id})">✕</button>
-      </div>
-      <div class="gasto-desc">${g.desc}</div>
-      <div class="gasto-monto">${cop(g.monto)}</div>
-      ${g.base64 ? `<img src="data:${g.mimeType};base64,${g.base64}" class="evidencia-thumb" alt="Evidencia">` : ""}
-      ${g.base64 && !g.driveUrl ? `<span class="upload-status status-pending" id="st-${g.id}">📎 Pendiente de subir</span>` : ""}
-      ${g.driveUrl ? `<a href="${g.driveUrl}" target="_blank" class="upload-status status-ok">✓ Ver en Drive</a>` : ""}
-    </div>`).join("");
-}
-
-function actualizarBalance() {
-  const presupuesto  = leerValor("presupuesto");
-  const totalGastado = gastos.reduce((s,g) => s+g.monto, 0);
-  const balance      = presupuesto - totalGastado;
-  const valEl = document.getElementById("balance-valor");
-  const detEl = document.getElementById("balance-det");
-  const resEl = document.getElementById("resumen-cats");
-
-  if (!presupuesto) {
-    valEl.textContent = "$ —"; valEl.className = "balance-valor balance-zero";
-    detEl.textContent = "Ingresa el dinero entregado y los gastos";
-    resEl.style.display = "none"; return;
-  }
-  valEl.textContent = cop(balance);
-  if (balance > 0) {
-    valEl.className = "balance-valor balance-pos";
-    detEl.innerHTML = `<b style="color:#1e7a3a">✓ Sobró ${cop(balance)}</b><br><span style="font-size:12px;">Entregado ${cop(presupuesto)} · Gastado ${cop(totalGastado)}</span>`;
-  } else if (balance < 0) {
-    valEl.className = "balance-valor balance-neg";
-    detEl.innerHTML = `<b style="color:#c0392b">⚠ Se pasaron ${cop(Math.abs(balance))}</b><br><span style="font-size:12px;">Entregado ${cop(presupuesto)} · Gastado ${cop(totalGastado)}</span>`;
-  } else {
-    valEl.className = "balance-valor balance-zero";
-    detEl.innerHTML = `Exacto: ${cop(totalGastado)}`;
-  }
-  const cats = {};
-  gastos.forEach(g => { cats[g.cat] = (cats[g.cat]||0) + g.monto; });
-  const entries = Object.entries(cats);
-  resEl.style.display = entries.length ? "grid" : "none";
-  resEl.innerHTML = entries.map(([k,v]) => `<div class="resumen-cat">${CATS[k].label}<span>${cop(v)}</span></div>`).join("");
-}
-
-function setProgreso(pct, txt) {
-  document.getElementById("progress-wrap").style.display = "block";
-  document.getElementById("progress-bar").style.width = pct + "%";
-  document.getElementById("progress-txt").textContent = txt;
-}
-function ocultarProgreso() { document.getElementById("progress-wrap").style.display = "none"; }
-
-async function subirImagen(gasto, viaje) {
-  const resp = await fetch(SHEETS_URL, {
-    method: "POST", headers: { "Content-Type": "text/plain" },
-    body: JSON.stringify({ tipo: "imagen", base64: gasto.base64, mimeType: gasto.mimeType,
-      nombreArchivo: gasto.fileName, nombreCategoria: CATS[gasto.cat].carpeta, nombreViaje: viaje })
-  });
-  const data = await resp.json();
-  return data.ok ? data.url : null;
-}
-
-async function enviarFila(payload) {
-  await fetch(SHEETS_URL, { method: "POST", mode: "no-cors",
-    headers: { "Content-Type": "text/plain" }, body: JSON.stringify(payload) });
-}
-
-async function enviarRegistro() {
-  const conductor   = document.getElementById("conductor").value;
-  const presupuesto = leerValor("presupuesto");
-  if (!conductor || !presupuesto) { alert("Selecciona el conductor y el dinero entregado."); return; }
-
-  const viaje = nombreViaje();
-  const btn   = document.getElementById("btn-enviar");
-  btn.disabled = true; btn.textContent = "⏳ Enviando…";
-
-  const conImg = gastos.filter(g => g.base64 && !g.driveUrl);
-  for (let i = 0; i < conImg.length; i++) {
-    setProgreso(Math.round((i / Math.max(conImg.length,1)) * 70),
-      `Subiendo evidencia ${i+1} de ${conImg.length}: "${conImg[i].desc}"…`);
-    try {
-      const url = await subirImagen(conImg[i], viaje);
-      const idx = gastos.findIndex(x => x.id === conImg[i].id);
-      if (idx !== -1) {
-        gastos[idx].driveUrl = url;
-        const st = document.getElementById("st-" + conImg[i].id);
-        if (st && url) { st.className = "upload-status status-ok"; st.textContent = "✓ Subida a Drive"; }
-      }
-    } catch(err) { console.warn("Error imagen", err); }
-  }
-
-  const detalleGastos = gastos.map(g =>
-    `${CATS[g.cat].carpeta}: ${g.desc} (${cop(g.monto)})${g.driveUrl ? " -> "+g.driveUrl : ""}`).join(" | ");
-  const totalGastado = gastos.reduce((s,g) => s+g.monto, 0);
-  const balance      = presupuesto - totalGastado;
-  const cats = {};
-  gastos.forEach(g => { cats[g.cat] = (cats[g.cat]||0) + g.monto; });
-
-  setProgreso(85, "Guardando en Google Sheets…");
-
-  await enviarFila({
-    tipo: "registro", nombreViaje: viaje,
-    fecha: document.getElementById("fecha").value,
-    destino: document.getElementById("destino").value,
-    conductor, encargada: document.getElementById("encargada").value.trim(),
-    presupuesto, totalGastado, balance,
-    estado: balance >= 0 ? `Sobró $${balance.toLocaleString("es-CO")}` : `Faltaron $${Math.abs(balance).toLocaleString("es-CO")}`,
-    cats, detalleGastos, notas: document.getElementById("notas").value.trim()
-  });
-
-  // ── También agregar al historial del carro ──
-  const viajeHistorial = {
-    id: Date.now(), fuente: "viatico",
-    fecha: document.getElementById("fecha").value,
-    tipo: "Batallón",
-    destino: document.getElementById("destino").value,
-    cliente: "",
-    notas: document.getElementById("notas").value.trim(),
-    gastos: gastos.map(g => ({ cat: g.cat, desc: g.desc, monto: g.monto })),
-    totalGastos: totalGastado
-  };
-  if (!viajesHistorial[conductor]) viajesHistorial[conductor] = [];
-  viajesHistorial[conductor].push(viajeHistorial);
-
-  setProgreso(100, "¡Listo!");
-  setTimeout(() => {
-    ocultarProgreso();
-    mostrarToast("✓ Registro enviado y guardado en historial", "#1e4d2b");
-    limpiarTodo(true);
-  }, 800);
-}
-
-function limpiarTodo(silencioso) {
-  if (!silencioso && !confirm("¿Borrar todos los datos de la planilla?")) return;
-  gastos = [];
-  document.getElementById("fecha").value = new Date().toISOString().split("T")[0];
-  ["encargada","notas"].forEach(id => document.getElementById(id).value = "");
-  document.getElementById("presupuesto").value = "0";
-  document.getElementById("destino").value = "Batallón";
-  document.getElementById("conductor").value = "";
-  const btn = document.getElementById("btn-enviar");
-  btn.textContent = "📊 Enviar registro a Google Sheets"; btn.disabled = false;
-  renderGastos(); actualizarBalance();
-}
-
-/* ════════════════════════════════════════════════════════════════
-   PESTAÑA 2 – HISTORIAL DEL CARRO
-   ════════════════════════════════════════════════════════════════ */
-
-// Inicializar selector de mes
-function inicializarMeses() {
-  const sel  = document.getElementById("filtro-mes");
-  const hoy  = new Date();
-  sel.innerHTML = "";
-  for (let i = 0; i < 12; i++) {
-    const d    = new Date(hoy.getFullYear(), hoy.getMonth() - i, 1);
-    const val  = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}`;
-    const txt  = `${MESES[d.getMonth()]} ${d.getFullYear()}`;
-    const opt  = document.createElement("option");
-    opt.value  = val; opt.textContent = txt;
-    sel.appendChild(opt);
-  }
-}
-inicializarMeses();
-
-document.getElementById("h-fecha").value = new Date().toISOString().split("T")[0];
-
-function seleccionarConductor(card) {
-  document.querySelectorAll(".conductor-card").forEach(c => c.classList.remove("selected"));
-  card.classList.add("selected");
-  conductorActivo = card.dataset.conductor;
-  document.getElementById("panel-conductor").style.display = "block";
-  if (!viajesHistorial[conductorActivo]) viajesHistorial[conductorActivo] = [];
-  renderHistorial();
-}
-
-function selTipo(btn) {
-  document.querySelectorAll(".tipo-btn").forEach(b => b.classList.remove("active"));
-  btn.classList.add("active");
-  tipoActivo = btn.dataset.tipo;
-  document.getElementById("campo-cliente").style.display = tipoActivo === "Domicilio" ? "block" : "none";
-}
-
-function selFiltro(btn) {
-  document.querySelectorAll(".filtro-btn").forEach(b => b.classList.remove("active"));
-  btn.classList.add("active");
-  filtroTipo = btn.dataset.ftipo;
-  renderHistorial();
-}
-
-// Gastos del nuevo viaje
-function mostrarFormH() {
-  document.getElementById("h-form-gasto").classList.add("visible");
-  document.getElementById("h-btn-agregar").style.display = "none";
-  document.getElementById("hg-desc").focus();
-}
-
-function cancelarGastoH() {
-  document.getElementById("h-form-gasto").classList.remove("visible");
-  document.getElementById("h-btn-agregar").style.display = "inline-block";
-  ["hg-desc","hg-monto","hg-foto"].forEach(id => document.getElementById(id).value = "");
-}
-
-function leerValorDir(id) {
+function leerNum(id) {
   const el = document.getElementById(id);
   if (!el) return 0;
   return parseFloat((el.value||"0").replace(/\./g,"").replace(",",".")) || 0;
 }
 
-function guardarGastoH() {
-  const desc  = document.getElementById("hg-desc").value.trim();
-  const monto = leerValorDir("hg-monto");
-  if (!desc || monto <= 0) { alert("Ingresa descripción y monto del gasto."); return; }
-  const file = document.getElementById("hg-foto").files[0];
-  const agregar = (base64, mimeType) => {
-    gastosViaje.push({ id: Date.now(), cat: catActivaH, desc, monto,
-                       base64: base64||null, mimeType: mimeType||null,
-                       fileName: base64 ? nombreArchivo(desc,mimeType) : null });
-    renderGastosViaje(); cancelarGastoH();
-  };
-  if (file) {
-    const r = new FileReader(); r.onload = e => agregar(e.target.result.split(",")[1], file.type); r.readAsDataURL(file);
-  } else agregar(null, null);
+function cop(n) { return "$ " + Math.abs(n).toLocaleString("es-CO"); }
+
+function toast(msg, color) {
+  const t = document.getElementById("toast");
+  t.textContent = msg; t.style.background = color || "#1e4d2b";
+  t.classList.add("show"); setTimeout(() => t.classList.remove("show"), 3500);
 }
 
-function eliminarGastoViaje(id) {
-  gastosViaje = gastosViaje.filter(g => g.id !== id);
-  renderGastosViaje();
+function archivoNombre(desc, mime) {
+  const ext  = mime ? "." + mime.split("/")[1].replace("jpeg","jpg") : ".jpg";
+  const base = desc.trim().normalize("NFD").replace(/[\u0300-\u036f]/g,"")
+               .replace(/[^a-zA-Z0-9 _\-]/g,"").replace(/\s+/g,"_").substring(0,80);
+  return base + ext;
 }
 
-function renderGastosViaje() {
-  const lista = document.getElementById("h-gastos-lista");
-  if (!gastosViaje.length) { lista.innerHTML = ""; return; }
-  lista.innerHTML = gastosViaje.map(g => `
-    <div class="gasto-item" id="hgi-${g.id}">
+function selCat(btn, scope) {
+  btn.closest(".cat-grid").querySelectorAll(".cat-btn").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+  if (scope === "v") vCat = btn.dataset.cat;
+  else               dCat = btn.dataset.cat;
+}
+
+function hoyISO() { return new Date().toISOString().split("T")[0]; }
+
+/* ════════════════════════════════════════════════
+   RENDER GASTOS GENÉRICO
+   ════════════════════════════════════════════════ */
+function renderGastosLista(gastos, contenedorId, fnEliminar) {
+  const lista = document.getElementById(contenedorId);
+  if (!gastos.length) { lista.innerHTML = ""; return; }
+  lista.innerHTML = gastos.map(g => `
+    <div class="gasto-item">
       <div class="gasto-head">
         <span class="cat-tag">${CATS[g.cat].label}</span>
-        <button class="eliminar" onclick="eliminarGastoViaje(${g.id})">✕</button>
+        <button class="eliminar" onclick="${fnEliminar}(${g.id})">✕</button>
       </div>
       <div class="gasto-desc">${g.desc}</div>
       <div class="gasto-monto">${cop(g.monto)}</div>
-      ${g.base64 ? `<img src="data:${g.mimeType};base64,${g.base64}" class="evidencia-thumb" alt="Evidencia">` : ""}
+      ${g.base64 ? `<img src="data:${g.mime};base64,${g.base64}" class="evidencia-thumb" alt="Evidencia">` : ""}
+      ${g.base64 && !g.driveUrl ? `<span class="upload-status status-pending" id="st-${g.id}">📎 Pendiente de subir</span>` : ""}
+      ${g.driveUrl ? `<a href="${g.driveUrl}" target="_blank" class="upload-status status-ok">✓ Ver en Drive</a>` : ""}
     </div>`).join("");
 }
 
-function guardarViaje() {
-  if (!conductorActivo) { alert("Selecciona un conductor."); return; }
-  const destino = document.getElementById("h-destino").value.trim();
-  const fecha   = document.getElementById("h-fecha").value;
-  if (!destino || !fecha) { alert("Ingresa la fecha y el destino."); return; }
+/* ════════════════════════════════════════════════
+   PESTAÑA 1 — VIÁTICOS
+   ════════════════════════════════════════════════ */
+document.getElementById("v-fecha").value = hoyISO();
 
-  const totalGastos = gastosViaje.reduce((s,g) => s+g.monto, 0);
-  const viaje = {
-    id: Date.now(), fuente: "directo",
-    fecha, tipo: tipoActivo,
-    destino,
-    cliente: document.getElementById("h-cliente").value.trim(),
-    notas:   document.getElementById("h-notas").value.trim(),
-    gastos:  gastosViaje.map(g => ({ cat: g.cat, desc: g.desc, monto: g.monto })),
-    totalGastos
+function mostrarFormV() {
+  document.getElementById("v-form-gasto").classList.add("visible");
+  document.getElementById("v-btn-agregar").style.display = "none";
+  document.getElementById("vg-desc").focus();
+}
+function cancelarGastoV() {
+  document.getElementById("v-form-gasto").classList.remove("visible");
+  document.getElementById("v-btn-agregar").style.display = "block";
+  ["vg-desc","vg-monto","vg-foto"].forEach(id => document.getElementById(id).value = "");
+}
+function guardarGastoV() {
+  const desc  = document.getElementById("vg-desc").value.trim();
+  const monto = leerNum("vg-monto");
+  if (!desc || monto <= 0) { alert("Ingresa descripción y monto."); return; }
+  const file  = document.getElementById("vg-foto").files[0];
+  const add   = (b64, mime) => {
+    vGastos.push({ id: Date.now(), cat: vCat, desc, monto,
+                   base64: b64||null, mime: mime||null,
+                   fileName: b64 ? archivoNombre(desc,mime) : null, driveUrl: null });
+    renderGastosLista(vGastos, "v-gastos-lista", "eliminarGastoV");
+    actualizarBalance();
+    cancelarGastoV();
   };
-  if (!viajesHistorial[conductorActivo]) viajesHistorial[conductorActivo] = [];
-  viajesHistorial[conductorActivo].push(viaje);
+  if (file) { const r = new FileReader(); r.onload = e => add(e.target.result.split(",")[1], file.type); r.readAsDataURL(file); }
+  else add(null,null);
+}
+function eliminarGastoV(id) {
+  vGastos = vGastos.filter(g => g.id !== id);
+  renderGastosLista(vGastos, "v-gastos-lista", "eliminarGastoV");
+  actualizarBalance();
+}
 
-  // Limpiar form
-  document.getElementById("h-destino").value = "";
-  document.getElementById("h-cliente").value = "";
-  document.getElementById("h-notas").value   = "";
-  document.getElementById("h-fecha").value   = new Date().toISOString().split("T")[0];
-  gastosViaje = [];
-  renderGastosViaje();
+function actualizarBalance() {
+  const pres  = leerNum("v-presupuesto");
+  const total = vGastos.reduce((s,g) => s+g.monto, 0);
+  const bal   = pres - total;
+  const valEl = document.getElementById("balance-valor");
+  const detEl = document.getElementById("balance-det");
+  const resEl = document.getElementById("resumen-cats");
+  if (!pres) {
+    valEl.textContent = "$ —"; valEl.className = "balance-valor bal-zero";
+    detEl.textContent = "Ingresa el dinero entregado y los gastos";
+    resEl.style.display = "none"; return;
+  }
+  valEl.textContent = cop(bal);
+  if (bal > 0) {
+    valEl.className = "balance-valor bal-pos";
+    detEl.innerHTML = `<b style="color:#1e7a3a">✓ Sobró ${cop(bal)}</b><br><span style="font-size:12px;">Entregado ${cop(pres)} · Gastado ${cop(total)}</span>`;
+  } else if (bal < 0) {
+    valEl.className = "balance-valor bal-neg";
+    detEl.innerHTML = `<b style="color:#c0392b">⚠ Se pasaron ${cop(Math.abs(bal))}</b><br><span style="font-size:12px;">Entregado ${cop(pres)} · Gastado ${cop(total)}</span>`;
+  } else {
+    valEl.className = "balance-valor bal-zero";
+    detEl.innerHTML = `Exacto: ${cop(total)}`;
+  }
+  const cats = {};
+  vGastos.forEach(g => { cats[g.cat] = (cats[g.cat]||0) + g.monto; });
+  const entries = Object.entries(cats);
+  resEl.style.display = entries.length ? "grid" : "none";
+  resEl.innerHTML = entries.map(([k,v]) => `<div class="resumen-cat">${CATS[k].label}<span>${cop(v)}</span></div>`).join("");
+}
+
+function setProgresoV(pct, txt) {
+  document.getElementById("v-progress").style.display = "block";
+  document.getElementById("v-progress-bar").style.width = pct + "%";
+  document.getElementById("v-progress-txt").textContent = txt;
+}
+function ocultarProgresoV() { document.getElementById("v-progress").style.display = "none"; }
+
+async function subirImagen(gasto, nombreViaje) {
+  const resp = await fetch(SHEETS_URL, {
+    method: "POST", headers: { "Content-Type": "text/plain" },
+    body: JSON.stringify({ tipo:"imagen", base64: gasto.base64, mimeType: gasto.mime,
+      nombreArchivo: gasto.fileName, nombreCategoria: CATS[gasto.cat].carpeta, nombreViaje })
+  });
+  const data = await resp.json();
+  return data.ok ? data.url : null;
+}
+
+async function enviarViatico() {
+  const conductor  = document.getElementById("v-conductor").value;
+  const presupuesto = leerNum("v-presupuesto");
+  if (!conductor || !presupuesto) { alert("Selecciona el conductor y el dinero entregado."); return; }
+
+  const destino = document.getElementById("v-destino").value.trim() || "Batallón";
+  const fecha   = document.getElementById("v-fecha").value;
+  const nombreViaje = `${conductor} - ${destino} - ${fecha}`;
+
+  const btn = document.getElementById("v-btn-enviar");
+  btn.disabled = true; btn.textContent = "⏳ Enviando…";
+
+  // 1. Subir imágenes
+  const conImg = vGastos.filter(g => g.base64 && !g.driveUrl);
+  for (let i = 0; i < conImg.length; i++) {
+    setProgresoV(Math.round((i / Math.max(conImg.length,1)) * 70),
+      `Subiendo evidencia ${i+1} de ${conImg.length}…`);
+    try {
+      const url = await subirImagen(conImg[i], nombreViaje);
+      const idx = vGastos.findIndex(x => x.id === conImg[i].id);
+      if (idx !== -1) {
+        vGastos[idx].driveUrl = url;
+        const st = document.getElementById("st-" + conImg[i].id);
+        if (st && url) { st.className = "upload-status status-ok"; st.textContent = "✓ Subida a Drive"; }
+      }
+    } catch(err) { console.warn(err); }
+  }
+
+  // 2. Enviar fila a Sheets
+  const totalGastado = vGastos.reduce((s,g) => s+g.monto, 0);
+  const balance      = presupuesto - totalGastado;
+  const cats         = {};
+  vGastos.forEach(g => { cats[g.cat] = (cats[g.cat]||0) + g.monto; });
+  const detalleGastos = vGastos.map(g =>
+    `${CATS[g.cat].carpeta}: ${g.desc} (${cop(g.monto)})${g.driveUrl?" -> "+g.driveUrl:""}`).join(" | ");
+
+  const carpetaViaje = await obtenerUrlCarpeta(nombreViaje);
+
+  setProgresoV(85, "Guardando en Google Sheets…");
+
+  await fetch(SHEETS_URL, {
+    method:"POST", mode:"no-cors", headers:{"Content-Type":"text/plain"},
+    body: JSON.stringify({
+      tipo:"registro", nombreViaje, fecha, destino, conductor,
+      encargada: document.getElementById("v-encargada").value.trim(),
+      presupuesto, totalGastado, balance,
+      estado: balance >= 0 ? `Sobró $${balance.toLocaleString("es-CO")}` : `Faltaron $${Math.abs(balance).toLocaleString("es-CO")}`,
+      cats, detalleGastos, notas: document.getElementById("v-notas").value.trim()
+    })
+  });
+
+  // 3. Agregar al historial en memoria
+  todosLosViajes.push({
+    id: Date.now(), fuente: "viatico", conductor, fecha,
+    tipo: "Viático", destino,
+    cliente: document.getElementById("v-encargada").value.trim(),
+    notas:   document.getElementById("v-notas").value.trim(),
+    gastos:  vGastos.map(g => ({ cat: g.cat, desc: g.desc, monto: g.monto })),
+    totalGastos: totalGastado
+  });
+
+  setProgresoV(100, "¡Listo!");
+  setTimeout(() => {
+    ocultarProgresoV();
+    toast("✓ Viático enviado y guardado en historial");
+    limpiarViatico(true);
+  }, 700);
+}
+
+// Función auxiliar: pedir URL de la carpeta Drive (usando imagen ficticia no, solo obtener)
+async function obtenerUrlCarpeta(nombreViaje) {
+  try {
+    const resp = await fetch(SHEETS_URL, {
+      method:"POST", headers:{"Content-Type":"text/plain"},
+      body: JSON.stringify({ tipo:"carpeta", nombreViaje })
+    });
+    const data = await resp.json();
+    return data.url || "";
+  } catch(e) { return ""; }
+}
+
+function limpiarViatico(silencioso) {
+  if (!silencioso && !confirm("¿Borrar todos los datos de la planilla?")) return;
+  vGastos = [];
+  document.getElementById("v-fecha").value = hoyISO();
+  ["v-destino","v-encargada","v-notas"].forEach(id => document.getElementById(id).value = "");
+  document.getElementById("v-presupuesto").value = "0";
+  document.getElementById("v-conductor").value   = "";
+  const btn = document.getElementById("v-btn-enviar");
+  btn.disabled = false; btn.textContent = "📊 Enviar registro a Google Sheets";
+  renderGastosLista(vGastos, "v-gastos-lista", "eliminarGastoV");
+  actualizarBalance();
+}
+
+/* ════════════════════════════════════════════════
+   PESTAÑA 2 — DOMICILIOS / TRANSPORTE
+   ════════════════════════════════════════════════ */
+document.getElementById("d-fecha").value = hoyISO();
+
+function selConductorD(card) {
+  document.querySelectorAll("#tab-domicilios .conductor-card").forEach(c => c.classList.remove("selected"));
+  card.classList.add("selected");
+  dConductor = card.dataset.conductor;
+}
+
+function selTipoD(btn) {
+  document.querySelectorAll(".tipo-btn").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+  dTipo = btn.dataset.tipo;
+}
+
+function mostrarFormD() {
+  document.getElementById("d-form-gasto").classList.add("visible");
+  document.getElementById("d-btn-agregar").style.display = "none";
+  document.getElementById("dg-desc").focus();
+}
+function cancelarGastoD() {
+  document.getElementById("d-form-gasto").classList.remove("visible");
+  document.getElementById("d-btn-agregar").style.display = "inline-block";
+  ["dg-desc","dg-monto","dg-foto"].forEach(id => document.getElementById(id).value = "");
+}
+function guardarGastoD() {
+  const desc  = document.getElementById("dg-desc").value.trim();
+  const monto = leerNum("dg-monto");
+  if (!desc || monto <= 0) { alert("Ingresa descripción y monto."); return; }
+  const file  = document.getElementById("dg-foto").files[0];
+  const add   = (b64, mime) => {
+    dGastos.push({ id: Date.now(), cat: dCat, desc, monto,
+                   base64: b64||null, mime: mime||null,
+                   fileName: b64 ? archivoNombre(desc,mime) : null });
+    renderGastosLista(dGastos, "d-gastos-lista", "eliminarGastoD");
+    cancelarGastoD();
+  };
+  if (file) { const r = new FileReader(); r.onload = e => add(e.target.result.split(",")[1], file.type); r.readAsDataURL(file); }
+  else add(null,null);
+}
+function eliminarGastoD(id) {
+  dGastos = dGastos.filter(g => g.id !== id);
+  renderGastosLista(dGastos, "d-gastos-lista", "eliminarGastoD");
+}
+
+async function guardarDomicilio() {
+  if (!dConductor) { alert("Selecciona un conductor."); return; }
+  const cliente = document.getElementById("d-cliente").value.trim();
+  const fecha   = document.getElementById("d-fecha").value;
+  if (!cliente || !fecha) { alert("Ingresa la fecha y el cliente o referencia."); return; }
+
+  const btn = document.getElementById("d-btn-guardar");
+  btn.disabled = true; btn.textContent = "⏳ Guardando…";
+
+  const totalGastos   = dGastos.reduce((s,g) => s+g.monto, 0);
+  const detalleGastos = dGastos.map(g => `${CATS[g.cat].carpeta}: ${g.desc} (${cop(g.monto)})`).join(" | ");
+
+  // Guardar en Sheets (hoja Domicilios + hoja Historial, lo maneja el Apps Script)
+  await fetch(SHEETS_URL, {
+    method:"POST", mode:"no-cors", headers:{"Content-Type":"text/plain"},
+    body: JSON.stringify({
+      tipo: "domicilio",
+      conductor: dConductor, fecha,
+      tipoServicio: dTipo,
+      cliente,
+      notas:    document.getElementById("d-notas").value.trim(),
+      totalGastos, detalleGastos
+    })
+  });
+
+  // Guardar en historial memoria (para ver en pestaña 3 sin recargar)
+  todosLosViajes.push({
+    id: Date.now(), fuente: "domicilio",
+    conductor: dConductor, fecha,
+    tipo: dTipo,
+    destino: cliente,   // el campo visible en historial es el cliente/referencia
+    cliente,
+    notas:   document.getElementById("d-notas").value.trim(),
+    gastos:  dGastos.map(g => ({ cat: g.cat, desc: g.desc, monto: g.monto })),
+    totalGastos
+  });
+
+  toast("✓ Servicio guardado");
+  limpiarDomicilio(true);
+  btn.disabled = false; btn.textContent = "✅ Guardar servicio";
+}
+
+function limpiarDomicilio(silencioso) {
+  if (!silencioso && !confirm("¿Limpiar el formulario?")) return;
+  dGastos = [];
+  dConductor = null;
+  document.querySelectorAll("#tab-domicilios .conductor-card").forEach(c => c.classList.remove("selected"));
+  document.getElementById("d-fecha").value   = hoyISO();
+  document.getElementById("d-cliente").value = "";
+  document.getElementById("d-notas").value   = "";
   document.querySelectorAll(".tipo-btn").forEach((b,i) => b.classList.toggle("active", i===0));
-  tipoActivo = "Domicilio";
-  document.getElementById("campo-cliente").style.display = "none";
+  dTipo = "Domicilio a cliente";
+  renderGastosLista(dGastos, "d-gastos-lista", "eliminarGastoD");
+}
 
-  mostrarToast("✓ Viaje guardado en el historial");
+/* ════════════════════════════════════════════════
+   PESTAÑA 3 — HISTORIAL
+   ════════════════════════════════════════════════ */
+
+// Inicializar selector de meses
+(function inicializarMeses() {
+  const sel = document.getElementById("h-mes");
+  const hoy = new Date();
+  for (let i = 0; i < 12; i++) {
+    const d   = new Date(hoy.getFullYear(), hoy.getMonth() - i, 1);
+    const val = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}`;
+    const txt = `${MESES[d.getMonth()]} ${d.getFullYear()}`;
+    const opt = document.createElement("option");
+    opt.value = val; opt.textContent = txt;
+    sel.appendChild(opt);
+  }
+})();
+
+function selHConductor(btn) {
+  document.querySelectorAll(".hc-btn").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+  hConductor = btn.dataset.hc;
+  renderHistorial();
+}
+function selFTipo(btn) {
+  document.querySelectorAll(".ft-btn").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+  hFiltroTipo = btn.dataset.ft;
   renderHistorial();
 }
 
-function claseTipo(tipo) {
-  if (tipo === "Domicilio")  return "tipo-domicilio";
-  if (tipo === "Batallón")   return "tipo-batallon";
-  return "tipo-fruver";
+function badgeClase(tipo) {
+  if (tipo === "Viático")                  return "badge-viatico";
+  if (tipo === "Domicilio a cliente")      return "badge-domicilio";
+  if (tipo === "Transporte de mercancía")  return "badge-mercancia";
+  return "badge-domicilio";
 }
-function emojiTipo(tipo) {
-  if (tipo === "Domicilio") return "📦";
-  if (tipo === "Batallón")  return "🪖";
-  return "🥦";
+function badgeEmoji(tipo) {
+  if (tipo === "Viático")                  return "🚛";
+  if (tipo === "Domicilio a cliente")      return "📦";
+  if (tipo === "Transporte de mercancía")  return "🏪";
+  return "📦";
 }
 
 function renderHistorial() {
-  if (!conductorActivo) return;
-  const mesSel  = document.getElementById("filtro-mes").value; // "YYYY-MM"
-  const viajes  = viajesHistorial[conductorActivo] || [];
+  const mes = document.getElementById("h-mes").value;
 
-  const filtrados = viajes.filter(v => {
-    const mes     = v.fecha.substring(0, 7);
-    const mesOk   = mes === mesSel;
-    const tipoOk  = filtroTipo === "Todos" || v.tipo === filtroTipo;
-    return mesOk && tipoOk;
+  const filtrados = todosLosViajes.filter(v => {
+    const mesOk       = v.fecha.substring(0,7) === mes;
+    const conductorOk = hConductor === "Todos" || v.conductor === hConductor;
+    const tipoOk      = hFiltroTipo === "Todos" || v.tipo === hFiltroTipo;
+    return mesOk && conductorOk && tipoOk;
   });
 
-  const lista = document.getElementById("historial-lista");
+  const lista    = document.getElementById("h-lista");
+  const resumenEl = document.getElementById("h-resumen");
 
   if (!filtrados.length) {
-    lista.innerHTML = `
-      <div class="empty-state">
-        <div class="icon">📭</div>
-        <p>No hay viajes registrados para este mes.</p>
-      </div>`;
-    document.getElementById("resumen-mensual-box").style.display = "none";
+    lista.innerHTML = `<div class="empty-state"><div class="icon">📭</div><p>No hay viajes registrados este mes.<br><span style="font-size:12px;color:#ccc;">Los viajes aparecen aquí al guardarlos en las pestañas anteriores.</span></p></div>`;
+    resumenEl.style.display = "none";
     return;
   }
 
-  // Resumen
-  const totalG  = filtrados.reduce((s,v) => s + v.totalGastos, 0);
-  const conteos = {};
-  filtrados.forEach(v => { conteos[v.tipo] = (conteos[v.tipo]||0) + 1; });
-  const tipoFrec = Object.entries(conteos).sort((a,b) => b[1]-a[1])[0][0];
+  // — Resumen —
+  const viaticos    = filtrados.filter(v => v.tipo === "Viático");
+  const domicilios  = filtrados.filter(v => v.tipo !== "Viático");
+  const gasViaticos = viaticos.reduce((s,v)   => s + v.totalGastos, 0);
+  const gasDomicilios = domicilios.reduce((s,v) => s + v.totalGastos, 0);
+  const totalGastos = gasViaticos + gasDomicilios;
 
-  const box = document.getElementById("resumen-mensual-box");
-  box.style.display = "block";
-  document.getElementById("resumen-titulo").textContent =
-    `${MESES[parseInt(mesSel.split("-")[1])-1].toUpperCase()} ${mesSel.split("-")[0]} · ${conductorActivo.split(" ")[0].toUpperCase()}`;
-  document.getElementById("r-viajes").textContent  = filtrados.length;
-  document.getElementById("r-tipos").textContent   = emojiTipo(tipoFrec) + " " + tipoFrec;
-  document.getElementById("r-gastos").textContent  = totalG > 0 ? cop(totalG) : "—";
+  const [anio, mesNum] = mes.split("-");
+  resumenEl.style.display = "block";
+  document.getElementById("h-resumen-titulo").textContent =
+    `${MESES[parseInt(mesNum)-1].toUpperCase()} ${anio}${hConductor !== "Todos" ? " · " + hConductor.split(" ")[0].toUpperCase() : ""}`;
+  document.getElementById("h-r-viaticos").textContent    = viaticos.length;
+  document.getElementById("h-r-viaticos-g").textContent  = gasViaticos > 0 ? cop(gasViaticos) : "Sin gastos";
+  document.getElementById("h-r-domicilios").textContent  = domicilios.length;
+  document.getElementById("h-r-domicilios-g").textContent = gasDomicilios > 0 ? cop(gasDomicilios) : "Sin gastos";
+  document.getElementById("h-r-total").textContent =
+    `${filtrados.length} viajes · ${totalGastos > 0 ? cop(totalGastos) : "$0"}`;
 
-  // Ordenar por fecha desc
+  // — Lista de viajes ordenados por fecha desc —
   const ordenados = [...filtrados].sort((a,b) => b.fecha.localeCompare(a.fecha));
-
   lista.innerHTML = ordenados.map(v => {
+    const fechaStr = new Date(v.fecha + "T12:00:00")
+      .toLocaleDateString("es-CO", { weekday:"short", day:"numeric", month:"short" });
     const gastosList = v.gastos.length
       ? v.gastos.map(g => `${CATS[g.cat].label} ${g.desc}: ${cop(g.monto)}`).join(" · ")
       : null;
-    const fechaObj = new Date(v.fecha + "T12:00:00");
-    const fechaStr = fechaObj.toLocaleDateString("es-CO", { weekday:"short", day:"numeric", month:"short" });
-
     return `
       <div class="viaje-card">
         <div class="viaje-card-head">
-          <span class="viaje-tipo ${claseTipo(v.tipo)}">${emojiTipo(v.tipo)} ${v.tipo}</span>
+          <span class="badge ${badgeClase(v.tipo)}">${badgeEmoji(v.tipo)} ${v.tipo}</span>
           <span class="viaje-fecha">${fechaStr}</span>
         </div>
         <div class="viaje-destino">${v.destino}</div>
-        ${v.cliente ? `<div class="viaje-origen">👤 ${v.cliente}</div>` : ""}
-        ${v.notas   ? `<div class="viaje-origen" style="color:#888;font-style:italic;">📝 ${v.notas}</div>` : ""}
+        ${v.conductor && hConductor==="Todos" ? `<div class="viaje-detalle">🚐 ${v.conductor}</div>` : ""}
+        ${v.cliente   ? `<div class="viaje-detalle">👤 ${v.cliente}</div>` : ""}
+        ${v.notas     ? `<div class="viaje-detalle" style="font-style:italic;color:#888;">📝 ${v.notas}</div>` : ""}
         ${gastosList
-          ? `<div class="viaje-gastos">💸 ${gastosList} <strong>(Total: ${cop(v.totalGastos)})</strong></div>`
-          : `<div class="viaje-sin-gastos">Sin gastos registrados</div>`}
-        <span class="viaje-fuente">${v.fuente === "viatico" ? "🔗 Desde viáticos" : "✏️ Directo"}</span>
+          ? `<div class="viaje-gastos">💸 ${gastosList} · <strong>Total: ${cop(v.totalGastos)}</strong></div>`
+          : `<div class="viaje-sin-g">Sin gastos registrados</div>`}
+        <span class="viaje-fuente">${v.fuente === "viatico" ? "🚛 Viático" : "📦 Servicio local"}</span>
       </div>`;
   }).join("");
 }
 
-async function enviarHistorial() {
-  if (!conductorActivo) { alert("Selecciona un conductor primero."); return; }
-  const mesSel   = document.getElementById("filtro-mes").value;
-  const viajes   = (viajesHistorial[conductorActivo] || [])
-    .filter(v => v.fecha.substring(0,7) === mesSel);
 
-  if (!viajes.length) { alert("No hay viajes en este mes para enviar."); return; }
-
-  const btn = document.getElementById("btn-enviar-historial");
-  btn.disabled = true; btn.textContent = "⏳ Enviando…";
-
-  try {
-    await fetch(SHEETS_URL, {
-      method: "POST", mode: "no-cors", headers: { "Content-Type": "text/plain" },
-      body: JSON.stringify({
-        tipo:       "historial",
-        conductor:  conductorActivo,
-        mes:        mesSel,
-        viajes:     viajes.map(v => ({
-          fecha: v.fecha, tipo: v.tipo, destino: v.destino,
-          cliente: v.cliente, notas: v.notas,
-          totalGastos: v.totalGastos,
-          detalleGastos: v.gastos.map(g => `${CATS[g.cat].carpeta}: ${g.desc} (${cop(g.monto)})`).join(" | "),
-          fuente: v.fuente
-        }))
-      })
-    });
-    mostrarToast("✓ Historial enviado a Sheets");
-  } catch(e) {
-    mostrarToast("⚠ Error al enviar. Intenta de nuevo.", "#c0392b");
-  }
-
-  btn.disabled = false; btn.textContent = "📊 Enviar historial a Sheets";
-}
-
-/* ════════════════════════════════════════════════════════════════
+/* ════════════════════════════════════════════════
    INICIO
-   ════════════════════════════════════════════════════════════════ */
-renderGastos();
+   ════════════════════════════════════════════════ */
+renderGastosLista(vGastos, "v-gastos-lista", "eliminarGastoV");
 actualizarBalance();
 </script>
 </body>
