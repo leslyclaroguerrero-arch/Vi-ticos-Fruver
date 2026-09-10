@@ -109,12 +109,12 @@ header p  { font-size: 11px; opacity: .65; margin-top: 1px; }
 #toast.show { opacity: 1; }
 
 
-/* ── SELECTOR DE DESTINOS ── */
+/* ── SELECTOR DE DESTINOS (autocomplete) ── */
 .destino-selector-wrap { position: relative; }
-.destino-select { width: 100%; border: 1.5px solid #cdd8ca; border-radius: 8px;
+.destino-input { width: 100%; border: 1.5px solid #cdd8ca; border-radius: 8px;
   padding: 10px 12px; font-size: 15px; color: #1a2a1a; background: #f9fbf8;
   outline: none; font-family: inherit; transition: border-color .15s; }
-.destino-select:focus { border-color: #1e4d2b; background: #fff; }
+.destino-input:focus { border-color: #1e4d2b; background: #fff; }
 .destino-valor-chip { display: inline-block; margin-top: 6px; background: #e8f5e9;
   color: #1e4d2b; border-radius: 20px; padding: 3px 12px; font-size: 13px;
   font-weight: 700; display: none; }
@@ -332,7 +332,15 @@ header p  { font-size: 11px; opacity: .65; margin-top: 1px; }
     <div class="section-title">Información del viaje</div>
     <div class="row2">
       <div class="field"><label>Fecha</label><input type="date" id="v-fecha"></div>
-      <div class="field"><label>Destino</label><input type="text" id="v-destino" placeholder="Ej: Batallón Cartagena"></div>
+      <div class="field">
+        <label>Destino</label>
+        <input class="destino-input" id="v-destino" list="dl-viaticos"
+          placeholder="Escribe o selecciona…" autocomplete="off"
+          oninput="onDestinoInputV(this)">
+        <datalist id="dl-viaticos"></datalist>
+        <button class="btn btn-outline btn-small" style="margin-top:6px;font-size:12px;"
+          onclick="abrirModalNuevoDestino('viatico')">+ Nuevo destino viático</button>
+      </div>
     </div>
     <div class="field">
       <label>Conductor</label>
@@ -444,13 +452,14 @@ header p  { font-size: 11px; opacity: .65; margin-top: 1px; }
       <div class="field">
         <label>Destino / Cliente</label>
         <div class="destino-selector-wrap">
-          <select class="destino-select" id="d-cliente" onchange="onDestinoChange(this)">
-            <option value="">— Selecciona un destino —</option>
-          </select>
+          <input class="destino-input" id="d-cliente" list="dl-domicilios"
+            placeholder="Escribe o selecciona un destino…"
+            oninput="onDestinoInputD(this)" autocomplete="off">
+          <datalist id="dl-domicilios"></datalist>
         </div>
-        <div class="destino-valor-chip" id="d-valor-chip">💰 Valor: —</div>
+        <div class="destino-valor-chip" id="d-valor-chip"></div>
         <button class="btn btn-outline btn-small" style="margin-top:8px;font-size:12px;"
-          onclick="abrirModalNuevoDestino()">+ Nuevo destino</button>
+          onclick="abrirModalNuevoDestino('domicilio')">+ Nuevo destino</button>
       </div>
       <div class="field"><label>Observaciones (opcional)</label>
         <textarea id="d-notas" placeholder="Notas del servicio" style="min-height:40px;"></textarea>
@@ -1371,7 +1380,9 @@ cargarDestinos();
 /* ════════════════════════════════════════════════
    GESTIÓN DE DESTINOS
    ════════════════════════════════════════════════ */
-let _destinos = [];   // cache: [{nombre, valor}]
+let _destinos         = [];   // domicilios: [{nombre, valor}]
+let _destinosViaticos = [];   // viáticos:   [{nombre}]
+let _ndSubtipo        = "domicilio";
 
 async function cargarDestinos() {
   try {
@@ -1380,44 +1391,54 @@ async function cargarDestinos() {
       body: JSON.stringify({ tipo: "leerDestinos" })
     });
     const data = await resp.json();
-    if (data.ok && Array.isArray(data.destinos)) {
-      _destinos = data.destinos;
-      llenarSelectDestinos();
+    if (data.ok) {
+      if (Array.isArray(data.destinos))         _destinos         = data.destinos;
+      if (Array.isArray(data.destinosViaticos)) _destinosViaticos = data.destinosViaticos;
+      llenarDatalists();
     }
   } catch(err) { console.warn("Error cargando destinos:", err); }
 }
 
-function llenarSelectDestinos() {
-  const sel = document.getElementById("d-cliente");
-  if (!sel) return;
-  const valActual = sel.value;
-  sel.innerHTML = '<option value="">— Selecciona un destino —</option>';
-  _destinos.forEach(d => {
-    const opt = document.createElement("option");
-    opt.value           = d.nombre;
-    opt.textContent     = d.nombre;
-    opt.dataset.valor   = d.valor;
-    sel.appendChild(opt);
-  });
-  if (valActual) sel.value = valActual;
-  onDestinoChange(sel);
+function llenarDatalists() {
+  const dlD = document.getElementById("dl-domicilios");
+  if (dlD) {
+    dlD.innerHTML = "";
+    _destinos.forEach(d => {
+      const opt = document.createElement("option"); opt.value = d.nombre; dlD.appendChild(opt);
+    });
+  }
+  const dlV = document.getElementById("dl-viaticos");
+  if (dlV) {
+    dlV.innerHTML = "";
+    _destinosViaticos.forEach(d => {
+      const opt = document.createElement("option"); opt.value = d.nombre; dlV.appendChild(opt);
+    });
+  }
 }
 
-function onDestinoChange(sel) {
-  const chip = document.getElementById("d-valor-chip");
-  if (!chip) return;
-  const opt = sel.options[sel.selectedIndex];
-  if (!sel.value || !opt) { chip.style.display = "none"; return; }
-  const valor = Number(opt.dataset.valor) || 0;
-  chip.style.display = "inline-block";
-  chip.textContent   = valor > 0
-    ? "💰 Valor del servicio: " + cop(valor)
-    : "💰 Sin valor asignado";
+function onDestinoInputD(input) {
+  const chip  = document.getElementById("d-valor-chip");
+  const match = _destinos.find(d => d.nombre.toLowerCase() === input.value.toLowerCase());
+  if (match) {
+    chip.style.display = "inline-block";
+    chip.textContent   = match.valor > 0
+      ? "💰 Valor del servicio: " + cop(match.valor)
+      : "💰 Sin valor asignado";
+  } else {
+    chip.style.display = "none";
+  }
 }
 
-function abrirModalNuevoDestino() {
+function onDestinoInputV(input) { /* datalist filtra solo */ }
+
+function abrirModalNuevoDestino(subtipo) {
+  _ndSubtipo = subtipo || "domicilio";
   document.getElementById("nd-nombre").value = "";
   document.getElementById("nd-valor").value  = "";
+  const valorWrap = document.getElementById("nd-valor-wrap");
+  if (valorWrap) valorWrap.style.display = _ndSubtipo === "domicilio" ? "block" : "none";
+  document.getElementById("nd-titulo").textContent =
+    _ndSubtipo === "domicilio" ? "➕ Nuevo destino (domicilio)" : "➕ Nuevo destino (viático)";
   document.getElementById("nd-overlay").classList.add("open");
   setTimeout(() => document.getElementById("nd-nombre").focus(), 100);
 }
@@ -1430,7 +1451,7 @@ function cerrarNDClick(e) {
 
 async function guardarNuevoDestino() {
   const nombre = document.getElementById("nd-nombre").value.trim();
-  const valor  = leerNum("nd-valor");
+  const valor  = _ndSubtipo === "domicilio" ? leerNum("nd-valor") : 0;
   if (!nombre) { alert("Ingresa el nombre del destino."); return; }
 
   const btn = document.getElementById("nd-btn-guardar");
@@ -1439,15 +1460,22 @@ async function guardarNuevoDestino() {
   try {
     const resp = await fetch(SHEETS_URL, {
       method: "POST", headers: { "Content-Type": "text/plain" },
-      body: JSON.stringify({ tipo: "guardarDestino", nombre, valor })
+      body: JSON.stringify({ tipo: "guardarDestino", nombre, valor, subtipo: _ndSubtipo })
     });
     const data = await resp.json();
     if (data.ok) {
-      _destinos.push({ nombre, valor });
-      _destinos.sort((a, b) => a.nombre.localeCompare(b.nombre));
-      llenarSelectDestinos();
-      document.getElementById("d-cliente").value = nombre;
-      onDestinoChange(document.getElementById("d-cliente"));
+      if (_ndSubtipo === "domicilio") {
+        _destinos.push({ nombre, valor });
+        _destinos.sort((a,b) => a.nombre.localeCompare(b.nombre));
+        const inp = document.getElementById("d-cliente");
+        if (inp) { inp.value = nombre; onDestinoInputD(inp); }
+      } else {
+        _destinosViaticos.push({ nombre });
+        _destinosViaticos.sort((a,b) => a.nombre.localeCompare(b.nombre));
+        const inp = document.getElementById("v-destino");
+        if (inp) inp.value = nombre;
+      }
+      llenarDatalists();
       cerrarModalND();
       toast("✓ Destino guardado: " + nombre);
     } else {
@@ -1464,12 +1492,12 @@ async function guardarNuevoDestino() {
 <!-- ── MODAL NUEVO DESTINO ── -->
 <div class="nd-overlay" id="nd-overlay" onclick="cerrarNDClick(event)">
   <div class="nd-box">
-    <div class="nd-title">➕ Nuevo destino</div>
+    <div class="nd-title" id="nd-titulo">➕ Nuevo destino</div>
     <div class="field">
       <label>Nombre del destino</label>
       <input type="text" id="nd-nombre" placeholder="Ej: Restaurante El Buen Sabor">
     </div>
-    <div class="field">
+    <div class="field" id="nd-valor-wrap">
       <label>Valor del servicio (COP $)</label>
       <input type="text" id="nd-valor" inputmode="numeric" placeholder="Ej: 15.000"
         oninput="formatearCampo(this)">
