@@ -108,6 +108,26 @@ header p  { font-size: 11px; opacity: .65; margin-top: 1px; }
          box-shadow: 0 4px 16px rgba(0,0,0,.2); max-width: 90vw; text-align: center; }
 #toast.show { opacity: 1; }
 
+
+/* ── SELECTOR DE DESTINOS ── */
+.destino-selector-wrap { position: relative; }
+.destino-select { width: 100%; border: 1.5px solid #cdd8ca; border-radius: 8px;
+  padding: 10px 12px; font-size: 15px; color: #1a2a1a; background: #f9fbf8;
+  outline: none; font-family: inherit; transition: border-color .15s; }
+.destino-select:focus { border-color: #1e4d2b; background: #fff; }
+.destino-valor-chip { display: inline-block; margin-top: 6px; background: #e8f5e9;
+  color: #1e4d2b; border-radius: 20px; padding: 3px 12px; font-size: 13px;
+  font-weight: 700; display: none; }
+
+/* ── MODAL NUEVO DESTINO ── */
+.nd-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.5);
+  z-index: 600; align-items: center; justify-content: center; padding: 20px; }
+.nd-overlay.open { display: flex; }
+.nd-box { background: #fff; border-radius: 16px; width: 100%; max-width: 400px; padding: 24px; }
+.nd-title { font-size: 16px; font-weight: 800; color: #1e4d2b; margin-bottom: 16px; }
+.nd-btns { display: flex; gap: 8px; margin-top: 16px; }
+.nd-btns .btn { flex: 1; }
+
 /* ══ PESTAÑA 2 – DOMICILIOS ══ */
 .conductor-selector { display: flex; flex-direction: column; gap: 8px; }
 .conductor-card { border: 2px solid #dde8da; border-radius: 12px; padding: 13px 16px;
@@ -421,8 +441,16 @@ header p  { font-size: 11px; opacity: .65; margin-top: 1px; }
           <button class="tipo-btn" data-tipo="Transporte de mercancía" onclick="selTipoD(this)">🏪<br>Transporte<br>de mercancía</button>
         </div>
       </div>
-      <div class="field"><label>Cliente o referencia</label>
-        <input type="text" id="d-cliente" placeholder="Ej: Restaurante El Buen Sabor">
+      <div class="field">
+        <label>Destino / Cliente</label>
+        <div class="destino-selector-wrap">
+          <select class="destino-select" id="d-cliente" onchange="onDestinoChange(this)">
+            <option value="">— Selecciona un destino —</option>
+          </select>
+        </div>
+        <div class="destino-valor-chip" id="d-valor-chip">💰 Valor: —</div>
+        <button class="btn btn-outline btn-small" style="margin-top:8px;font-size:12px;"
+          onclick="abrirModalNuevoDestino()">+ Nuevo destino</button>
       </div>
       <div class="field"><label>Observaciones (opcional)</label>
         <textarea id="d-notas" placeholder="Notas del servicio" style="min-height:40px;"></textarea>
@@ -504,17 +532,17 @@ header p  { font-size: 11px; opacity: .65; margin-top: 1px; }
       <div class="res-bloque">
         <div class="titulo">Viáticos</div>
         <div class="num" id="h-r-viaticos">0</div>
-        <div class="sub" id="h-r-viaticos-g">Sin gastos</div>
+
       </div>
       <div class="res-bloque">
         <div class="titulo">Domicilios / Transporte</div>
         <div class="num" id="h-r-domicilios">0</div>
-        <div class="sub" id="h-r-domicilios-g">Sin gastos</div>
+
       </div>
     </div>
     <div class="res-total">
-      <div class="titulo">Total viajes · Total gastos</div>
-      <div class="num" id="h-r-total">0 viajes · $0</div>
+      <div class="titulo">Total de viajes del mes</div>
+      <div class="num" id="h-r-total">0</div>
     </div>
   </div>
 
@@ -574,6 +602,7 @@ function cambiarTab(tab, btn) {
     if (!historialCargado) cargarHistorialDesdeSheets();
     else renderHistorial();
   }
+  if (tab === "domicilios" && _destinos.length === 0) cargarDestinos();
 }
 
 /* ════════════════════════════════════════════════
@@ -863,9 +892,11 @@ function renderServiciosLista() {
           <div style="margin-bottom:4px;">${tipoTag}</div>
           <div class="servicio-cliente">👤 ${s.cliente}</div>
           ${s.notas ? `<div class="servicio-notas">📝 ${s.notas}</div>` : ""}
+          ${s.valorServicio > 0
+            ? `<div class="servicio-gastos" style="color:#1e7a3a;">🏷️ Valor: ${cop(s.valorServicio)}</div>` : ""}
           ${totalG > 0
             ? `<div class="servicio-gastos">💸 ${s.gastos.map(g=>CATS[g.cat].label+": "+cop(g.monto)).join(" · ")}</div>`
-            : `<div class="servicio-gastos" style="color:#bbb;">Sin gastos</div>`}
+            : `<div class="servicio-gastos" style="color:#bbb;">Sin gastos adicionales</div>`}
         </div>
         <button class="eliminar" onclick="eliminarServicio(${i})">✕</button>
       </div>`;
@@ -880,11 +911,15 @@ function eliminarServicio(idx) {
 function agregarServicioALista() {
   if (!dConductor) { alert("Selecciona un conductor primero."); return; }
   if (!document.getElementById("d-fecha").value) { alert("Selecciona la fecha."); return; }
-  const cliente = document.getElementById("d-cliente").value.trim();
-  if (!cliente) { alert("Ingresa el cliente o referencia."); return; }
+  const clienteSel = document.getElementById("d-cliente");
+  const cliente     = clienteSel.value.trim();
+  if (!cliente) { alert("Selecciona un destino de la lista."); return; }
+  const opt         = clienteSel.options[clienteSel.selectedIndex];
+  const valorServicio = opt ? (Number(opt.dataset.valor) || 0) : 0;
 
   dServicios.push({
     tipo: dTipo, cliente,
+    valorServicio,
     notas:  document.getElementById("d-notas").value.trim(),
     gastos: dGastos.map(g => ({ cat: g.cat, desc: g.desc, monto: g.monto }))
   });
@@ -892,6 +927,7 @@ function agregarServicioALista() {
   dGastos = [];
   document.getElementById("d-cliente").value = "";
   document.getElementById("d-notas").value   = "";
+  document.getElementById("d-valor-chip").style.display = "none";
   document.querySelectorAll(".tipo-btn").forEach((b,i) => b.classList.toggle("active", i===0));
   dTipo = "Domicilio a cliente";
   renderGastosLista(dGastos, "d-gastos-lista", "eliminarGastoD");
@@ -930,7 +966,7 @@ async function guardarTodosLosServicios() {
         body: JSON.stringify({
           tipo: "domicilio", conductor: dConductor, fecha,
           tipoServicio: s.tipo, cliente: s.cliente,
-          notas: s.notas, totalGastos, detalleGastos
+          notas: s.notas, valorServicio: s.valorServicio || 0, totalGastos, detalleGastos
         })
       });
     } catch(err) { console.warn(err); }
@@ -955,6 +991,7 @@ function limpiarDomicilio(silencioso) {
   document.getElementById("d-fecha").value   = hoyISO();
   document.getElementById("d-cliente").value = "";
   document.getElementById("d-notas").value   = "";
+  document.getElementById("d-valor-chip").style.display = "none";
   document.querySelectorAll(".tipo-btn").forEach((b,i) => b.classList.toggle("active", i===0));
   dTipo = "Domicilio a cliente";
   renderGastosLista(dGastos, "d-gastos-lista", "eliminarGastoD");
@@ -1034,12 +1071,9 @@ function renderHistorial() {
   resumenEl.style.display = "block";
   document.getElementById("h-resumen-titulo").textContent =
     `${MESES[parseInt(mesNum)-1].toUpperCase()} ${anio}${hConductor !== "Todos" ? " · " + hConductor.split(" ")[0].toUpperCase() : ""}`;
-  document.getElementById("h-r-viaticos").textContent     = viaticos.length;
-  document.getElementById("h-r-viaticos-g").textContent   = gasViaticos > 0 ? cop(gasViaticos) : "Sin gastos";
-  document.getElementById("h-r-domicilios").textContent   = domicilios.length;
-  document.getElementById("h-r-domicilios-g").textContent = gasDomicilios > 0 ? cop(gasDomicilios) : "Sin gastos";
-  document.getElementById("h-r-total").textContent =
-    `${filtrados.length} viajes · ${totalGastos > 0 ? cop(totalGastos) : "$0"}`;
+  document.getElementById("h-r-viaticos").textContent   = viaticos.length;
+  document.getElementById("h-r-domicilios").textContent = domicilios.length;
+  document.getElementById("h-r-total").textContent      = filtrados.length;
 
   const ordenados = [...filtrados].sort((a,b) => b.fecha.localeCompare(a.fecha));
   window._viajesOrdenados = ordenados;
@@ -1331,6 +1365,28 @@ function normalizarFecha(f) {
    ════════════════════════════════════════════════ */
 renderGastosLista(vGastos, "v-gastos-lista", "eliminarGastoV");
 actualizarBalance();
+// Pre-cargar destinos en segundo plano
+cargarDestinos();
 </script>
+
+<!-- ── MODAL NUEVO DESTINO ── -->
+<div class="nd-overlay" id="nd-overlay" onclick="cerrarNDClick(event)">
+  <div class="nd-box">
+    <div class="nd-title">➕ Nuevo destino</div>
+    <div class="field">
+      <label>Nombre del destino</label>
+      <input type="text" id="nd-nombre" placeholder="Ej: Restaurante El Buen Sabor">
+    </div>
+    <div class="field">
+      <label>Valor del servicio (COP $)</label>
+      <input type="text" id="nd-valor" inputmode="numeric" placeholder="Ej: 15.000"
+        oninput="formatearCampo(this)">
+    </div>
+    <div class="nd-btns">
+      <button class="btn btn-outline" onclick="cerrarModalND()">Cancelar</button>
+      <button class="btn btn-green" id="nd-btn-guardar" onclick="guardarNuevoDestino()">Guardar ✓</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
