@@ -1367,6 +1367,98 @@ renderGastosLista(vGastos, "v-gastos-lista", "eliminarGastoV");
 actualizarBalance();
 // Pre-cargar destinos en segundo plano
 cargarDestinos();
+
+/* ════════════════════════════════════════════════
+   GESTIÓN DE DESTINOS
+   ════════════════════════════════════════════════ */
+let _destinos = [];   // cache: [{nombre, valor}]
+
+async function cargarDestinos() {
+  try {
+    const resp = await fetch(SHEETS_URL, {
+      method: "POST", headers: { "Content-Type": "text/plain" },
+      body: JSON.stringify({ tipo: "leerDestinos" })
+    });
+    const data = await resp.json();
+    if (data.ok && Array.isArray(data.destinos)) {
+      _destinos = data.destinos;
+      llenarSelectDestinos();
+    }
+  } catch(err) { console.warn("Error cargando destinos:", err); }
+}
+
+function llenarSelectDestinos() {
+  const sel = document.getElementById("d-cliente");
+  if (!sel) return;
+  const valActual = sel.value;
+  sel.innerHTML = '<option value="">— Selecciona un destino —</option>';
+  _destinos.forEach(d => {
+    const opt = document.createElement("option");
+    opt.value           = d.nombre;
+    opt.textContent     = d.nombre;
+    opt.dataset.valor   = d.valor;
+    sel.appendChild(opt);
+  });
+  if (valActual) sel.value = valActual;
+  onDestinoChange(sel);
+}
+
+function onDestinoChange(sel) {
+  const chip = document.getElementById("d-valor-chip");
+  if (!chip) return;
+  const opt = sel.options[sel.selectedIndex];
+  if (!sel.value || !opt) { chip.style.display = "none"; return; }
+  const valor = Number(opt.dataset.valor) || 0;
+  chip.style.display = "inline-block";
+  chip.textContent   = valor > 0
+    ? "💰 Valor del servicio: " + cop(valor)
+    : "💰 Sin valor asignado";
+}
+
+function abrirModalNuevoDestino() {
+  document.getElementById("nd-nombre").value = "";
+  document.getElementById("nd-valor").value  = "";
+  document.getElementById("nd-overlay").classList.add("open");
+  setTimeout(() => document.getElementById("nd-nombre").focus(), 100);
+}
+function cerrarModalND() {
+  document.getElementById("nd-overlay").classList.remove("open");
+}
+function cerrarNDClick(e) {
+  if (e.target === document.getElementById("nd-overlay")) cerrarModalND();
+}
+
+async function guardarNuevoDestino() {
+  const nombre = document.getElementById("nd-nombre").value.trim();
+  const valor  = leerNum("nd-valor");
+  if (!nombre) { alert("Ingresa el nombre del destino."); return; }
+
+  const btn = document.getElementById("nd-btn-guardar");
+  btn.disabled = true; btn.textContent = "⏳ Guardando…";
+
+  try {
+    const resp = await fetch(SHEETS_URL, {
+      method: "POST", headers: { "Content-Type": "text/plain" },
+      body: JSON.stringify({ tipo: "guardarDestino", nombre, valor })
+    });
+    const data = await resp.json();
+    if (data.ok) {
+      _destinos.push({ nombre, valor });
+      _destinos.sort((a, b) => a.nombre.localeCompare(b.nombre));
+      llenarSelectDestinos();
+      document.getElementById("d-cliente").value = nombre;
+      onDestinoChange(document.getElementById("d-cliente"));
+      cerrarModalND();
+      toast("✓ Destino guardado: " + nombre);
+    } else {
+      alert(data.error || "No se pudo guardar el destino.");
+    }
+  } catch(err) {
+    alert("Error de conexión: " + err.message);
+  }
+  btn.disabled = false; btn.textContent = "Guardar ✓";
+}
+
 </script>
 
 <!-- ── MODAL NUEVO DESTINO ── -->
