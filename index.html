@@ -1199,9 +1199,11 @@ async function abrirDetalle(idx) {
 
 function renderDetalleModal(v) {
   const det = v.detalle;
-  if (!det || v.totalGastos === 0) {
+
+  // Sin detalle del todo
+  if (!det) {
     document.getElementById("m-gastos").innerHTML =
-      `<div class="modal-sin-gastos">Este viaje no tuvo gastos registrados.</div>`;
+      `<div class="modal-sin-gastos">No se pudo cargar el detalle de este viaje.</div>`;
     document.getElementById("m-evidencias-wrap").innerHTML = "";
     return;
   }
@@ -1210,18 +1212,37 @@ function renderDetalleModal(v) {
     { key:"combustible" }, { key:"peaje" }, { key:"comida" },
     { key:"viatico" }, { key:"imprevisto" }, { key:"otro" }
   ];
-  const filas = cats
-    .filter(c => det[c.key] && det[c.key] > 0)
-    .map(c => `
+
+  const filasConValor = cats.filter(c => det[c.key] && det[c.key] > 0);
+  const totalDetalle  = filasConValor.reduce((s,c) => s + det[c.key], 0);
+  const totalMostrar  = v.totalGastos || totalDetalle;
+
+  // Sin gastos reales
+  if (!filasConValor.length && !totalMostrar) {
+    document.getElementById("m-gastos").innerHTML =
+      `<div class="modal-sin-gastos">Este viaje no tuvo gastos registrados.</div>`;
+    document.getElementById("m-evidencias-wrap").innerHTML = "";
+    return;
+  }
+
+  // Si hay total pero no categorías (ej: domicilios sin detalle parseado)
+  let filas = filasConValor.map(c => `
       <div class="cat-row">
         <span class="cat-nombre">${CATS_LABELS[c.key]}</span>
         <span class="cat-valor">${cop(det[c.key])}</span>
       </div>`).join("");
 
+  if (!filasConValor.length && totalMostrar) {
+    filas = `<div class="cat-row">
+      <span class="cat-nombre" style="color:#aaa;font-size:13px;">Sin desglose disponible</span>
+      <span class="cat-valor">${cop(totalMostrar)}</span>
+    </div>`;
+  }
+
   document.getElementById("m-gastos").innerHTML = filas + `
     <div class="cat-total">
       <span>Total gastos</span>
-      <span>${cop(v.totalGastos)}</span>
+      <span>${cop(totalMostrar)}</span>
     </div>`;
 
   document.getElementById("m-evidencias-wrap").innerHTML = det.urlEvidencias
