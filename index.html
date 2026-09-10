@@ -128,6 +128,38 @@ header p  { font-size: 11px; opacity: .65; margin-top: 1px; }
 .nd-btns { display: flex; gap: 8px; margin-top: 16px; }
 .nd-btns .btn { flex: 1; }
 
+
+/* ── MODAL RESUMEN DOMICILIOS ── */
+.rd-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.5);
+  z-index: 600; align-items: flex-end; justify-content: center; }
+.rd-overlay.open { display: flex; }
+.rd-box { background: #fff; border-radius: 20px 20px 0 0; width: 100%; max-width: 600px;
+  padding: 0 0 30px; max-height: 88vh; overflow-y: auto;
+  animation: slideUp .25s ease; }
+.rd-handle { width: 40px; height: 4px; background: #cdd8ca; border-radius: 4px;
+  margin: 12px auto 16px; }
+.rd-header { padding: 0 18px 14px; border-bottom: 1px solid #eef3ec; }
+.rd-titulo { font-size: 18px; font-weight: 800; color: #1a2a1a; margin-bottom: 2px; }
+.rd-subtitulo { font-size: 12px; color: #778; }
+.rd-body { padding: 16px 18px; }
+.rd-fila { display: flex; justify-content: space-between; align-items: center;
+  padding: 10px 0; border-bottom: 1px solid #f5f7f2; font-size: 14px; }
+.rd-fila:last-child { border-bottom: none; }
+.rd-fila .etiqueta { color: #445; }
+.rd-fila .valor    { font-weight: 700; }
+.rd-fila .val-pos  { color: #1e7a3a; }
+.rd-fila .val-neg  { color: #c0392b; }
+.rd-fila .val-neu  { color: #b85c00; }
+.rd-separador { height: 1px; background: #dde8da; margin: 8px 0; }
+.rd-total { display: flex; justify-content: space-between; padding: 12px 0 0;
+  font-size: 17px; font-weight: 800; border-top: 2px solid #1e4d2b; margin-top: 4px; }
+.rd-close { display: block; width: calc(100% - 36px); margin: 14px 18px 0;
+  padding: 13px; background: #f5f7f2; border: none; border-radius: 10px;
+  font-size: 15px; font-weight: 700; cursor: pointer; font-family: inherit; color: #556; }
+.res-bloque-clickable { cursor: pointer; transition: background .15s; }
+.res-bloque-clickable:hover { background: rgba(255,255,255,.2); }
+.res-bloque-clickable:active { background: rgba(255,255,255,.25); }
+
 /* ══ PESTAÑA 2 – DOMICILIOS ══ */
 .conductor-selector { display: flex; flex-direction: column; gap: 8px; }
 .conductor-card { border: 2px solid #dde8da; border-radius: 12px; padding: 13px 16px;
@@ -543,10 +575,10 @@ header p  { font-size: 11px; opacity: .65; margin-top: 1px; }
         <div class="num" id="h-r-viaticos">0</div>
 
       </div>
-      <div class="res-bloque">
-        <div class="titulo">Domicilios / Transporte</div>
+      <div class="res-bloque res-bloque-clickable" onclick="abrirResumenDomicilios()" title="Toca para ver detalle">
+        <div class="titulo">Domicilios / Transporte 📊</div>
         <div class="num" id="h-r-domicilios">0</div>
-
+        <div style="font-size:10px;opacity:.6;margin-top:4px;">Toca para ver detalle</div>
       </div>
     </div>
     <div class="res-total">
@@ -1383,6 +1415,123 @@ actualizarBalance();
 cargarDestinos();
 
 /* ════════════════════════════════════════════════
+   MODAL RESUMEN DOMICILIOS DEL MES
+   ════════════════════════════════════════════════ */
+function abrirResumenDomicilios() {
+  // Tomar los domicilios ya filtrados del mes/conductor actual
+  const mes  = document.getElementById("h-mes").value;
+  const norm = s => (s||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().trim();
+
+  const domicilios = todosLosViajes.filter(v => {
+    const mesOk       = v.fecha.substring(0,7) === mes;
+    const conductorOk = hConductor === "Todos" ||
+                        norm(v.conductor).includes(norm(hConductor.split(" ")[0]));
+    return mesOk && conductorOk && v.tipo !== "Viático";
+  });
+
+  if (!domicilios.length) { toast("No hay domicilios en este período."); return; }
+
+  // Calcular totales
+  const totalIngresos = domicilios.reduce((s,v) => s + (v.valorServicio || 0), 0);
+  const totalGastos   = domicilios.reduce((s,v) => s + (v.totalGastos   || 0), 0);
+  const balance       = totalIngresos - totalGastos;
+
+  // Desglose por tipo
+  const porTipo = {};
+  domicilios.forEach(v => {
+    const t = v.tipo || "Domicilio a cliente";
+    if (!porTipo[t]) porTipo[t] = { count: 0, ingresos: 0, gastos: 0 };
+    porTipo[t].count++;
+    porTipo[t].ingresos += v.valorServicio || 0;
+    porTipo[t].gastos   += v.totalGastos   || 0;
+  });
+
+  // Título
+  const [anio, mesNum] = mes.split("-");
+  const MESES = ["Enero","Febrero","Marzo","Abril","Mayo","Junio",
+                 "Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+  const nombreMes = MESES[parseInt(mesNum)-1] + " " + anio;
+  const nombreCond = hConductor !== "Todos" ? " · " + hConductor.split(" ")[0] : "";
+
+  document.getElementById("rd-titulo").textContent    = "📦 Domicilios / Transporte";
+  document.getElementById("rd-subtitulo").textContent = nombreMes + nombreCond;
+
+  // Cuerpo
+  let html = "";
+
+  // Desglose por tipo
+  Object.entries(porTipo).forEach(([tipo, d]) => {
+    const emoji = tipo === "Domicilio a cliente" ? "📦" : "🏪";
+    html += `<div style="font-size:11px;font-weight:700;color:#1e4d2b;letter-spacing:1px;
+      text-transform:uppercase;margin:12px 0 6px;">${emoji} ${tipo}</div>`;
+    html += `<div class="rd-fila">
+      <span class="etiqueta">Servicios realizados</span>
+      <span class="valor">${d.count}</span>
+    </div>`;
+    if (d.ingresos > 0) {
+      html += `<div class="rd-fila">
+        <span class="etiqueta">Ingresos por servicio</span>
+        <span class="valor val-pos">${cop(d.ingresos)}</span>
+      </div>`;
+    }
+    if (d.gastos > 0) {
+      html += `<div class="rd-fila">
+        <span class="etiqueta">Gastos adicionales</span>
+        <span class="valor val-neg">${cop(d.gastos)}</span>
+      </div>`;
+    }
+  });
+
+  // Totales generales
+  html += `<div class="rd-separador"></div>`;
+  html += `<div class="rd-fila">
+    <span class="etiqueta">Total servicios</span>
+    <span class="valor">${domicilios.length}</span>
+  </div>`;
+
+  if (totalIngresos > 0) {
+    html += `<div class="rd-fila">
+      <span class="etiqueta">Total ingresos</span>
+      <span class="valor val-pos">${cop(totalIngresos)}</span>
+    </div>`;
+  }
+  if (totalGastos > 0) {
+    html += `<div class="rd-fila">
+      <span class="etiqueta">Total gastos</span>
+      <span class="valor val-neg">${cop(totalGastos)}</span>
+    </div>`;
+  }
+
+  if (totalIngresos > 0 || totalGastos > 0) {
+    const balClass = balance >= 0 ? "val-pos" : "val-neg";
+    const balLabel = balance >= 0 ? "Balance neto" : "Déficit";
+    html += `<div class="rd-total">
+      <span>${balLabel}</span>
+      <span class="${balClass}">${cop(balance)}</span>
+    </div>`;
+  }
+
+  if (totalIngresos === 0 && totalGastos === 0) {
+    html += `<div style="text-align:center;padding:16px;color:#aaa;font-size:14px;">
+      Los registros de este período no tienen valores asignados.<br>
+      <span style="font-size:12px;">Asigna valores a los destinos en la hoja "Destinos" de Sheets.</span>
+    </div>`;
+  }
+
+  document.getElementById("rd-body").innerHTML = html;
+  document.getElementById("rd-overlay").classList.add("open");
+  document.body.style.overflow = "hidden";
+}
+
+function cerrarRD() {
+  document.getElementById("rd-overlay").classList.remove("open");
+  document.body.style.overflow = "";
+}
+function cerrarRDClick(e) {
+  if (e.target === document.getElementById("rd-overlay")) cerrarRD();
+}
+
+/* ════════════════════════════════════════════════
    GESTIÓN DE DESTINOS
    ════════════════════════════════════════════════ */
 let _destinos         = [];   // domicilios: [{nombre, valor}]
@@ -1536,6 +1685,19 @@ async function guardarNuevoDestino() {
       <button class="btn btn-outline" onclick="cerrarModalND()">Cancelar</button>
       <button class="btn btn-green" id="nd-btn-guardar" onclick="guardarNuevoDestino()">Guardar ✓</button>
     </div>
+  </div>
+</div>
+
+<!-- ── MODAL RESUMEN DOMICILIOS ── -->
+<div class="rd-overlay" id="rd-overlay" onclick="cerrarRDClick(event)">
+  <div class="rd-box">
+    <div class="rd-handle"></div>
+    <div class="rd-header">
+      <div class="rd-titulo" id="rd-titulo">Resumen domicilios</div>
+      <div class="rd-subtitulo" id="rd-subtitulo"></div>
+    </div>
+    <div class="rd-body" id="rd-body"></div>
+    <button class="rd-close" onclick="cerrarRD()">Cerrar</button>
   </div>
 </div>
 </body>
