@@ -921,29 +921,33 @@ function eliminarServicio(idx) {
 function agregarServicioALista() {
   if (!dConductor) { alert("Selecciona un conductor primero."); return; }
   if (!document.getElementById("d-fecha").value) { alert("Selecciona la fecha."); return; }
-  const clienteSel = document.getElementById("d-cliente");
-  const cliente     = clienteSel.value.trim();
-  if (!cliente) { alert("Selecciona un destino de la lista."); return; }
-  const opt         = clienteSel.options[clienteSel.selectedIndex];
-  const valorServicio = opt ? (Number(opt.dataset.valor) || 0) : 0;
+
+  const inpCliente = document.getElementById("d-cliente");
+  const cliente    = inpCliente.value.trim();
+  if (!cliente) { alert("Escribe o selecciona un destino."); return; }
+
+  // Buscar el valor en el cache _destinos (ya que es input+datalist, no select)
+  const matchDestino  = _destinos.find(d => d.nombre.toLowerCase() === cliente.toLowerCase());
+  const valorServicio = matchDestino ? (matchDestino.valor || 0) : 0;
 
   dServicios.push({
-    tipo: dTipo, cliente,
+    tipo:         dTipo,
+    cliente,
     valorServicio,
     notas:  document.getElementById("d-notas").value.trim(),
     gastos: dGastos.map(g => ({ cat: g.cat, desc: g.desc, monto: g.monto }))
   });
 
+  // Limpiar solo el mini-formulario, mantener conductor y fecha
   dGastos = [];
-  document.getElementById("d-cliente").value = "";
-  document.getElementById("d-notas").value   = "";
+  inpCliente.value = "";
+  document.getElementById("d-notas").value = "";
   document.getElementById("d-valor-chip").style.display = "none";
-  document.querySelectorAll(".tipo-btn").forEach((b,i) => b.classList.toggle("active", i===0));
+  document.querySelectorAll(".tipo-btn").forEach((b, i) => b.classList.toggle("active", i === 0));
   dTipo = "Domicilio a cliente";
   renderGastosLista(dGastos, "d-gastos-lista", "eliminarGastoD");
   renderServiciosLista();
-  document.getElementById("d-cliente").focus();
-  toast("✓ Servicio agregado a la lista");
+  toast("✓ Servicio agregado · " + cliente);
 }
 
 async function guardarTodosLosServicios() {
