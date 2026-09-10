@@ -1365,15 +1365,16 @@ async function cargarHistorialDesdeSheets() {
         if (!idsSesion.has(id)) {
           todosLosViajes.push({
             id,
-            fuente:      v.tipo === "Viático" ? "viatico" : "domicilio",
-            conductor:   v.conductor  || "",
-            fecha:       normalizarFecha(v.fecha),
-            tipo:        v.tipo       || "",
-            destino:     v.referencia || "",
-            cliente:     v.referencia || "",
-            notas:       v.notas      || "",
-            gastos:      [],
-            totalGastos: Number(v.totalGastos) || 0
+            fuente:        v.tipo === "Viático" ? "viatico" : "domicilio",
+            conductor:     v.conductor  || "",
+            fecha:         normalizarFecha(v.fecha),
+            tipo:          v.tipo       || "",
+            destino:       v.referencia || "",
+            cliente:       v.referencia || "",
+            notas:         v.notas      || "",
+            gastos:        [],
+            valorServicio: Number(v.valorServicio) || 0,
+            totalGastos:   Number(v.totalGastos)   || 0
             // filaNum y detalle se cargan al abrir el modal
           });
           idsSesion.add(id);
