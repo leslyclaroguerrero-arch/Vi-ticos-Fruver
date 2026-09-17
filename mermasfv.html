@@ -579,16 +579,29 @@ function pPunto() {
   pFiltrar(pto); pValEnv();
 }
 
-async function pCargar() {
+async function pCargar(intento) {
+  intento = intento || 1;
   const c=document.getElementById('p-lotes');
   document.getElementById('p-blotes').textContent='0';
-  c.innerHTML=`<div class="cl"><span class="sp">⏳</span> Cargando...</div>`;
+  c.innerHTML=`<div class="cl"><span class="sp">⏳</span> Cargando lotes${intento>1?' (intento '+intento+')':''}...</div>`;
   try {
-    const r=await fetch(URL_AS+"?action=getLotesPendientes");
-    const d=await r.json();
-    pTL=d.lotes||[];
+    // Timeout de 25 segundos
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 25000);
+    const r = await fetch(URL_AS + "?action=getLotesPendientes", { signal: ctrl.signal });
+    clearTimeout(timer);
+    const d = await r.json();
+    pTL = d.lotes || [];
     pFiltrar(document.getElementById('p-pto').value);
-  } catch(e){ c.innerHTML=`<div class="sl"><span class="si">❌</span>Error al cargar. Toca "Actualizar lista".</div>`; }
+  } catch(e) {
+    if (intento < 3) {
+      // Reintento automático con 2 segundos de espera
+      c.innerHTML=`<div class="cl"><span class="sp">⏳</span> Reintentando...</div>`;
+      setTimeout(() => pCargar(intento + 1), 2000);
+    } else {
+      c.innerHTML=`<div class="sl"><span class="si">❌</span>Error al cargar después de 3 intentos. Toca "Actualizar lista".</div>`;
+    }
+  }
 }
 
 function pFiltrar(pto) {
