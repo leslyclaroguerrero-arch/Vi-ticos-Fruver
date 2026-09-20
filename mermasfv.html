@@ -624,10 +624,14 @@ function pRenderLotes() {
   if(!filt.length){ c.innerHTML=`<div class="sl"><span class="si">🔍</span>Sin resultados</div>`; return; }
   c.innerHTML=filt.map(({l,i})=>{
     const ag=ya.has(l.filaIndex), sl=pLS.has(i);
+    const ic = l.destino === 'Va para malla' ? '🥦' : '🧃';
+    const tipoBadge = l.destino === 'Va para malla'
+      ? `<span style="font-size:0.68rem;font-weight:700;color:#7C3AED;background:#F5F3FF;border-radius:4px;padding:1px 5px;margin-left:4px;">MALLA</span>`
+      : `<span style="font-size:0.68rem;font-weight:700;color:var(--naranja);background:var(--naranja-suave);border-radius:4px;padding:1px 5px;margin-left:4px;">PULPA</span>`;
     return `<div class="lc ${ag?'la':sl?'ls':''}" id="plc-${i}" onclick="pToggle(${i})">
       <div class="lck" id="pck-${i}">${ag||sl?'✓':''}</div>
       <div class="lci">
-        <div class="lcp">🧃 ${l.producto}</div>
+        <div class="lcp">${ic} ${l.producto}${tipoBadge}</div>
         <div class="lcd">${l.cantidad} ${l.unidad} · ${l.fecha}</div>
         <div class="lcu">Reportado por ${l.persona}</div>
       </div>
