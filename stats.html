@@ -93,6 +93,9 @@ body{font-family:'Inter',sans-serif;background:var(--gris);color:var(--texto);mi
 .chk-bajado{display:flex;align-items:center;gap:6px;cursor:pointer;font-size:0.82rem;}
 .chk-bajado input{width:15px;height:15px;accent-color:var(--verde);cursor:pointer;}
 .empty{text-align:center;padding:32px;color:var(--texto-s);font-size:0.88rem;}
+.btn-marcar-prod{padding:6px 14px;background:var(--verde);color:white;border:none;border-radius:8px;font-size:0.75rem;font-weight:700;cursor:pointer;white-space:nowrap;}
+.btn-marcar-prod:disabled{opacity:0.4;cursor:not-allowed;}
+.btn-marcar-prod.parcial{background:var(--naranja);}
 
 /* GRAFICAS */
 .graficas{display:grid;grid-template-columns:1fr;gap:16px;padding:16px;}
@@ -409,12 +412,6 @@ function renderTabla(tbodyId, mapa, conCheck) {
     const todoBajado    = conCheck && item.desglose.length>0 && item.desglose.every(d=>d.bajado);
     const algunBajado   = conCheck && item.desglose.some(d=>d.bajado);
     const bajadoPorInfo = todoBajado ? (item.desglose[0].bajadoPor||"") + " · " + (item.desglose[0].fechaBajada||"") : "";
-    let estadoHtml = "";
-    if (conCheck) {
-      if (todoBajado)    estadoHtml=`<div class="ya-bajado">Bajado</div><div class="ya-bajado-info">${bajadoPorInfo}</div>`;
-      else if (algunBajado) estadoHtml=`<span class="badge badge-naranja">Parcial</span>`;
-      else                  estadoHtml=`<span class="badge badge-rojo">Pendiente</span>`;
-    }
 
     // Fila resumen del producto
     const trEl = document.createElement("tr");
@@ -425,10 +422,31 @@ function renderTabla(tbodyId, mapa, conCheck) {
       <td style="font-weight:600;">${prod}</td>
       <td>${fmtN(item.total)}</td>
       <td>${item.unidad}</td>
-      ${conCheck?`<td>${estadoHtml}</td>`:""}
+      ${conCheck?`<td class="td-estado-prod"></td>`:""}
     `;
     trEl.onclick = () => toggleGrp(grp, trEl);
     tbody.appendChild(trEl);
+
+    // Celda de estado / botón — se construye con JS para poder asignar el handler sin onclick="..."
+    if (conCheck) {
+      const tdEstado = trEl.querySelector(".td-estado-prod");
+      if (todoBajado) {
+        tdEstado.innerHTML = `<div class="ya-bajado">&#10003; Bajado</div><div class="ya-bajado-info">${bajadoPorInfo}</div>`;
+      } else {
+        // Botón que marca todos los registros pendientes de este producto
+        const filasPendientes = item.desglose.filter(d=>!d.bajado).map(d=>d.fila);
+        const btnClase = algunBajado ? "btn-marcar-prod parcial" : "btn-marcar-prod";
+        const btnLabel = algunBajado ? "Marcar restantes" : "Marcar bajado";
+        const btnEl = document.createElement("button");
+        btnEl.className = btnClase;
+        btnEl.textContent = btnLabel;
+        btnEl.onclick = (e) => {
+          e.stopPropagation(); // no abrir/cerrar desglose
+          marcarProducto(btnEl, filasPendientes, trEl, grp);
+        };
+        tdEstado.appendChild(btnEl);
+      }
+    }
 
     // Filas de desglose
     item.desglose.forEach(d => {
@@ -488,6 +506,29 @@ function marcarTodo() {
     btn.disabled = false;
     if (ok) cargarDatos();
     else alert("Error al marcar. Intenta de nuevo.");
+  });
+}
+
+// Marca todos los registros pendientes de UN producto desde la fila resumen
+function marcarProducto(btnEl, filasPendientes, trEl, grp) {
+  const quien = document.getElementById("quienBaja").value.trim()||"Sin nombre";
+  if (!filasPendientes.length) return;
+  btnEl.disabled = true;
+  btnEl.textContent = "Marcando...";
+  enviarMarcado(filasPendientes, quien, function(ok) {
+    if (ok) {
+      // Actualizar celda de estado de la fila producto
+      const tdEstado = trEl.querySelector(".td-estado-prod");
+      tdEstado.innerHTML = `<div class="ya-bajado">&#10003; Bajado</div><div class="ya-bajado-info">${quien} · ahora</div>`;
+      // Actualizar checkboxes visibles en el desglose (si estaba abierto)
+      document.querySelectorAll(`.tr-det[data-grp="${grp}"] .chk-bajado`).forEach(lbl => {
+        lbl.innerHTML = `<div class="ya-bajado">${quien}</div>`;
+      });
+    } else {
+      btnEl.disabled = false;
+      btnEl.textContent = "Reintentar";
+      alert("Error al marcar. Intenta de nuevo.");
+    }
   });
 }
 
