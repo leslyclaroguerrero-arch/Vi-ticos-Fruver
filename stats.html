@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Estadisticas - Fruver</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+:root{
+  --verde:#2D6A4F;--verde-claro:#52B788;--verde-suave:#D8F3DC;
+  --naranja:#E76F1E;--naranja-suave:#FEF5EE;--naranja-borde:#F4A96A;
+  --morado:#7C3AED;--morado-suave:#F5F3FF;--morado-borde:#C4B5FD;
+  --rojo:#C0392B;--rojo-suave:#FDECEA;
+  --gris:#F4F7F4;--gris-borde:#CBD5CB;--texto:#1A2E1A;--texto-s:#5A705A;--blanco:#FFF;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Inter',sans-serif;background:var(--gris);color:var(--texto);min-height:100vh;}
+
+/* LOGIN */
+#loginOverlay{position:fixed;inset:0;background:var(--verde);display:flex;align-items:center;justify-content:center;z-index:9999;}
+.login-box{background:var(--blanco);border-radius:20px;padding:36px 28px;width:min(340px,90vw);text-align:center;box-shadow:0 8px 32px rgba(0,0,0,0.2);}
+.login-box .logo{font-size:3rem;margin-bottom:8px;}
+.login-box h1{font-size:1.2rem;font-weight:700;color:var(--verde);margin-bottom:4px;}
+.login-box p{font-size:0.82rem;color:var(--texto-s);margin-bottom:24px;}
+.login-box input{width:100%;padding:14px;border:2px solid var(--gris-borde);border-radius:10px;font-size:1.1rem;font-family:inherit;text-align:center;letter-spacing:4px;margin-bottom:14px;}
+.login-box input:focus{outline:none;border-color:var(--verde-claro);}
+.login-box .btn-login{width:100%;padding:14px;background:var(--verde);color:white;border:none;border-radius:10px;font-size:1rem;font-weight:700;cursor:pointer;}
+.err{color:var(--rojo);font-size:0.82rem;margin-top:8px;display:none;}
+
+/* TOPBAR */
+.topbar{background:var(--verde);color:white;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,0.15);}
+.topbar-titulo{font-size:1rem;font-weight:700;}
+.topbar a{color:rgba(255,255,255,0.8);font-size:0.82rem;text-decoration:none;}
+
+/* FILTROS */
+.filtros{background:var(--blanco);padding:16px;margin:16px;border-radius:14px;box-shadow:0 1px 4px rgba(0,0,0,0.07);}
+.filtros h2{font-size:0.78rem;font-weight:700;color:var(--texto-s);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:12px;}
+.filtros-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+@media(min-width:600px){.filtros-grid{grid-template-columns:1fr 1fr 1fr auto;}}
+.fg label{font-size:0.72rem;font-weight:600;color:var(--texto-s);text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:4px;}
+.fg input[type=date],.fg select{width:100%;padding:10px 12px;border:1.5px solid var(--gris-borde);border-radius:8px;font-size:0.88rem;font-family:inherit;color:var(--texto);}
+.fg select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%235A705A' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px;}
+.fg input:focus,.fg select:focus{outline:none;border-color:var(--verde-claro);}
+.btn-buscar{padding:10px 20px;background:var(--verde);color:white;border:none;border-radius:10px;font-size:0.9rem;font-weight:700;cursor:pointer;white-space:nowrap;align-self:flex-end;}
+.btn-buscar:disabled{opacity:0.5;cursor:not-allowed;}
+.fg-btn{display:flex;align-items:flex-end;}
+
+/* ESTADO */
+#estadoMsg{text-align:center;padding:24px;color:var(--texto-s);font-size:0.9rem;}
+
+/* KPI */
+.kpi-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 16px 4px;}
+@media(min-width:600px){.kpi-row{grid-template-columns:repeat(4,1fr);}}
+.kpi{background:var(--blanco);border-radius:12px;padding:16px;box-shadow:0 1px 4px rgba(0,0,0,0.07);text-align:center;}
+.kpi .kv{font-size:1.7rem;font-weight:700;margin-bottom:4px;}
+.kpi .kl{font-size:0.7rem;color:var(--texto-s);font-weight:600;text-transform:uppercase;letter-spacing:0.05em;}
+.kv-rojo .kv{color:var(--rojo);}
+.kv-naranja .kv{color:var(--naranja);}
+.kv-morado .kv{color:var(--morado);}
+.kv-verde .kv{color:var(--verde);}
+
+/* SECCION */
+.seccion{background:var(--blanco);border-radius:14px;margin:16px;box-shadow:0 1px 4px rgba(0,0,0,0.07);overflow:hidden;}
+.sec-header{padding:14px 20px;border-bottom:1px solid var(--gris);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;}
+.sec-header h2{font-size:0.95rem;font-weight:700;}
+.sec-badge{display:flex;align-items:center;gap:8px;}
+.badge{padding:3px 10px;border-radius:20px;font-size:0.72rem;font-weight:700;}
+.badge-rojo{background:var(--rojo-suave);color:var(--rojo);}
+.badge-naranja{background:var(--naranja-suave);color:var(--naranja);}
+.badge-morado{background:var(--morado-suave);color:var(--morado);}
+.badge-verde{background:var(--verde-suave);color:var(--verde);}
+.btn-todo{padding:7px 14px;background:var(--verde);color:white;border:none;border-radius:8px;font-size:0.78rem;font-weight:700;cursor:pointer;}
+.btn-todo:disabled{opacity:0.4;cursor:not-allowed;}
+.quien-row{padding:12px 20px;border-bottom:1px solid var(--gris);display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:#fafcfa;}
+.quien-row label{font-size:0.78rem;font-weight:600;color:var(--texto-s);white-space:nowrap;}
+.quien-row input{padding:8px 12px;border:1.5px solid var(--gris-borde);border-radius:8px;font-size:0.88rem;font-family:inherit;max-width:220px;}
+.quien-row input:focus{outline:none;border-color:var(--verde-claro);}
+
+/* TABLA */
+.tbl-wrap{overflow-x:auto;}
+.tbl{width:100%;border-collapse:collapse;}
+.tbl th{background:var(--gris);font-size:0.7rem;font-weight:700;color:var(--texto-s);text-transform:uppercase;letter-spacing:0.05em;padding:10px 14px;text-align:left;}
+.tbl td{padding:12px 14px;font-size:0.88rem;border-bottom:1px solid var(--gris);}
+.tr-prod{cursor:pointer;transition:background 0.1s;}
+.tr-prod:hover{background:#f7faf7;}
+.tr-prod.expanded .expand-icon{transform:rotate(90deg);}
+.expand-icon{display:inline-block;font-size:0.7rem;margin-right:6px;transition:transform 0.2s;color:var(--texto-s);}
+.tr-det{background:#fafcfa;}
+.tr-det td{padding:8px 14px 8px 32px;font-size:0.8rem;color:var(--texto-s);border-bottom:1px solid #f0f4f0;}
+.ya-bajado{font-size:0.78rem;font-weight:700;color:var(--verde);}
+.ya-bajado-info{font-size:0.7rem;color:var(--texto-s);}
+.chk-bajado{display:flex;align-items:center;gap:6px;cursor:pointer;font-size:0.82rem;}
+.chk-bajado input{width:15px;height:15px;accent-color:var(--verde);cursor:pointer;}
+.empty{text-align:center;padding:32px;color:var(--texto-s);font-size:0.88rem;}
+
+/* GRAFICAS */
+.graficas{display:grid;grid-template-columns:1fr;gap:16px;padding:16px;}
+@media(min-width:700px){.graficas{grid-template-columns:1fr 1fr;}}
+.g-card{background:var(--blanco);border-radius:14px;padding:16px;box-shadow:0 1px 4px rgba(0,0,0,0.07);}
+.g-card h3{font-size:0.78rem;font-weight:700;color:var(--texto-s);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:14px;}
+.g-card.full{grid-column:1/-1;}
+.chart-wrap{position:relative;height:220px;}
+.g-card.full .chart-wrap{height:260px;}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginOverlay">
+  <div class="login-box">
+    <div class="logo">📊</div>
+    <h1>Estadisticas Fruver</h1>
+    <p>Ingresa la contrasena de acceso</p>
+    <input type="password" id="passInput" placeholder="Contrasena" autocomplete="off">
+    <button class="btn-login" onclick="verificarPass()">Entrar</button>
+    <div class="err" id="passErr">Contrasena incorrecta. Intenta de nuevo.</div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="appContent" style="display:none;">
+
+  <div class="topbar">
+    <div class="topbar-titulo">📊 Estadisticas Fruver</div>
+    <a href="index.html">← Volver</a>
+  </div>
+
+  <!-- FILTROS -->
+  <div class="filtros">
+    <h2>Filtrar periodo</h2>
+    <div class="filtros-grid">
+      <div class="fg">
+        <label>Desde</label>
+        <input type="date" id="fDesde">
+      </div>
+      <div class="fg">
+        <label>Hasta</label>
+        <input type="date" id="fHasta">
+      </div>
+      <div class="fg">
+        <label>Punto de venta</label>
+        <select id="fPunto">
+          <option value="">Todos los puntos</option>
+          <option>Gran Frutiver San Francisco</option>
+          <option>Todozuyo La 70</option>
+          <option>Todozuyo El Concor</option>
+        </select>
+      </div>
+      <div class="fg fg-btn">
+        <button class="btn-buscar" id="btnBuscar" onclick="cargarDatos()">Ver estadisticas</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="estadoMsg" style="display:none;"></div>
+
+  <div id="dashboard" style="display:none;">
+
+    <!-- KPIs -->
+    <div class="kpi-row" id="kpiRow"></div>
+
+    <!-- BAJAS -->
+    <div class="seccion">
+      <div class="sec-header">
+        <h2>🔻 Bajas del sistema</h2>
+        <div class="sec-badge">
+          <span class="badge badge-rojo" id="badgeBajas">0 productos</span>
+          <button class="btn-todo" id="btnMarcarTodo" onclick="marcarTodo()">Marcar todo</button>
+        </div>
+      </div>
+      <div class="quien-row">
+        <label>Quien baja el inventario:</label>
+        <input type="text" id="quienBaja" placeholder="Tu nombre">
+      </div>
+      <div class="tbl-wrap">
+        <table class="tbl">
+          <thead><tr>
+            <th style="width:30px;"></th>
+            <th>Producto</th>
+            <th>Total perdida</th>
+            <th>Unidad</th>
+            <th>Estado</th>
+          </tr></thead>
+          <tbody id="tbodyBajas"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- PULPAS -->
+    <div class="seccion">
+      <div class="sec-header">
+        <h2>🧃 Pulpas producidas</h2>
+        <span class="badge badge-naranja" id="badgePulpas">0 productos</span>
+      </div>
+      <div class="tbl-wrap">
+        <table class="tbl">
+          <thead><tr>
+            <th style="width:30px;"></th>
+            <th>Producto</th>
+            <th>Total pulpas</th>
+            <th>Unidad</th>
+          </tr></thead>
+          <tbody id="tbodyPulpas"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- MALLAS -->
+    <div class="seccion">
+      <div class="sec-header">
+        <h2>🥦 Mallas producidas</h2>
+        <span class="badge badge-morado" id="badgeMallas">0 productos</span>
+      </div>
+      <div class="tbl-wrap">
+        <table class="tbl">
+          <thead><tr>
+            <th style="width:30px;"></th>
+            <th>Producto</th>
+            <th>Total mallas</th>
+            <th>Unidad</th>
+          </tr></thead>
+          <tbody id="tbodyMallas"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- GRAFICAS -->
+    <div class="graficas">
+      <div class="g-card">
+        <h3>Merma por punto de venta</h3>
+        <div class="chart-wrap"><canvas id="chartPunto"></canvas></div>
+      </div>
+      <div class="g-card">
+        <h3>Top 10 productos con mas perdida</h3>
+        <div class="chart-wrap"><canvas id="chartTop"></canvas></div>
+      </div>
+      <div class="g-card full">
+        <h3>Perdida diaria en el periodo</h3>
+        <div class="chart-wrap"><canvas id="chartDia"></canvas></div>
+      </div>
+    </div>
+
+  </div><!-- /dashboard -->
+</div><!-- /appContent -->
+
+<script>
+// ── CONFIG ──────────────────────────────────────────────────────────────────
+const PASS    = "900862650";
+const GAS_URL = "https://script.google.com/macros/s/AKfycbwy8AKztFN-2LorAtjnowZmu0tR2p7tSEavhSs15APb0PITrnCvyjP2cMzUlRuS56dU/exec";
+
+// ── LOGIN ───────────────────────────────────────────────────────────────────
+function verificarPass() {
+  if (document.getElementById("passInput").value.trim() === PASS) {
+    document.getElementById("loginOverlay").style.display = "none";
+    document.getElementById("appContent").style.display  = "block";
+    initFechas();
+  } else {
+    document.getElementById("passErr").style.display = "block";
+    document.getElementById("passInput").value = "";
+    document.getElementById("passInput").focus();
+  }
+}
+document.getElementById("passInput").addEventListener("keydown", e => { if (e.key==="Enter") verificarPass(); });
+
+// ── FECHAS ──────────────────────────────────────────────────────────────────
+function fmt(d) {
+  return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+}
+function initFechas() {
+  const hoy   = new Date();
+  const lunes = new Date(hoy);
+  lunes.setDate(hoy.getDate() - ((hoy.getDay()+6)%7));
+  document.getElementById("fDesde").value = fmt(lunes);
+  document.getElementById("fHasta").value = fmt(hoy);
+}
+
+// ── CARGAR DATOS ─────────────────────────────────────────────────────────────
+let _filas = [];
+let _charts = {};
+
+function cargarDatos() {
+  const desde = document.getElementById("fDesde").value;
+  const hasta = document.getElementById("fHasta").value;
+  const punto = document.getElementById("fPunto").value;
+  if (!desde||!hasta) { alert("Selecciona fechas de inicio y fin"); return; }
+  if (desde>hasta)    { alert("La fecha inicio debe ser antes que el fin"); return; }
+
+  const btn = document.getElementById("btnBuscar");
+  btn.disabled = true; btn.textContent = "Cargando...";
+  document.getElementById("dashboard").style.display = "none";
+  setEstado("Cargando datos del servidor...");
+
+  const url = GAS_URL+"?action=getDatos&desde="+desde+"&hasta="+hasta+(punto?"&punto="+encodeURIComponent(punto):"");
+
+  fetch(url)
+    .then(r => r.json())
+    .then(data => {
+      if (data.error) throw new Error(data.error);
+      _filas = data.filas || [];
+      document.getElementById("estadoMsg").style.display = "none";
+      renderDashboard();
+    })
+    .catch(err => setEstado("Error al cargar: "+err.message+". Verifica que el Apps Script este desplegado."))
+    .finally(() => { btn.disabled=false; btn.textContent="Ver estadisticas"; });
+}
+
+function setEstado(msg) {
+  const el = document.getElementById("estadoMsg");
+  el.textContent = msg;
+  el.style.display = "block";
+}
+
+// ── RENDER DASHBOARD ─────────────────────────────────────────────────────────
+function renderDashboard() {
+  // Mapas: producto → { total, unidad, desglose[] }
+  const mapBajas  = {};
+  const mapPulpas = {};
+  const mapMallas = {};
+  const porPunto  = {};
+  const porProd   = {};
+  const porDia    = {};
+
+  _filas.forEach(f => {
+    const prod = (f.producto||"?").toString().trim();
+    const cant = parseFloat(f.cantidad)||0;
+    const unid = f.unidad||"";
+    const fecha = f.fecha||"";
+    const fechaD = fecha ? fecha.split("-").reverse().join("/") : "";
+
+    // ── Merma directa botada
+    if (f.destino==="Se boto") {
+      addMap(mapBajas,prod,unid,cant,{fecha:fechaD,cant,origen:"Merma directa · "+f.punto,fila:f.fila,bajado:!!f.bajadoPor,bajadoPor:f.bajadoPor,fechaBajada:f.fechaBajada});
+      add(porPunto,f.punto,cant); add(porProd,prod,cant); add(porDia,fecha,cant);
+    }
+    // La misma comparación con tilde (por si el Sheet tiene tilde)
+    if (f.destino==="Se botó") {
+      addMap(mapBajas,prod,unid,cant,{fecha:fechaD,cant,origen:"Merma directa · "+f.punto,fila:f.fila,bajado:!!f.bajadoPor,bajadoPor:f.bajadoPor,fechaBajada:f.fechaBajada});
+      add(porPunto,f.punto,cant); add(porProd,prod,cant); add(porDia,fecha,cant);
+    }
+
+    // ── Kg botados en transformacion
+    const kb = parseFloat(f.kgBotados)||0;
+    if (kb>0) {
+      addMap(mapBajas,prod,unid,kb,{fecha:fechaD,cant:kb,origen:"Botado en transformacion · "+f.punto,fila:f.fila,bajado:!!f.bajadoPor,bajadoPor:f.bajadoPor,fechaBajada:f.fechaBajada});
+      add(porPunto,f.punto,kb); add(porProd,prod,kb); add(porDia,fecha,kb);
+    }
+
+    // ── Lote marcado BOTADO (col K = "BOTADO")
+    if (String(f.pulpas).toUpperCase()==="BOTADO") {
+      addMap(mapBajas,prod,unid,cant,{fecha:fechaD,cant,origen:"Lote danado (BOTADO) · "+f.punto,fila:f.fila,bajado:!!f.bajadoPor,bajadoPor:f.bajadoPor,fechaBajada:f.fechaBajada});
+      add(porPunto,f.punto,cant); add(porProd,prod,cant); add(porDia,fecha,cant);
+    }
+
+    // ── Pulpas producidas
+    const np = parseFloat(f.pulpas)||0;
+    if (np>0) addMap(mapPulpas,prod,"pulpas",np,{fecha:fechaD,cant:np,origen:f.punto});
+
+    // ── Mallas producidas
+    const nm = parseFloat(f.mallas)||0;
+    if (nm>0) addMap(mapMallas,prod,"mallas",nm,{fecha:fechaD,cant:nm,origen:f.punto});
+  });
+
+  // KPIs
+  const totBajas  = Object.values(mapBajas).reduce((a,v)=>a+v.total,0);
+  const totPulpas = Object.values(mapPulpas).reduce((a,v)=>a+v.total,0);
+  const totMallas = Object.values(mapMallas).reduce((a,v)=>a+v.total,0);
+  document.getElementById("kpiRow").innerHTML =
+    kpi("kv-rojo",  fmtN(totBajas),  "Total a bajar") +
+    kpi("kv-naranja",fmtN(totPulpas),"Pulpas producidas") +
+    kpi("kv-morado", fmtN(totMallas),"Mallas producidas") +
+    kpi("kv-verde",  _filas.length,  "Registros en periodo");
+
+  // Tablas
+  renderTabla("tbodyBajas",  mapBajas,  true);
+  renderTabla("tbodyPulpas", mapPulpas, false);
+  renderTabla("tbodyMallas", mapMallas, false);
+  document.getElementById("badgeBajas").textContent  = Object.keys(mapBajas).length+" productos";
+  document.getElementById("badgePulpas").textContent = Object.keys(mapPulpas).length+" productos";
+  document.getElementById("badgeMallas").textContent = Object.keys(mapMallas).length+" productos";
+
+  // Graficas
+  renderGraficas(porPunto, porProd, porDia);
+  document.getElementById("dashboard").style.display = "block";
+}
+
+function addMap(mapa,prod,unid,cant,item) {
+  if (!mapa[prod]) mapa[prod]={total:0,unidad:unid,desglose:[]};
+  mapa[prod].total += cant;
+  mapa[prod].desglose.push(item);
+}
+function add(obj,k,v){ obj[k]=(obj[k]||0)+v; }
+function fmtN(n){ return Number.isInteger(n)?n:parseFloat(n.toFixed(2)); }
+function kpi(cls,val,lbl){ return `<div class="kpi ${cls}"><div class="kv">${val}</div><div class="kl">${lbl}</div></div>`; }
+
+// ── RENDER TABLA ──────────────────────────────────────────────────────────────
+function renderTabla(tbodyId, mapa, conCheck) {
+  const tbody = document.getElementById(tbodyId);
+  if (!Object.keys(mapa).length) {
+    tbody.innerHTML = `<tr><td colspan="5" class="empty">Sin datos en este periodo</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = "";
+  Object.keys(mapa).sort().forEach((prod,idx) => {
+    const item = mapa[prod];
+    const grp  = tbodyId+"_"+idx;
+
+    // Estado bajado
+    const todoBajado    = conCheck && item.desglose.length>0 && item.desglose.every(d=>d.bajado);
+    const algunBajado   = conCheck && item.desglose.some(d=>d.bajado);
+    const bajadoPorInfo = todoBajado ? (item.desglose[0].bajadoPor||"") + " · " + (item.desglose[0].fechaBajada||"") : "";
+    let estadoHtml = "";
+    if (conCheck) {
+      if (todoBajado)    estadoHtml=`<div class="ya-bajado">Bajado</div><div class="ya-bajado-info">${bajadoPorInfo}</div>`;
+      else if (algunBajado) estadoHtml=`<span class="badge badge-naranja">Parcial</span>`;
+      else                  estadoHtml=`<span class="badge badge-rojo">Pendiente</span>`;
+    }
+
+    // Fila resumen del producto
+    const trEl = document.createElement("tr");
+    trEl.className = "tr-prod";
+    trEl.setAttribute("data-grp", grp);
+    trEl.innerHTML = `
+      <td><span class="expand-icon">&#9658;</span></td>
+      <td style="font-weight:600;">${prod}</td>
+      <td>${fmtN(item.total)}</td>
+      <td>${item.unidad}</td>
+      ${conCheck?`<td>${estadoHtml}</td>`:""}
+    `;
+    trEl.onclick = () => toggleGrp(grp, trEl);
+    tbody.appendChild(trEl);
+
+    // Filas de desglose
+    item.desglose.forEach(d => {
+      const detEl = document.createElement("tr");
+      detEl.className = "tr-det";
+      detEl.setAttribute("data-grp", grp);
+      detEl.style.display = "none";
+      let chkHtml = "";
+      if (conCheck) {
+        if (d.bajado) {
+          chkHtml = `<td><div class="ya-bajado">${d.bajadoPor||""}</div><div class="ya-bajado-info">${d.fechaBajada||""}</div></td>`;
+        } else {
+          chkHtml = `<td><label class="chk-bajado"><input type="checkbox" class="chk-fila" data-fila="${d.fila}" onchange="checkUno(this)">Marcar bajado</label></td>`;
+        }
+      }
+      detEl.innerHTML = `
+        <td></td>
+        <td>📅 ${d.fecha} &nbsp;·&nbsp; <span style="font-size:0.75rem;">${d.origen}</span></td>
+        <td>${fmtN(d.cant)}</td>
+        <td>${item.unidad}</td>
+        ${chkHtml}
+      `;
+      tbody.appendChild(detEl);
+    });
+  });
+}
+
+function toggleGrp(grp, trProd) {
+  const open = trProd.classList.contains("expanded");
+  trProd.classList.toggle("expanded", !open);
+  document.querySelectorAll(`.tr-det[data-grp="${grp}"]`).forEach(r => r.style.display = open ? "none" : "table-row");
+}
+
+// ── CHECK-IN ──────────────────────────────────────────────────────────────────
+function checkUno(chk) {
+  if (!chk.checked) return;
+  const quien = document.getElementById("quienBaja").value.trim()||"Sin nombre";
+  enviarMarcado([chk.getAttribute("data-fila")], quien, function(ok) {
+    if (ok) {
+      chk.disabled = true;
+      chk.parentElement.innerHTML = `<div class="ya-bajado">${quien}</div>`;
+    } else {
+      chk.checked = false;
+      alert("Error al marcar. Intenta de nuevo.");
+    }
+  });
+}
+
+function marcarTodo() {
+  const quien = document.getElementById("quienBaja").value.trim()||"Sin nombre";
+  const checks = document.querySelectorAll(".chk-fila:not(:checked)");
+  if (!checks.length) { alert("Todo ya esta marcado como bajado"); return; }
+  const filas = Array.from(checks).map(c=>c.getAttribute("data-fila"));
+  const btn = document.getElementById("btnMarcarTodo");
+  btn.disabled = true;
+  enviarMarcado(filas, quien, function(ok) {
+    btn.disabled = false;
+    if (ok) cargarDatos();
+    else alert("Error al marcar. Intenta de nuevo.");
+  });
+}
+
+function enviarMarcado(filas, quien, cb) {
+  const url = GAS_URL+"?action=marcarBajado&filas="+filas.join(",")+"&quien="+encodeURIComponent(quien);
+  fetch(url)
+    .then(r=>r.json())
+    .then(d => cb(d.result==="ok"))
+    .catch(()=>cb(false));
+}
+
+// ── GRAFICAS ───────────────────────────────────────────────────────────────────
+function renderGraficas(porPunto, porProd, porDia) {
+  Object.values(_charts).forEach(c=>c.destroy());
+  _charts = {};
+
+  const gOpts = { responsive:true, maintainAspectRatio:false };
+  const gridColor = "rgba(0,0,0,0.05)";
+
+  // Por punto
+  const pLabels = Object.keys(porPunto);
+  _charts.punto = new Chart(document.getElementById("chartPunto"), {
+    type:"bar",
+    data:{
+      labels: pLabels.map(p=>p.replace("Gran Frutiver ","GF ").replace("Todozuyo ","TZ ")),
+      datasets:[{
+        data: pLabels.map(p=>parseFloat(porPunto[p].toFixed(2))),
+        backgroundColor:["#2D6A4F","#52B788","#E76F1E"],
+        borderRadius:8
+      }]
+    },
+    options:{...gOpts, plugins:{legend:{display:false}},
+      scales:{y:{grid:{color:gridColor},beginAtZero:true},x:{grid:{display:false}}}}
+  });
+
+  // Top 10 productos
+  const top10 = Object.entries(porProd).sort((a,b)=>b[1]-a[1]).slice(0,10);
+  _charts.top = new Chart(document.getElementById("chartTop"), {
+    type:"bar",
+    data:{
+      labels: top10.map(p=>p[0]),
+      datasets:[{
+        data: top10.map(p=>parseFloat(p[1].toFixed(2))),
+        backgroundColor:"#C0392B",
+        borderRadius:6
+      }]
+    },
+    options:{...gOpts, indexAxis:"y", plugins:{legend:{display:false}},
+      scales:{x:{grid:{color:gridColor},beginAtZero:true},y:{grid:{display:false},ticks:{font:{size:10}}}}}
+  });
+
+  // Tendencia diaria
+  const dias = Object.keys(porDia).sort();
+  _charts.dia = new Chart(document.getElementById("chartDia"), {
+    type:"line",
+    data:{
+      labels: dias.map(d=>d.split("-").reverse().join("/")),
+      datasets:[{
+        label:"Merma del dia",
+        data: dias.map(d=>parseFloat(porDia[d].toFixed(2))),
+        borderColor:"#E76F1E",
+        backgroundColor:"rgba(231,111,30,0.07)",
+        fill:true, tension:0.35,
+        pointRadius:4, pointBackgroundColor:"#E76F1E"
+      }]
+    },
+    options:{...gOpts, plugins:{legend:{display:false}},
+      scales:{y:{grid:{color:gridColor},beginAtZero:true},x:{grid:{display:false},ticks:{font:{size:10}}}}}
+  });
+}
+</script>
+</body>
+</html>
