@@ -332,26 +332,27 @@ function renderDashboard() {
     const fechaD = fecha ? fecha.split("-").reverse().join("/") : "";
 
     // ── Merma directa botada
+    const ev = f.evidencias||"";
     if (f.destino==="Se boto") {
-      addMap(mapBajas,prod,unid,cant,{fecha:fechaD,cant,origen:"Merma directa · "+f.punto,fila:f.fila,bajado:!!f.bajadoPor,bajadoPor:f.bajadoPor,fechaBajada:f.fechaBajada});
+      addMap(mapBajas,prod,unid,cant,{fecha:fechaD,cant,origen:"Merma directa · "+f.punto,fila:f.fila,bajado:!!f.bajadoPor,bajadoPor:f.bajadoPor,fechaBajada:f.fechaBajada,evidencias:ev});
       add(porPunto,f.punto,cant); add(porProd,prod,cant); add(porDia,fecha,cant);
     }
     // La misma comparación con tilde (por si el Sheet tiene tilde)
     if (f.destino==="Se botó") {
-      addMap(mapBajas,prod,unid,cant,{fecha:fechaD,cant,origen:"Merma directa · "+f.punto,fila:f.fila,bajado:!!f.bajadoPor,bajadoPor:f.bajadoPor,fechaBajada:f.fechaBajada});
+      addMap(mapBajas,prod,unid,cant,{fecha:fechaD,cant,origen:"Merma directa · "+f.punto,fila:f.fila,bajado:!!f.bajadoPor,bajadoPor:f.bajadoPor,fechaBajada:f.fechaBajada,evidencias:ev});
       add(porPunto,f.punto,cant); add(porProd,prod,cant); add(porDia,fecha,cant);
     }
 
     // ── Kg botados en transformacion
     const kb = parseFloat(f.kgBotados)||0;
     if (kb>0) {
-      addMap(mapBajas,prod,unid,kb,{fecha:fechaD,cant:kb,origen:"Botado en transformacion · "+f.punto,fila:f.fila,bajado:!!f.bajadoPor,bajadoPor:f.bajadoPor,fechaBajada:f.fechaBajada});
+      addMap(mapBajas,prod,unid,kb,{fecha:fechaD,cant:kb,origen:"Botado en transformacion · "+f.punto,fila:f.fila,bajado:!!f.bajadoPor,bajadoPor:f.bajadoPor,fechaBajada:f.fechaBajada,evidencias:ev});
       add(porPunto,f.punto,kb); add(porProd,prod,kb); add(porDia,fecha,kb);
     }
 
     // ── Lote marcado BOTADO (col K = "BOTADO")
     if (String(f.pulpas).toUpperCase()==="BOTADO") {
-      addMap(mapBajas,prod,unid,cant,{fecha:fechaD,cant,origen:"Lote danado (BOTADO) · "+f.punto,fila:f.fila,bajado:!!f.bajadoPor,bajadoPor:f.bajadoPor,fechaBajada:f.fechaBajada});
+      addMap(mapBajas,prod,unid,cant,{fecha:fechaD,cant,origen:"Lote danado (BOTADO) · "+f.punto,fila:f.fila,bajado:!!f.bajadoPor,bajadoPor:f.bajadoPor,fechaBajada:f.fechaBajada,evidencias:ev});
       add(porPunto,f.punto,cant); add(porProd,prod,cant); add(porDia,fecha,cant);
     }
 
@@ -462,9 +463,14 @@ function renderTabla(tbodyId, mapa, conCheck) {
           chkHtml = `<td><label class="chk-bajado"><input type="checkbox" class="chk-fila" data-fila="${d.fila}" onchange="checkUno(this)">Marcar bajado</label></td>`;
         }
       }
+      const fotoLink = d.evidencias
+        ? `<a href="${d.evidencias}" target="_blank" rel="noopener"
+             style="display:inline-flex;align-items:center;gap:4px;margin-top:4px;font-size:0.72rem;color:var(--verde);font-weight:600;text-decoration:none;"
+             onclick="event.stopPropagation()">📷 Ver fotos</a>`
+        : "";
       detEl.innerHTML = `
         <td></td>
-        <td>📅 ${d.fecha} &nbsp;·&nbsp; <span style="font-size:0.75rem;">${d.origen}</span></td>
+        <td>📅 ${d.fecha} &nbsp;·&nbsp; <span style="font-size:0.75rem;">${d.origen}</span>${fotoLink ? "<br>"+fotoLink : ""}</td>
         <td>${fmtN(d.cant)}</td>
         <td>${item.unidad}</td>
         ${chkHtml}
