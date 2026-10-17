@@ -84,11 +84,13 @@
   .db.am{border-color:var(--morado);background:var(--morado-suave);}.db.am .de{color:var(--morado);}
 
   /* FOTO */
-  .fa{border:2px dashed var(--gris-borde);border-radius:10px;padding:20px 16px;text-align:center;cursor:pointer;position:relative;}
+  .fa-btns{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .fa{border:2px dashed var(--gris-borde);border-radius:10px;padding:16px 10px;text-align:center;cursor:pointer;position:relative;background:var(--blanco);transition:border-color 0.15s,background 0.15s;overflow:hidden;}
+  .fa:hover{border-color:var(--verde-claro);background:var(--verde-suave);}
   .fa input[type="file"]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
-  .fa .fi{font-size:1.8rem;display:block;margin-bottom:4px;}
-  .fa p{font-size:0.82rem;color:var(--texto-suave);}
-  .fa p strong{color:var(--verde);}
+  .fa .fi{font-size:1.5rem;display:block;margin-bottom:4px;}
+  .fa strong{font-size:0.8rem;color:var(--verde);display:block;}
+  .fa span{font-size:0.75rem;font-weight:600;color:var(--texto-suave);display:block;}
 
   /* BOTONES */
   .btn-add{width:100%;padding:13px;background:transparent;border-radius:var(--radio);font-size:0.95rem;font-weight:700;font-family:inherit;cursor:pointer;transition:all 0.15s;margin-top:4px;}
@@ -255,9 +257,15 @@
     </div>
     <div class="field">
       <label>Evidencia (opcional)</label>
-      <div class="fa">
-        <input type="file" id="m-fts" accept="image/*" multiple onchange="mFoto(event)" />
-        <span class="fi">📷</span><p><strong>Toca para foto</strong> o galería</p>
+      <div class="fa-btns">
+        <div class="fa">
+          <input type="file" id="m-fts-cam" accept="image/*" capture="environment" multiple onchange="mFoto(event)" />
+          <span class="fi">📷</span><strong>Tomar foto</strong><span>Abre la cámara</span>
+        </div>
+        <div class="fa">
+          <input type="file" id="m-fts-gal" accept="image/*" multiple onchange="mFoto(event)" />
+          <span class="fi">🖼️</span><strong>Galería</strong><span>Elegir imagen</span>
+        </div>
       </div>
       <div class="hint" id="m-fhnt"></div>
     </div>
@@ -387,7 +395,8 @@ function mPunto() {
   mLimpProd();
   const c=document.getElementById('m-cant'); c.value=''; c.disabled=true;
   document.getElementById('m-hnt').textContent='';
-  document.getElementById('m-fts').value=''; document.getElementById('m-fhnt').textContent='';
+  document.getElementById('m-fts-cam').value=''; document.getElementById('m-fts-gal').value='';
+  document.getElementById('m-fhnt').textContent='';
   mFts=[]; mDst=null;
   document.getElementById('m-dbb').className='db'; document.getElementById('m-dbp').className='db'; document.getElementById('m-dbm').className='db';
   const pto=document.getElementById('m-pto').value;
@@ -456,8 +465,33 @@ function mDest(v) {
 }
 
 function mFoto(e) {
-  mFts=Array.from(e.target.files);
+  mFts=[...mFts, ...Array.from(e.target.files)];
   document.getElementById('m-fhnt').textContent=mFts.length?`📎 ${mFts.length} foto(s) seleccionada(s)`:'';
+}
+
+// Comprime una imagen File a base64 con Canvas (máx 1200px, calidad 70%)
+function comprimirFoto(file) {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const img = new Image();
+      img.onload = () => {
+        const MAX = 1200;
+        let w = img.width, h = img.height;
+        if (w > MAX || h > MAX) {
+          if (w > h) { h = Math.round(h * MAX / w); w = MAX; }
+          else       { w = Math.round(w * MAX / h); h = MAX; }
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.70);
+        resolve({ b64: dataUrl.split(',')[1], mime: 'image/jpeg' });
+      };
+      img.src = ev.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
 }
 
 function mVal() {
@@ -475,7 +509,8 @@ function mAgregar() {
   mLimpProd();
   const c=document.getElementById('m-cant'); c.value=''; c.disabled=true;
   document.getElementById('m-hnt').textContent='';
-  document.getElementById('m-fts').value=''; document.getElementById('m-fhnt').textContent='';
+  document.getElementById('m-fts-cam').value=''; document.getElementById('m-fts-gal').value='';
+  document.getElementById('m-fhnt').textContent='';
   mFts=[]; mDst=null;
   document.getElementById('m-dbb').className='db'; document.getElementById('m-dbp').className='db'; document.getElementById('m-dbm').className='db';
   document.getElementById('m-badd').disabled=true;
@@ -516,13 +551,9 @@ async function mEnviar() {
   const est=document.getElementById('m-est'); const btn=document.getElementById('m-send');
   btn.disabled=true; est.className='estado ca'; est.textContent='⏳ Enviando registros...';
 
-  // Convertir todas las fotos a base64
-  const regsConB64 = await Promise.all(mReg.map(async (r,i) => {
-    const fotosB64 = await Promise.all(r.fts.map(async f => ({
-      b64: await fileToBase64(f),
-      mime: f.type || 'image/jpeg',
-      nombre: f.name || 'foto.jpg'
-    })));
+  // Comprimir y convertir fotos a base64
+  const regsConB64 = await Promise.all(mReg.map(async (r) => {
+    const fotosB64 = await Promise.all(r.fts.map(f => comprimirFoto(f)));
     return {...r, fotosB64};
   }));
 
@@ -553,7 +584,7 @@ function mLimpTodo() {
   const sp=document.getElementById('m-per'); sp.innerHTML='<option value="">— Primero selecciona el punto —</option>'; sp.disabled=true;
   mLimpProd(); document.getElementById('m-inp').disabled=true;
   const c=document.getElementById('m-cant'); c.value=''; c.disabled=true;
-  document.getElementById('m-hnt').textContent=''; document.getElementById('m-fts').value=''; document.getElementById('m-fhnt').textContent='';
+  document.getElementById('m-hnt').textContent=''; document.getElementById('m-fts-cam').value=''; document.getElementById('m-fts-gal').value=''; document.getElementById('m-fhnt').textContent='';
   mFts=[]; mDst=null;
   document.getElementById('m-dbb').className='db'; document.getElementById('m-dbp').className='db'; document.getElementById('m-dbm').className='db';
   document.getElementById('m-badd').disabled=true; document.getElementById('m-send').disabled=true;
