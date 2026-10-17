@@ -418,7 +418,7 @@ header p  { font-size: 11px; opacity: .65; margin-top: 1px; }
       </div>
       <div class="field">
         <label>Foto de factura / evidencia</label>
-        <input type="file" id="vg-foto" accept="image/*" capture="environment"
+        <input type="file" id="vg-foto" accept="image/*"
           style="font-size:13px;background:#fff;border:1.5px solid #cdd8ca;border-radius:8px;padding:8px 10px;">
       </div>
       <div style="display:flex;gap:8px;margin-top:4px;">
@@ -446,7 +446,7 @@ header p  { font-size: 11px; opacity: .65; margin-top: 1px; }
       </div>
       <div class="field">
         <label>Foto de soporte (opcional)</label>
-        <input type="file" id="vi-foto" accept="image/*" capture="environment"
+        <input type="file" id="vi-foto" accept="image/*"
           style="font-size:13px;background:#fff;border:1.5px solid #cdd8ca;border-radius:8px;padding:8px 10px;">
       </div>
       <div style="display:flex;gap:8px;margin-top:4px;">
@@ -553,7 +553,7 @@ header p  { font-size: 11px; opacity: .65; margin-top: 1px; }
           </div>
           <div class="field">
             <label>Foto (opcional)</label>
-            <input type="file" id="dg-foto" accept="image/*" capture="environment"
+            <input type="file" id="dg-foto" accept="image/*"
               style="font-size:13px;background:#fff;border:1.5px solid #cdd8ca;border-radius:8px;padding:8px 10px;">
           </div>
           <div style="display:flex;gap:8px;margin-top:4px;">
@@ -723,6 +723,111 @@ function selCat(btn, scope) {
 function hoyISO() { return new Date().toISOString().split("T")[0]; }
 
 /* ════════════════════════════════════════════════
+   COMPRIMIR FOTO (máx. 1280 px, JPEG 70 %)
+   Una foto de celular de 3–5 MB queda en ~150–250 KB:
+   menos memoria en el teléfono y subida más rápida.
+   ════════════════════════════════════════════════ */
+function comprimirImagen(file, maxLado = 1280, calidad = 0.7) {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      try {
+        let w = img.naturalWidth, h = img.naturalHeight;
+        const escala = Math.min(1, maxLado / Math.max(w, h));
+        w = Math.round(w * escala); h = Math.round(h * escala);
+        const canvas = document.createElement("canvas");
+        canvas.width = w; canvas.height = h;
+        canvas.getContext("2d").drawImage(img, 0, 0, w, h);
+        const dataUrl = canvas.toDataURL("image/jpeg", calidad);
+        canvas.width = canvas.height = 0;           // liberar memoria
+        URL.revokeObjectURL(url);
+        resolve({ base64: dataUrl.split(",")[1], mime: "image/jpeg" });
+      } catch (e) { URL.revokeObjectURL(url); reject(e); }
+    };
+    img.onerror = (e) => { URL.revokeObjectURL(url); reject(e); };
+    img.src = url;
+  });
+}
+
+/* ════════════════════════════════════════════════
+   BORRADOR AUTOMÁTICO
+   Si Android cierra Chrome (p. ej. al abrir la cámara) y la
+   página se recarga, se recupera lo que ya estaba ingresado.
+   ════════════════════════════════════════════════ */
+const BORRADOR_KEY = "fruver_borrador_v1";
+let _borradorTimer = null;
+let _restaurando   = false;
+
+function programarBorrador() {
+  if (_restaurando) return;
+  clearTimeout(_borradorTimer);
+  _borradorTimer = setTimeout(guardarBorrador, 400);
+}
+
+function guardarBorrador() {
+  const val = id => (document.getElementById(id) || {}).value || "";
+  const estado = {
+    v: {
+      fecha: val("v-fecha"), destino: val("v-destino"), conductor: val("v-conductor"),
+      encargada: val("v-encargada"), presupuesto: val("v-presupuesto"), notas: val("v-notas"),
+      gastos: vGastos, ingresos: vIngresos
+    },
+    d: { conductor: dConductor, fecha: val("d-fecha"), servicios: dServicios }
+  };
+  try {
+    localStorage.setItem(BORRADOR_KEY, JSON.stringify(estado));
+  } catch (e) {
+    // Sin espacio: guardar sin fotos (los datos y montos sí se conservan)
+    try {
+      const sinFoto = arr => arr.map(g => Object.assign({}, g, { base64: null, mime: null, fileName: null }));
+      estado.v.gastos   = sinFoto(vGastos);
+      estado.v.ingresos = sinFoto(vIngresos);
+      localStorage.setItem(BORRADOR_KEY, JSON.stringify(estado));
+    } catch (e2) { /* almacenamiento no disponible: seguir sin borrador */ }
+  }
+}
+
+function restaurarBorrador() {
+  let estado = null;
+  try { estado = JSON.parse(localStorage.getItem(BORRADOR_KEY) || "null"); } catch (e) {}
+  if (!estado) return;
+  _restaurando = true;
+  let recuperado = false;
+  const set = (id, v) => { const el = document.getElementById(id); if (el && v) el.value = v; };
+
+  const v = estado.v || {};
+  const presNum = parseFloat(String(v.presupuesto || "0").replace(/\./g, "")) || 0;
+  if ((v.gastos && v.gastos.length) || (v.ingresos && v.ingresos.length) ||
+      v.destino || v.conductor || v.encargada || v.notas || presNum) {
+    set("v-fecha", v.fecha); set("v-destino", v.destino); set("v-conductor", v.conductor);
+    set("v-encargada", v.encargada); set("v-presupuesto", v.presupuesto); set("v-notas", v.notas);
+    vGastos   = Array.isArray(v.gastos)   ? v.gastos   : [];
+    vIngresos = Array.isArray(v.ingresos) ? v.ingresos : [];
+    recuperado = true;
+  }
+
+  const d = estado.d || {};
+  if (d.conductor || (d.servicios && d.servicios.length)) {
+    if (d.conductor) {
+      const card = document.querySelector(`#tab-domicilios .conductor-card[data-conductor="${d.conductor}"]`);
+      if (card) { card.classList.add("selected"); dConductor = d.conductor; }
+    }
+    set("d-fecha", d.fecha);
+    dServicios = Array.isArray(d.servicios) ? d.servicios : [];
+    renderServiciosLista();
+    if (dServicios.length) recuperado = true;
+  }
+
+  _restaurando = false;
+  if (recuperado) setTimeout(() => toast("↩️ Se recuperó la información que estabas ingresando"), 600);
+}
+
+// Guardar cada vez que se escribe o cambia algo en los formularios
+document.addEventListener("input",  programarBorrador);
+document.addEventListener("change", programarBorrador);
+
+/* ════════════════════════════════════════════════
    RENDER GASTOS GENÉRICO
    ════════════════════════════════════════════════ */
 function renderGastosLista(gastos, contenedorId, fnEliminar) {
@@ -770,7 +875,7 @@ function guardarGastoV() {
     actualizarBalance();
     cancelarGastoV();
   };
-  if (file) { const r = new FileReader(); r.onload = e => add(e.target.result.split(",")[1], file.type); r.readAsDataURL(file); }
+  if (file) { comprimirImagen(file).then(r => add(r.base64, r.mime)).catch(() => alert("No se pudo leer la foto. Intenta elegirla de nuevo.")); }
   else add(null,null);
 }
 function eliminarGastoV(id) {
@@ -803,7 +908,7 @@ function guardarIngresoV() {
     actualizarBalance();
     cancelarIngresoV();
   };
-  if (file) { const r = new FileReader(); r.onload = e => add(e.target.result.split(",")[1], file.type); r.readAsDataURL(file); }
+  if (file) { comprimirImagen(file).then(r => add(r.base64, r.mime)).catch(() => alert("No se pudo leer la foto. Intenta elegirla de nuevo.")); }
   else add(null,null);
 }
 function eliminarIngresoV(id) {
@@ -829,6 +934,7 @@ function renderIngresosLista() {
 }
 
 function actualizarBalance() {
+  programarBorrador();
   const pres     = leerNum("v-presupuesto");
   const total    = vGastos.reduce((s,g) => s+g.monto, 0);
   const ingresos = vIngresos.reduce((s,i) => s+i.monto, 0);
@@ -989,6 +1095,7 @@ function selConductorD(card) {
   document.querySelectorAll("#tab-domicilios .conductor-card").forEach(c => c.classList.remove("selected"));
   card.classList.add("selected");
   dConductor = card.dataset.conductor;
+  programarBorrador();
 }
 function selTipoD(btn) {
   document.querySelectorAll(".tipo-btn").forEach(b => b.classList.remove("active"));
@@ -1017,7 +1124,7 @@ function guardarGastoD() {
     renderGastosLista(dGastos, "d-gastos-lista", "eliminarGastoD");
     cancelarGastoD();
   };
-  if (file) { const r = new FileReader(); r.onload = e => add(e.target.result.split(",")[1], file.type); r.readAsDataURL(file); }
+  if (file) { comprimirImagen(file).then(r => add(r.base64, r.mime)).catch(() => alert("No se pudo leer la foto. Intenta elegirla de nuevo.")); }
   else add(null,null);
 }
 function eliminarGastoD(id) {
@@ -1026,6 +1133,7 @@ function eliminarGastoD(id) {
 }
 
 function renderServiciosLista() {
+  programarBorrador();
   const lista = document.getElementById("d-servicios-lista");
   const cont  = document.getElementById("d-contador");
   cont.textContent = dServicios.length ? `(${dServicios.length} agregado${dServicios.length>1?"s":""})` : "";
@@ -1549,6 +1657,7 @@ function normalizarFecha(f) {
 /* ════════════════════════════════════════════════
    INICIO
    ════════════════════════════════════════════════ */
+restaurarBorrador();
 renderGastosLista(vGastos, "v-gastos-lista", "eliminarGastoV");
 renderIngresosLista();
 actualizarBalance();
