@@ -60,6 +60,21 @@ header p  { font-size: 11px; opacity: .65; margin-top: 1px; }
 .status-pending { background: #fff8e1; color: #b85c00; }
 .status-ok      { background: #e8f5e9; color: #1e7a3a; text-decoration: none; }
 
+/* ── BOTONES DE FOTO (cámara / galería) ── */
+.foto-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.field label.foto-btn, .foto-btn { position: relative; display: flex; align-items: center; justify-content: center;
+            min-height: 46px; border-radius: 10px; font-size: 14px; font-weight: 700;
+            cursor: pointer; text-align: center; user-select: none; margin: 0 !important; }
+.foto-btn input { position: absolute; inset: 0; opacity: 0; width: 100%; height: 100%; cursor: pointer; }
+.foto-cam { background: #1e4d2b; color: #fff !important; border: 1.5px solid #1e4d2b; }
+.foto-gal { background: #fff; color: #1e4d2b !important; border: 1.5px solid #1e4d2b; }
+.foto-btn:active { opacity: .8; }
+.foto-prev { margin-top: 8px; }
+.foto-prev img { width: 100%; max-height: 140px; object-fit: cover; border-radius: 8px; border: 1px solid #dde8da; display: block; }
+.foto-prev .foto-info { display: flex; justify-content: space-between; align-items: center;
+                        font-size: 12px; color: #1e7a3a; font-weight: 600; margin-top: 4px; }
+.foto-prev .foto-quitar { background: none; border: none; color: #b55; font-size: 12px; font-weight: 700; cursor: pointer; font-family: inherit; }
+
 /* ── INGRESOS DE REGRESO ── */
 .ingreso-item { border: 1px solid #b7dcc0; border-radius: 10px; padding: 12px; margin-bottom: 8px; background: #f0faf2; }
 .ingreso-tag  { font-size: 12px; background: #d4efdc; color: #1e7a3a; border-radius: 20px; padding: 2px 10px; font-weight: 600; }
@@ -418,8 +433,15 @@ header p  { font-size: 11px; opacity: .65; margin-top: 1px; }
       </div>
       <div class="field">
         <label>Foto de factura / evidencia</label>
-        <input type="file" id="vg-foto" accept="image/*"
-          style="font-size:13px;background:#fff;border:1.5px solid #cdd8ca;border-radius:8px;padding:8px 10px;">
+        <div class="foto-btns">
+          <label class="foto-btn foto-cam">📷 Tomar foto
+            <input type="file" accept="image/*" capture="environment" onchange="fotoElegida('vg', this)">
+          </label>
+          <label class="foto-btn foto-gal">🖼️ Galería
+            <input type="file" accept="image/*" onchange="fotoElegida('vg', this)">
+          </label>
+        </div>
+        <div class="foto-prev" id="vg-foto-prev"></div>
       </div>
       <div style="display:flex;gap:8px;margin-top:4px;">
         <button class="btn btn-outline btn-small" onclick="cancelarGastoV()">Cancelar</button>
@@ -446,8 +468,15 @@ header p  { font-size: 11px; opacity: .65; margin-top: 1px; }
       </div>
       <div class="field">
         <label>Foto de soporte (opcional)</label>
-        <input type="file" id="vi-foto" accept="image/*"
-          style="font-size:13px;background:#fff;border:1.5px solid #cdd8ca;border-radius:8px;padding:8px 10px;">
+        <div class="foto-btns">
+          <label class="foto-btn foto-cam">📷 Tomar foto
+            <input type="file" accept="image/*" capture="environment" onchange="fotoElegida('vi', this)">
+          </label>
+          <label class="foto-btn foto-gal">🖼️ Galería
+            <input type="file" accept="image/*" onchange="fotoElegida('vi', this)">
+          </label>
+        </div>
+        <div class="foto-prev" id="vi-foto-prev"></div>
       </div>
       <div style="display:flex;gap:8px;margin-top:4px;">
         <button class="btn btn-outline btn-small" onclick="cancelarIngresoV()">Cancelar</button>
@@ -553,8 +582,15 @@ header p  { font-size: 11px; opacity: .65; margin-top: 1px; }
           </div>
           <div class="field">
             <label>Foto (opcional)</label>
-            <input type="file" id="dg-foto" accept="image/*"
-              style="font-size:13px;background:#fff;border:1.5px solid #cdd8ca;border-radius:8px;padding:8px 10px;">
+        <div class="foto-btns">
+          <label class="foto-btn foto-cam">📷 Tomar foto
+            <input type="file" accept="image/*" capture="environment" onchange="fotoElegida('dg', this)">
+          </label>
+          <label class="foto-btn foto-gal">🖼️ Galería
+            <input type="file" accept="image/*" onchange="fotoElegida('dg', this)">
+          </label>
+        </div>
+        <div class="foto-prev" id="dg-foto-prev"></div>
           </div>
           <div style="display:flex;gap:8px;margin-top:4px;">
             <button class="btn btn-outline btn-small" onclick="cancelarGastoD()">Cancelar</button>
@@ -751,6 +787,37 @@ function comprimirImagen(file, maxLado = 1280, calidad = 0.7) {
 }
 
 /* ════════════════════════════════════════════════
+   FOTO ELEGIDA (cámara o galería)
+   Se comprime apenas se elige y queda guardada hasta
+   que se presione "Guardar gasto/ingreso".
+   ════════════════════════════════════════════════ */
+const fotosPend = { vg: null, vi: null, dg: null };
+
+function fotoElegida(pref, input) {
+  const file = input.files && input.files[0];
+  input.value = "";                       // permitir volver a elegir la misma foto
+  if (!file) return;
+  const prev = document.getElementById(pref + "-foto-prev");
+  prev.innerHTML = `<div class="foto-info">⏳ Procesando foto…</div>`;
+  comprimirImagen(file)
+    .then(r => { fotosPend[pref] = r; renderFotoPend(pref); programarBorrador(); })
+    .catch(() => {
+      prev.innerHTML = "";
+      alert("No se pudo leer la foto. Intenta de nuevo o elígela desde la Galería.");
+    });
+}
+function renderFotoPend(pref) {
+  const prev = document.getElementById(pref + "-foto-prev");
+  const f = fotosPend[pref];
+  if (!prev) return;
+  prev.innerHTML = f ? `
+    <img src="data:${f.mime};base64,${f.base64}" alt="Foto">
+    <div class="foto-info"><span>✓ Foto lista</span>
+      <button type="button" class="foto-quitar" onclick="quitarFoto('${pref}')">Quitar foto ✕</button></div>` : "";
+}
+function quitarFoto(pref) { fotosPend[pref] = null; renderFotoPend(pref); programarBorrador(); }
+
+/* ════════════════════════════════════════════════
    BORRADOR AUTOMÁTICO
    Si Android cierra Chrome (p. ej. al abrir la cámara) y la
    página se recarga, se recupera lo que ya estaba ingresado.
@@ -773,7 +840,17 @@ function guardarBorrador() {
       encargada: val("v-encargada"), presupuesto: val("v-presupuesto"), notas: val("v-notas"),
       gastos: vGastos, ingresos: vIngresos
     },
-    d: { conductor: dConductor, fecha: val("d-fecha"), servicios: dServicios }
+    d: { conductor: dConductor, fecha: val("d-fecha"), servicios: dServicios,
+         cliente: val("d-cliente"), notas: val("d-notas"), tipo: dTipo, gastos: dGastos },
+    // Formularios que estaban abiertos (por si Chrome se cierra al abrir la cámara)
+    f: {
+      vg: { abierto: document.getElementById("v-form-gasto").classList.contains("visible"),
+            desc: val("vg-desc"), monto: val("vg-monto"), cat: vCat, foto: fotosPend.vg },
+      vi: { abierto: document.getElementById("v-form-ingreso").classList.contains("visible"),
+            desc: val("vi-desc"), monto: val("vi-monto"), foto: fotosPend.vi },
+      dg: { abierto: document.getElementById("d-form-gasto").classList.contains("visible"),
+            desc: val("dg-desc"), monto: val("dg-monto"), cat: dCat, foto: fotosPend.dg }
+    }
   };
   try {
     localStorage.setItem(BORRADOR_KEY, JSON.stringify(estado));
@@ -783,6 +860,8 @@ function guardarBorrador() {
       const sinFoto = arr => arr.map(g => Object.assign({}, g, { base64: null, mime: null, fileName: null }));
       estado.v.gastos   = sinFoto(vGastos);
       estado.v.ingresos = sinFoto(vIngresos);
+      estado.d.gastos   = sinFoto(dGastos);
+      ["vg","vi","dg"].forEach(k => { estado.f[k].foto = null; });
       localStorage.setItem(BORRADOR_KEY, JSON.stringify(estado));
     } catch (e2) { /* almacenamiento no disponible: seguir sin borrador */ }
   }
@@ -818,6 +897,36 @@ function restaurarBorrador() {
     renderServiciosLista();
     if (dServicios.length) recuperado = true;
   }
+  if (d.cliente || d.notas || (d.gastos && d.gastos.length)) {
+    set("d-cliente", d.cliente); set("d-notas", d.notas);
+    if (d.tipo) {
+      const tb = document.querySelector(`.tipo-btn[data-tipo="${d.tipo}"]`);
+      if (tb) selTipoD(tb);
+    }
+    dGastos = Array.isArray(d.gastos) ? d.gastos : [];
+    renderGastosLista(dGastos, "d-gastos-lista", "eliminarGastoD");
+    recuperado = true;
+  }
+
+  // Reabrir el formulario de gasto/ingreso que se estaba llenando
+  const f = estado.f || {};
+  const reabrir = (k, formId, btnId, descId, montoId, catScope) => {
+    const x = f[k];
+    if (!x || !(x.abierto && (x.desc || x.monto || x.foto))) return;
+    document.getElementById(formId).classList.add("visible");
+    document.getElementById(btnId).style.display = "none";
+    set(descId, x.desc); set(montoId, x.monto);
+    if (x.cat && catScope) {
+      const cb = document.querySelector(`#${formId} .cat-btn[data-cat="${x.cat}"]`);
+      if (cb) selCat(cb, catScope);
+    }
+    fotosPend[k] = x.foto || null;
+    renderFotoPend(k);
+    recuperado = true;
+  };
+  reabrir("vg", "v-form-gasto",   "v-btn-agregar", "vg-desc", "vg-monto", "v");
+  reabrir("vi", "v-form-ingreso", "v-btn-ingreso", "vi-desc", "vi-monto", null);
+  reabrir("dg", "d-form-gasto",   "d-btn-agregar", "dg-desc", "dg-monto", "d");
 
   _restaurando = false;
   if (recuperado) setTimeout(() => toast("↩️ Se recuperó la información que estabas ingresando"), 600);
@@ -860,13 +969,14 @@ function mostrarFormV() {
 function cancelarGastoV() {
   document.getElementById("v-form-gasto").classList.remove("visible");
   document.getElementById("v-btn-agregar").style.display = "block";
-  ["vg-desc","vg-monto","vg-foto"].forEach(id => document.getElementById(id).value = "");
+  ["vg-desc","vg-monto"].forEach(id => document.getElementById(id).value = "");
+  fotosPend.vg = null; renderFotoPend("vg"); programarBorrador();
 }
 function guardarGastoV() {
   const desc  = document.getElementById("vg-desc").value.trim();
   const monto = leerNum("vg-monto");
   if (!desc || monto <= 0) { alert("Ingresa descripción y monto."); return; }
-  const file = document.getElementById("vg-foto").files[0];
+  const foto = fotosPend.vg;
   const add  = (b64, mime) => {
     vGastos.push({ id: Date.now(), cat: vCat, desc, monto,
                    base64: b64||null, mime: mime||null,
@@ -875,7 +985,7 @@ function guardarGastoV() {
     actualizarBalance();
     cancelarGastoV();
   };
-  if (file) { comprimirImagen(file).then(r => add(r.base64, r.mime)).catch(() => alert("No se pudo leer la foto. Intenta elegirla de nuevo.")); }
+  if (foto) add(foto.base64, foto.mime);
   else add(null,null);
 }
 function eliminarGastoV(id) {
@@ -893,13 +1003,14 @@ function mostrarFormIngresoV() {
 function cancelarIngresoV() {
   document.getElementById("v-form-ingreso").classList.remove("visible");
   document.getElementById("v-btn-ingreso").style.display = "block";
-  ["vi-desc","vi-monto","vi-foto"].forEach(id => document.getElementById(id).value = "");
+  ["vi-desc","vi-monto"].forEach(id => document.getElementById(id).value = "");
+  fotosPend.vi = null; renderFotoPend("vi"); programarBorrador();
 }
 function guardarIngresoV() {
   const desc  = document.getElementById("vi-desc").value.trim();
   const monto = leerNum("vi-monto");
   if (!desc || monto <= 0) { alert("Ingresa qué trajo y el valor recibido."); return; }
-  const file = document.getElementById("vi-foto").files[0];
+  const foto = fotosPend.vi;
   const add  = (b64, mime) => {
     vIngresos.push({ id: Date.now(), cat: "ingreso", desc, monto,
                      base64: b64||null, mime: mime||null,
@@ -908,7 +1019,7 @@ function guardarIngresoV() {
     actualizarBalance();
     cancelarIngresoV();
   };
-  if (file) { comprimirImagen(file).then(r => add(r.base64, r.mime)).catch(() => alert("No se pudo leer la foto. Intenta elegirla de nuevo.")); }
+  if (foto) add(foto.base64, foto.mime);
   else add(null,null);
 }
 function eliminarIngresoV(id) {
@@ -1073,6 +1184,9 @@ function limpiarViatico(silencioso) {
   if (!silencioso && !confirm("¿Borrar todos los datos de la planilla?")) return;
   vGastos = [];
   vIngresos = [];
+  fotosPend.vg = null; fotosPend.vi = null;
+  renderFotoPend("vg"); renderFotoPend("vi");
+  ["vg-desc","vg-monto","vi-desc","vi-monto"].forEach(id => document.getElementById(id).value = "");
   document.getElementById("v-fecha").value = hoyISO();
   ["v-destino","v-encargada","v-notas"].forEach(id => document.getElementById(id).value = "");
   document.getElementById("v-presupuesto").value = "0";
@@ -1110,13 +1224,14 @@ function mostrarFormD() {
 function cancelarGastoD() {
   document.getElementById("d-form-gasto").classList.remove("visible");
   document.getElementById("d-btn-agregar").style.display = "inline-block";
-  ["dg-desc","dg-monto","dg-foto"].forEach(id => document.getElementById(id).value = "");
+  ["dg-desc","dg-monto"].forEach(id => document.getElementById(id).value = "");
+  fotosPend.dg = null; renderFotoPend("dg"); programarBorrador();
 }
 function guardarGastoD() {
   const desc  = document.getElementById("dg-desc").value.trim();
   const monto = leerNum("dg-monto");
   if (!desc || monto <= 0) { alert("Ingresa descripción y monto."); return; }
-  const file = document.getElementById("dg-foto").files[0];
+  const foto = fotosPend.dg;
   const add  = (b64, mime) => {
     dGastos.push({ id: Date.now(), cat: dCat, desc, monto,
                    base64: b64||null, mime: mime||null,
@@ -1124,7 +1239,7 @@ function guardarGastoD() {
     renderGastosLista(dGastos, "d-gastos-lista", "eliminarGastoD");
     cancelarGastoD();
   };
-  if (file) { comprimirImagen(file).then(r => add(r.base64, r.mime)).catch(() => alert("No se pudo leer la foto. Intenta elegirla de nuevo.")); }
+  if (foto) add(foto.base64, foto.mime);
   else add(null,null);
 }
 function eliminarGastoD(id) {
@@ -1249,6 +1364,7 @@ async function guardarTodosLosServicios() {
 function limpiarDomicilio(silencioso) {
   if (!silencioso && !confirm("¿Limpiar todo el formulario?")) return;
   dGastos = []; dServicios = []; dConductor = null;
+  cancelarGastoD();
   document.querySelectorAll("#tab-domicilios .conductor-card").forEach(c => c.classList.remove("selected"));
   document.getElementById("d-fecha").value   = hoyISO();
   document.getElementById("d-cliente").value = "";
