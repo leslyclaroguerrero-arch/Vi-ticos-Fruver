@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Transportes Fruver – Barranquilla</title>
+<title>Transportes Fruver</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: 'Segoe UI', Arial, sans-serif; background: #f5f7f2; color: #1a2a1a; min-height: 100vh; }
@@ -59,6 +59,17 @@ header p  { font-size: 11px; opacity: .65; margin-top: 1px; }
 .upload-status { font-size: 11px; margin-top: 5px; padding: 3px 10px; border-radius: 10px; display: inline-block; }
 .status-pending { background: #fff8e1; color: #b85c00; }
 .status-ok      { background: #e8f5e9; color: #1e7a3a; text-decoration: none; }
+
+/* ── PUNTO DEL DOMICILIO ── */
+.punto-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 4px; }
+.punto-btn { border: 2px solid #cdd8ca; background: #fff; border-radius: 10px; padding: 12px 8px;
+             font-size: 15px; font-weight: 800; cursor: pointer; text-align: center; line-height: 1.4;
+             font-family: inherit; color: #1a2a1a; transition: all .15s; }
+.punto-btn small { display: block; font-size: 11px; font-weight: 600; opacity: .7; }
+.punto-btn.active[data-punto="Todozuyo La 70"]      { border-color: #6a1b9a; background: #6a1b9a; color: #fff; }
+.punto-btn.active[data-punto="Todozuyo El Concord"] { border-color: #00695c; background: #00695c; color: #fff; }
+.punto-ayuda { font-size: 11px; color: #889; margin-top: 6px; }
+.punto-tag { font-size: 10px; border-radius: 10px; padding: 1px 8px; font-weight: 700; margin-left: 4px; }
 
 /* ── BOTONES DE FOTO (cámara / galería) ── */
 .foto-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
@@ -351,6 +362,14 @@ header p  { font-size: 11px; opacity: .65; margin-top: 1px; }
         <label id="e-destino-label">Destino / Cliente</label>
         <input type="text" id="e-destino" placeholder="Destino o nombre del cliente">
       </div>
+      <div class="field" id="e-punto-wrap" style="display:none;">
+        <label>Punto del domicilio</label>
+        <select id="e-punto">
+          <option value="">— Sin punto —</option>
+          <option value="Todozuyo La 70">La 70</option>
+          <option value="Todozuyo El Concord">El Concord</option>
+        </select>
+      </div>
       <div class="edit-btns">
         <button class="btn btn-outline btn-small" onclick="cancelarEdicion()">Cancelar</button>
         <button class="btn btn-green btn-small" id="e-btn-guardar" onclick="guardarEdicion()">💾 Guardar cambios</button>
@@ -540,6 +559,14 @@ header p  { font-size: 11px; opacity: .65; margin-top: 1px; }
     <div class="add-gasto-form visible" id="d-form-servicio" style="display:block;">
       <div style="font-size:13px;font-weight:700;color:#1e4d2b;margin-bottom:10px;">Nuevo servicio</div>
       <div class="field">
+        <label>¿De qué punto es el domicilio?</label>
+        <div class="punto-grid">
+          <button class="punto-btn" data-punto="Todozuyo La 70" onclick="selPuntoD(this)">🏬 La 70<small>Todozuyo</small></button>
+          <button class="punto-btn" data-punto="Todozuyo El Concord" onclick="selPuntoD(this)">🏬 El Concord<small>Todozuyo</small></button>
+        </div>
+        <div class="punto-ayuda">Queda marcado para los siguientes servicios. Cámbialo solo si el domicilio es del otro punto.</div>
+      </div>
+      <div class="field">
         <label>Tipo de servicio</label>
         <div class="tipo-grid tipo-grid-2" style="margin-top:4px;">
           <button class="tipo-btn active" data-tipo="Domicilio a cliente" onclick="selTipoD(this)">📦<br>Domicilio<br>a cliente</button>
@@ -637,6 +664,12 @@ header p  { font-size: 11px; opacity: .65; margin-top: 1px; }
       <button class="ft-btn" data-ft="Domicilio a cliente"           onclick="selFTipo(this)">📦 Domicilios</button>
       <button class="ft-btn" data-ft="Transporte de mercancía"       onclick="selFTipo(this)">🏪 Mercancía</button>
     </div>
+    <div style="font-size:12px;font-weight:600;color:#556;margin-bottom:6px;">Punto (domicilios)</div>
+    <div class="filtro-tipo-wrap" id="filtro-punto">
+      <button class="ft-btn fp-btn active" data-fp="Todos"               onclick="selFPunto(this)">Todos</button>
+      <button class="ft-btn fp-btn" data-fp="Todozuyo La 70"            onclick="selFPunto(this)">🏬 La 70</button>
+      <button class="ft-btn fp-btn" data-fp="Todozuyo El Concord"       onclick="selFPunto(this)">🏬 El Concord</button>
+    </div>
   </div>
 
   <div class="resumen-box" id="h-resumen" style="display:none;margin:14px 14px 0;">
@@ -695,6 +728,30 @@ let vGastos   = [], vCat = "combustible";
 let vIngresos = [];                       // ingresos del viaje de regreso
 let dGastos   = [], dCat = "combustible";
 let dConductor = null, dTipo = "Domicilio a cliente";
+let dPunto = null;                          // punto del domicilio (se mantiene entre servicios)
+let hFiltroPunto = "Todos";
+
+const PUNTOS = {
+  "Todozuyo La 70":      { corto: "La 70",      color: "#6a1b9a", bg: "#f3e5f5" },
+  "Todozuyo El Concord": { corto: "El Concord", color: "#00695c", bg: "#e0f2f1" }
+};
+function puntoCorto(p) { return (PUNTOS[p] || {}).corto || p || "Sin punto"; }
+function puntoTag(p) {
+  if (!p) return "";
+  const c = PUNTOS[p] || { color: "#556", bg: "#eee" };
+  return `<span class="punto-tag" style="background:${c.bg};color:${c.color};">🏬 ${puntoCorto(p)}</span>`;
+}
+function selPuntoD(btn) {
+  document.querySelectorAll(".punto-btn").forEach(b => b.classList.remove("active"));
+  if (btn) { btn.classList.add("active"); dPunto = btn.dataset.punto; } else dPunto = null;
+  programarBorrador();
+}
+function selFPunto(btn) {
+  document.querySelectorAll(".fp-btn").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+  hFiltroPunto = btn.dataset.fp;
+  renderHistorial();
+}
 let dServicios = [];
 
 let todosLosViajes   = [];
@@ -841,7 +898,7 @@ function guardarBorrador() {
       gastos: vGastos, ingresos: vIngresos
     },
     d: { conductor: dConductor, fecha: val("d-fecha"), servicios: dServicios,
-         cliente: val("d-cliente"), notas: val("d-notas"), tipo: dTipo, gastos: dGastos },
+         cliente: val("d-cliente"), notas: val("d-notas"), tipo: dTipo, gastos: dGastos, punto: dPunto },
     // Formularios que estaban abiertos (por si Chrome se cierra al abrir la cámara)
     f: {
       vg: { abierto: document.getElementById("v-form-gasto").classList.contains("visible"),
@@ -897,6 +954,10 @@ function restaurarBorrador() {
     renderServiciosLista();
     if (dServicios.length) recuperado = true;
   }
+  if (d.punto) {
+    const pb = document.querySelector(`.punto-btn[data-punto="${d.punto}"]`);
+    if (pb) { pb.classList.add("active"); dPunto = d.punto; }
+  }
   if (d.cliente || d.notas || (d.gastos && d.gastos.length)) {
     set("d-cliente", d.cliente); set("d-notas", d.notas);
     if (d.tipo) {
@@ -935,6 +996,10 @@ function restaurarBorrador() {
 // Guardar cada vez que se escribe o cambia algo en los formularios
 document.addEventListener("input",  programarBorrador);
 document.addEventListener("change", programarBorrador);
+// Guardar de inmediato cuando la página se oculta (p. ej. al abrir la cámara)
+function guardarBorradorYa() { if (_restaurando) return; clearTimeout(_borradorTimer); guardarBorrador(); }
+document.addEventListener("visibilitychange", () => { if (document.hidden) guardarBorradorYa(); });
+window.addEventListener("pagehide", guardarBorradorYa);
 
 /* ════════════════════════════════════════════════
    RENDER GASTOS GENÉRICO
@@ -1251,7 +1316,11 @@ function renderServiciosLista() {
   programarBorrador();
   const lista = document.getElementById("d-servicios-lista");
   const cont  = document.getElementById("d-contador");
-  cont.textContent = dServicios.length ? `(${dServicios.length} agregado${dServicios.length>1?"s":""})` : "";
+  const porPunto = {};
+  dServicios.forEach(s => { porPunto[s.punto] = (porPunto[s.punto] || 0) + 1; });
+  const detPunto = Object.entries(porPunto).map(([p,n]) => `${puntoCorto(p)}: ${n}`).join(" · ");
+  cont.textContent = dServicios.length
+    ? `(${dServicios.length} agregado${dServicios.length>1?"s":""} · ${detPunto})` : "";
   if (!dServicios.length) { lista.innerHTML = ""; return; }
   lista.innerHTML = dServicios.map((s, i) => {
     const totalG   = s.gastos.reduce((a,g) => a+g.monto, 0);
@@ -1262,7 +1331,7 @@ function renderServiciosLista() {
       <div class="servicio-item">
         <div class="servicio-num">${i+1}</div>
         <div class="servicio-info">
-          <div style="margin-bottom:4px;">${tipoTag}</div>
+          <div style="margin-bottom:4px;">${tipoTag}${puntoTag(s.punto)}</div>
           <div class="servicio-cliente">👤 ${s.cliente}</div>
           ${s.notas ? `<div class="servicio-notas">📝 ${s.notas}</div>` : ""}
           ${s.valorServicio > 0
@@ -1285,6 +1354,8 @@ function agregarServicioALista() {
   if (!dConductor) { alert("Selecciona un conductor primero."); return; }
   if (!document.getElementById("d-fecha").value) { alert("Selecciona la fecha."); return; }
 
+  if (!dPunto) { alert("Selecciona de qué punto es el domicilio: La 70 o El Concord."); return; }
+
   const inpCliente = document.getElementById("d-cliente");
   const cliente    = inpCliente.value.trim();
   if (!cliente) { alert("Escribe o selecciona un destino."); return; }
@@ -1294,6 +1365,7 @@ function agregarServicioALista() {
   const valorServicio = matchDestino ? (matchDestino.valor || 0) : 0;
 
   dServicios.push({
+    punto:        dPunto,
     tipo:         dTipo,
     cliente,
     valorServicio,
@@ -1310,7 +1382,7 @@ function agregarServicioALista() {
   dTipo = "Domicilio a cliente";
   renderGastosLista(dGastos, "d-gastos-lista", "eliminarGastoD");
   renderServiciosLista();
-  toast("✓ Servicio agregado · " + cliente);
+  toast("✓ Servicio agregado · " + puntoCorto(dPunto) + " · " + cliente);
 }
 
 async function guardarTodosLosServicios() {
@@ -1342,7 +1414,7 @@ async function guardarTodosLosServicios() {
         method: "POST", headers: { "Content-Type": "text/plain" },
         body: JSON.stringify({
           tipo: "domicilio", conductor: dConductor, fecha,
-          tipoServicio: s.tipo, cliente: s.cliente,
+          tipoServicio: s.tipo, cliente: s.cliente, punto: s.punto || "",
           notas: s.notas, valorServicio: s.valorServicio || 0, totalGastos, detalleGastos
         })
       });
@@ -1350,9 +1422,10 @@ async function guardarTodosLosServicios() {
 
     todosLosViajes.push({
       id: "ses_" + Date.now() + Math.random(), fuente: "domicilio",
-      conductor: dConductor, fecha, tipo: s.tipo,
+      conductor: dConductor, fecha, tipo: s.tipo, punto: s.punto || "",
       destino: s.cliente, cliente: s.cliente,
-      notas: s.notas, gastos: s.gastos, totalGastos
+      notas: s.notas, gastos: s.gastos, totalGastos,
+      valorServicio: s.valorServicio || 0
     });
   }
 
@@ -1365,6 +1438,7 @@ function limpiarDomicilio(silencioso) {
   if (!silencioso && !confirm("¿Limpiar todo el formulario?")) return;
   dGastos = []; dServicios = []; dConductor = null;
   cancelarGastoD();
+  selPuntoD(null);
   document.querySelectorAll("#tab-domicilios .conductor-card").forEach(c => c.classList.remove("selected"));
   document.getElementById("d-fecha").value   = hoyISO();
   document.getElementById("d-cliente").value = "";
@@ -1399,7 +1473,7 @@ function selHConductor(btn) {
   renderHistorial();
 }
 function selFTipo(btn) {
-  document.querySelectorAll(".ft-btn").forEach(b => b.classList.remove("active"));
+  document.querySelectorAll(".ft-btn:not(.fp-btn)").forEach(b => b.classList.remove("active"));
   btn.classList.add("active");
   hFiltroTipo = btn.dataset.ft;
   renderHistorial();
@@ -1427,7 +1501,8 @@ function renderHistorial() {
     const conductorOk = hConductor === "Todos" ||
                         norm(v.conductor).includes(norm(hConductor.split(" ")[0]));
     const tipoOk      = hFiltroTipo === "Todos" || v.tipo === hFiltroTipo;
-    return mesOk && conductorOk && tipoOk;
+    const puntoOk     = hFiltroPunto === "Todos" || v.punto === hFiltroPunto;
+    return mesOk && conductorOk && tipoOk && puntoOk;
   });
 
   const lista     = document.getElementById("h-lista");
@@ -1463,7 +1538,7 @@ function renderHistorial() {
           <span class="viaje-fecha">${fechaStr}</span>
         </div>
         <div class="viaje-destino">📍 ${v.destino || v.cliente || "—"}</div>
-        <div class="viaje-detalle">👤 ${v.conductor || "—"}</div>
+        <div class="viaje-detalle">👤 ${v.conductor || "—"}${v.punto ? " · " + puntoTag(v.punto) : ""}</div>
         ${v.totalGastos > 0
           ? `<div class="viaje-gastos">💰 Total: <strong>${cop(v.totalGastos)}</strong></div>`
           : `<div class="viaje-sin-g">Sin gastos</div>`}
@@ -1615,6 +1690,8 @@ function toggleEdicion() {
   // Cambiar el label según el tipo
   document.getElementById("e-destino-label").textContent =
     v.fuente === "viatico" ? "Destino" : "Cliente / Referencia";
+  document.getElementById("e-punto-wrap").style.display = v.fuente === "viatico" ? "none" : "block";
+  document.getElementById("e-punto").value = v.punto || "";
 
   panel.classList.add("visible");
   btn.textContent = "✕ Cancelar edición";
@@ -1656,7 +1733,8 @@ async function guardarEdicion() {
         filaNum:   v.filaNum,
         fecha:     nuevaFecha,
         conductor: nuevoConductor,
-        destino:   nuevoDestino
+        destino:   nuevoDestino,
+        punto:     v.fuente === "viatico" ? undefined : document.getElementById("e-punto").value
       })
     });
     const data = await resp.json();
@@ -1667,6 +1745,7 @@ async function guardarEdicion() {
       v.conductor = nuevoConductor;
       v.destino   = nuevoDestino;
       v.cliente   = nuevoDestino;
+      if (v.fuente !== "viatico") v.punto = document.getElementById("e-punto").value;
 
       // Actualizar la cabecera del modal en vivo
       document.getElementById("m-destino").textContent = nuevoDestino;
@@ -1731,6 +1810,7 @@ async function cargarHistorialDesdeSheets() {
             conductor:     v.conductor  || "",
             fecha:         normalizarFecha(v.fecha),
             tipo:          v.tipo       || "",
+            punto:         v.punto      || "",
             destino:       v.referencia || "",
             cliente:       v.referencia || "",
             notas:         v.notas      || "",
@@ -1792,7 +1872,8 @@ function abrirResumenDomicilios() {
     const mesOk       = v.fecha.substring(0,7) === mes;
     const conductorOk = hConductor === "Todos" ||
                         norm(v.conductor).includes(norm(hConductor.split(" ")[0]));
-    return mesOk && conductorOk && v.tipo !== "Viático";
+    const puntoOk     = hFiltroPunto === "Todos" || v.punto === hFiltroPunto;
+    return mesOk && conductorOk && puntoOk && v.tipo !== "Viático";
   });
 
   if (!domicilios.length) { toast("No hay domicilios en este período."); return; }
@@ -1815,13 +1896,34 @@ function abrirResumenDomicilios() {
   // Título
   const [anio, mesNum] = mes.split("-");
   const nombreMes = MESES[parseInt(mesNum)-1] + " " + anio;
-  const nombreCond = hConductor !== "Todos" ? " · " + hConductor.split(" ")[0] : "";
+  const nombreCond = (hConductor !== "Todos" ? " · " + hConductor.split(" ")[0] : "")
+                   + (hFiltroPunto !== "Todos" ? " · " + puntoCorto(hFiltroPunto) : "");
 
   document.getElementById("rd-titulo").textContent    = "📦 Domicilios / Transporte";
   document.getElementById("rd-subtitulo").textContent = nombreMes + nombreCond;
 
   // Cuerpo
   let html = "";
+
+  // Desglose por punto
+  const porPunto = {};
+  domicilios.forEach(v => {
+    const k = v.punto || "";
+    if (!porPunto[k]) porPunto[k] = { count: 0, ingresos: 0, gastos: 0 };
+    porPunto[k].count++;
+    porPunto[k].ingresos += v.valorServicio || 0;
+    porPunto[k].gastos   += v.totalGastos   || 0;
+  });
+  html += `<div style="font-size:11px;font-weight:700;color:#1e4d2b;letter-spacing:1px;
+    text-transform:uppercase;margin:4px 0 6px;">🏬 Por punto</div>`;
+  Object.entries(porPunto).sort((a,b) => (a[0]||"zz").localeCompare(b[0]||"zz")).forEach(([p, d]) => {
+    html += `<div class="rd-fila">
+      <span class="etiqueta">${p ? puntoTag(p) : '<span style="color:#aaa;">Sin punto (registros anteriores)</span>'}
+        &nbsp;${d.count} servicio${d.count>1?"s":""}</span>
+      <span class="valor">${d.ingresos > 0 ? '<span class="val-pos">' + cop(d.ingresos) + '</span>' : ""}${
+        d.gastos > 0 ? ' <span class="val-neg" style="font-size:12px;">−' + cop(d.gastos) + '</span>' : ""}</span>
+    </div>`;
+  });
 
   // Desglose por tipo
   Object.entries(porTipo).forEach(([tipo, d]) => {
